@@ -34,20 +34,20 @@ kg.demirbank.psp.dto/
 - `POST /api/qr/tx/check` (внешний API для клиентов)
 
 **Поля:**
-- qrType: string, enum ["staticQr","dynamicQr"] (required)
-- merchantProvider: string, max 32 (required)
-- merchantId: string, max 32
-- serviceId: string, max 32
-- serviceName: string, max 32
-- beneficiaryAccountNumber: string, max 32
-- merchantCode: integer, 0-9999 (required)
-- currencyCode: string, 3 digits, default "417" (required)
-- qrTransactionId: string, max 32
-- qrComment: string, max 32
-- customerType: string, enum ["1","2"] (required) - 1=Individual, 2=Corporate
-- amount: integer, max 13 digits, positive (required)
-- qrLinkHash: string, 4 alphanumeric chars (required)
-- extra: Array<KeyValueDto>, max 5
+- qrType: string, enum ["staticQr","dynamicQr"] (required, @Pattern)
+- merchantProvider: string, max 32 (required, @NotBlank)
+- merchantId: string, max 32 (optional, @Size)
+- serviceId: string, max 32 (optional, @Size)
+- serviceName: string, max 32 (optional, @Size)
+- beneficiaryAccountNumber: string, max 32 (optional, @Size)
+- merchantCode: Integer, 0-9999 (required, @NotNull @Min @Max)
+- currencyCode: string, 3 digits, default "417" (required, @Pattern)
+- qrTransactionId: string, max 32 (optional, @Size)
+- qrComment: string, max 32 (optional, @Size)
+- customerType: string, enum ["1","2"] (required, @Pattern) - 1=Individual, 2=Corporate
+- amount: Long, max 13 digits, positive (required, @NotNull @Digits @Positive)
+- qrLinkHash: string, 4 alphanumeric chars (required, @Pattern "^[A-Z0-9]{4}$")
+- extra: List<KeyValueDto>, max 5 (optional, @Size @Valid)
 
 ### CreateRequestDto
 
@@ -57,10 +57,10 @@ kg.demirbank.psp.dto/
 - `POST /api/qr/tx/create` (внешний API)
 
 **Поля:** Все поля из CheckRequestDto плюс:
-- transactionId: string, max 32 (required) - ID транзакции (operator's transaction ID)
-- pspTransactionId: string, max 50 (required) - ID транзакции в PSP
-- receiptId: string, max 20 (required) - ID чека
-- transactionType: CustomerType enum (required) - Тип транзакции
+- transactionId: string, max 32 (required, @NotNull @Size) - ID транзакции (operator's transaction ID)
+- pspTransactionId: string, max 50 (required, @NotBlank @Size) - ID транзакции в PSP
+- receiptId: string, max 20 (required, @NotBlank @Size) - ID чека
+- transactionType: CustomerType enum (required, @NotNull) - Тип транзакции
 
 ### CheckResponseDto
 
@@ -78,14 +78,14 @@ kg.demirbank.psp.dto/
 
 **Поля:**
 - transactionId: string (UUID) - ID транзакции от оператора
-- status: integer - Статус транзакции
+- status: Status enum - Статус транзакции (nullable)
 - transactionType: CustomerType - Тип транзакции (enum)
-- amount: integer - Сумма транзакции
+- amount: Long - Сумма транзакции в тыйынах
 - beneficiaryName: string - Имя получателя (masked)
-- customerType: integer - Тип клиента (1=Individual, 2=Corporate)
+- customerType: Integer - Тип клиента (1=Individual, 2=Corporate)
 - receiptId: string - ID чека
 - createdDate: string (ISO8601) - Дата создания
-- executedDate: string (ISO8601) - Дата выполнения (может быть пустой)
+- executedDate: string (ISO8601) - Дата выполнения (default "")
 
 ### StatusDto
 
@@ -99,7 +99,7 @@ kg.demirbank.psp.dto/
 - transactionType: CustomerType - enum тип транзакции (nullable)
 - amount: Long - сумма в тыйынах
 - beneficiaryName: string (nullable)
-- customerType: string (nullable)
+- customerType: string (nullable) - "1" или "2"
 - receiptId: string (nullable)
 - createdDate: string (ISO8601)
 - executedDate: string (ISO8601, nullable)
@@ -110,16 +110,16 @@ kg.demirbank.psp.dto/
 - `POST /in/qr/{version}/tx/update/{transactionId}` (входящий от оператора)
 
 **Поля:**
-- status: integer (required) - Новый статус транзакции
-- updateDate: string, max 30 - Дата обновления
+- status: Status enum (required, @NotNull) - Новый статус транзакции
+- updateDate: string, max 30 (optional, @Size) - Дата обновления
 
 ### KeyValueDto
 
 **Вспомогательный тип для extra полей**
 
 **Поля:**
-- key: string, max 64 (required)
-- value: string, max 256 (required)
+- key: string, max 64 (required, @NotBlank @Size)
+- value: string, max 256 (required, @NotBlank @Size)
 
 ## Маппинг эндпоинтов
 

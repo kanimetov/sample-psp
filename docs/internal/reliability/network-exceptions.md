@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document describes the network exception handling implementation in the PSP Service. The system now properly handles various network-related errors including timeouts, connection failures, and SSL/TLS issues.
+This document describes the network exception handling implementation in the PSP Service. The system properly handles various network-related errors including timeouts, connection failures, and SSL/TLS issues.
 
 ## Network Exception Types
 
@@ -36,6 +36,7 @@ Thrown when the service cannot establish a connection to the operator service.
 **Triggers:**
 - Connection refused
 - Connection reset
+- Connect timeout
 - No route to host
 - Port unreachable
 - Broken pipe
@@ -137,11 +138,29 @@ These methods traverse the exception chain to identify network issues at any lev
 The `mapOperatorError()` method in `OperatorServiceImpl` maps low-level network exceptions to appropriate high-level exceptions:
 
 ```
-TimeoutException → NetworkTimeoutException (504)
-ConnectException → NetworkConnectionException (503)
-SSLException → NetworkException (502)
-IOException → NetworkException (502)
+TimeoutException/ReadTimeoutException/WriteTimeoutException → NetworkTimeoutException (504)
+ConnectException/ConnectTimeoutException/NoRouteToHostException/PortUnreachableException → NetworkConnectionException (503)
+SSLException/SSLHandshakeException/CertificateException → NetworkException (502)
+IOException/SocketException/UnknownHostException/BindException → NetworkException (502)
+Other non-network errors → SystemErrorException (500)
 ```
+
+### Interaction with HTTP errors (from operator)
+
+When the operator responds with an HTTP status (i.e., not a transport failure), errors are first mapped directly by status code before network detection:
+
+- 400 → BadRequestException
+- 404 → ResourceNotFoundException
+- 422 → UnprocessableEntityException
+- 452 → RecipientDataIncorrectException
+- 453 → AccessDeniedException
+- 454 → IncorrectRequestDataException
+- 455 → MinAmountNotValidException
+- 456 → MaxAmountNotValidException
+- 500 → SystemErrorException
+- 523 → SupplierNotAvailableException
+- 524 → ExternalServerNotAvailableException
+- default → SystemErrorException (unexpected operator error)
 
 ## Retry Strategy
 

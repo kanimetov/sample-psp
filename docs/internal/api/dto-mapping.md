@@ -21,15 +21,15 @@ kg.demirbank.psp.dto/
 
 ## A. Исходящие запросы к Оператору (PSP → Operator)
 
-**Controller:** `OutgoingController` (mock для тестирования интеграции)  
-**Base URL:** `/ipc/operator/api/v1/payment/qr/{version}/tx`
+**Service:** `OperatorService` (через WebClient)  
+**Base URL:** `/psp/api/v1/payment/qr/{version}/tx`
 
 ### 1. Check QR реквизитов
 
 Проверка валидности QR-кода и получение информации о бенефициаре.
 
 ```
-POST /ipc/operator/api/v1/payment/qr/{version}/tx/check
+POST /psp/api/v1/payment/qr/{version}/tx/check
 ```
 
 **Headers:**
@@ -69,7 +69,7 @@ POST /ipc/operator/api/v1/payment/qr/{version}/tx/check
 Создание новой транзакции в системе оператора.
 
 ```
-POST /ipc/operator/api/v1/payment/qr/{version}/tx/create
+POST /psp/api/v1/payment/qr/{version}/tx/create
 ```
 
 **Headers:** (те же, что и в check)
@@ -113,7 +113,7 @@ POST /ipc/operator/api/v1/payment/qr/{version}/tx/create
 Запрос на выполнение созданной транзакции.
 
 ```
-POST /ipc/operator/api/v1/payment/qr/{version}/tx/execute/{transactionId}
+POST /psp/api/v1/payment/qr/{version}/tx/execute/{transactionId}
 ```
 
 **Headers:** (те же, что и в check)

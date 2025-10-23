@@ -6,10 +6,11 @@
 - POST /api/qr/tx/execute/{transactionId}
 - GET  /api/qr/tx/{transactionId}
 
-### Исходящие (PSP → Operator) - Mock для тестирования
-- POST /ipc/operator/api/v1/payment/qr/{version}/tx/check
-- POST /ipc/operator/api/v1/payment/qr/{version}/tx/create
-- POST /ipc/operator/api/v1/payment/qr/{version}/tx/execute/{transactionId}
+### Исходящие (PSP → Operator) - через OperatorService
+- POST /psp/api/v1/payment/qr/{version}/tx/check
+- POST /psp/api/v1/payment/qr/{version}/tx/create  
+- POST /psp/api/v1/payment/qr/{version}/tx/execute/{transactionId}
+- POST /psp/api/v1/payment/qr/{version}/tx/update/{transactionId}
 
 ### Входящие (Operator → PSP, Beneficiary)
 - POST /in/qr/{version}/tx/check

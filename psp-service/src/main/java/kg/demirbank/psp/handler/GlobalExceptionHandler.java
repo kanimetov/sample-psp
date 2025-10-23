@@ -300,6 +300,75 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handle Network Timeout Exception (504)
+     */
+    @ExceptionHandler(NetworkTimeoutException.class)
+    public Mono<ResponseEntity<ErrorResponseDto>> handleNetworkTimeoutException(
+            NetworkTimeoutException ex,
+            ServerWebExchange exchange) {
+        
+        log.error("Network Timeout: {}", ex.getMessage(), ex);
+        
+        ErrorResponseDto errorResponse = ErrorResponseDto.builder()
+                .code(504)
+                .message("Request timeout")
+                .details("The request to the external service timed out. Please try again later.")
+                .timestamp(LocalDateTime.now())
+                .path(exchange.getRequest().getPath().value())
+                .build();
+        
+        return Mono.just(ResponseEntity
+                .status(HttpStatus.GATEWAY_TIMEOUT)
+                .body(errorResponse));
+    }
+
+    /**
+     * Handle Network Connection Exception (503)
+     */
+    @ExceptionHandler(NetworkConnectionException.class)
+    public Mono<ResponseEntity<ErrorResponseDto>> handleNetworkConnectionException(
+            NetworkConnectionException ex,
+            ServerWebExchange exchange) {
+        
+        log.error("Network Connection Error: {}", ex.getMessage(), ex);
+        
+        ErrorResponseDto errorResponse = ErrorResponseDto.builder()
+                .code(503)
+                .message("Service temporarily unavailable")
+                .details("Unable to connect to the external service. Please try again later.")
+                .timestamp(LocalDateTime.now())
+                .path(exchange.getRequest().getPath().value())
+                .build();
+        
+        return Mono.just(ResponseEntity
+                .status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(errorResponse));
+    }
+
+    /**
+     * Handle Generic Network Exception (502)
+     */
+    @ExceptionHandler(NetworkException.class)
+    public Mono<ResponseEntity<ErrorResponseDto>> handleNetworkException(
+            NetworkException ex,
+            ServerWebExchange exchange) {
+        
+        log.error("Network Error: {}", ex.getMessage(), ex);
+        
+        ErrorResponseDto errorResponse = ErrorResponseDto.builder()
+                .code(502)
+                .message("Network error")
+                .details("A network error occurred while communicating with external service.")
+                .timestamp(LocalDateTime.now())
+                .path(exchange.getRequest().getPath().value())
+                .build();
+        
+        return Mono.just(ResponseEntity
+                .status(HttpStatus.BAD_GATEWAY)
+                .body(errorResponse));
+    }
+
+    /**
      * Handle WebClient Response Exceptions (from operator calls)
      */
     @ExceptionHandler(WebClientResponseException.class)

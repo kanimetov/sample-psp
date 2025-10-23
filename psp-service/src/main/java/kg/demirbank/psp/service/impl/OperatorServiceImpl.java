@@ -110,6 +110,7 @@ public class OperatorServiceImpl implements OperatorService {
      * Map operator errors to our custom exceptions
      */
     private Throwable mapOperatorError(Throwable error) {
+        // Handle WebClientResponseException (HTTP errors with response)
         if (error instanceof WebClientResponseException) {
             WebClientResponseException ex = (WebClientResponseException) error;
             int statusCode = ex.getStatusCode().value();
@@ -146,8 +147,106 @@ public class OperatorServiceImpl implements OperatorService {
             }
         }
         
-        // For non-WebClient errors, wrap in SystemErrorException
+        // Handle timeout exceptions
+        if (isTimeoutException(error)) {
+            log.error("Timeout occurred while calling operator service", error);
+            return new NetworkTimeoutException("Request to operator service timed out", error);
+        }
+        
+        // Handle connection exceptions
+        if (isConnectionException(error)) {
+            log.error("Connection error occurred while calling operator service", error);
+            return new NetworkConnectionException("Failed to connect to operator service", error);
+        }
+        
+        // Handle SSL/TLS exceptions
+        if (isSslException(error)) {
+            log.error("SSL/TLS error occurred while calling operator service", error);
+            return new NetworkException("SSL/TLS error while connecting to operator service", error);
+        }
+        
+        // For all other network-related errors
+        if (isNetworkException(error)) {
+            log.error("Network error occurred while calling operator service", error);
+            return new NetworkException("Network error while calling operator service: " + error.getMessage(), error);
+        }
+        
+        // For non-network errors, wrap in SystemErrorException
         log.error("Unexpected error in operator service", error);
         return new SystemErrorException("Unexpected system error: " + error.getMessage(), error);
+    }
+    
+    /**
+     * Check if the error is a timeout exception
+     */
+    private boolean isTimeoutException(Throwable error) {
+        if (error == null) {
+            return false;
+        }
+        
+        String errorClass = error.getClass().getName();
+        String message = error.getMessage() != null ? error.getMessage().toLowerCase() : "";
+        
+        return errorClass.contains("TimeoutException") 
+                || errorClass.contains("ReadTimeoutException")
+                || errorClass.contains("WriteTimeoutException")
+                || message.contains("timeout")
+                || message.contains("timed out")
+                || isTimeoutException(error.getCause());
+    }
+    
+    /**
+     * Check if the error is a connection exception
+     */
+    private boolean isConnectionException(Throwable error) {
+        if (error == null) {
+            return false;
+        }
+        
+        String errorClass = error.getClass().getName();
+        String message = error.getMessage() != null ? error.getMessage().toLowerCase() : "";
+        
+        return errorClass.contains("ConnectException")
+                || errorClass.contains("ConnectTimeoutException")
+                || errorClass.contains("NoRouteToHostException")
+                || errorClass.contains("PortUnreachableException")
+                || message.contains("connection refused")
+                || message.contains("connection reset")
+                || message.contains("broken pipe")
+                || message.contains("no route to host")
+                || isConnectionException(error.getCause());
+    }
+    
+    /**
+     * Check if the error is an SSL/TLS exception
+     */
+    private boolean isSslException(Throwable error) {
+        if (error == null) {
+            return false;
+        }
+        
+        String errorClass = error.getClass().getName();
+        
+        return errorClass.contains("SSLException")
+                || errorClass.contains("CertificateException")
+                || errorClass.contains("SSLHandshakeException")
+                || isSslException(error.getCause());
+    }
+    
+    /**
+     * Check if the error is a general network exception
+     */
+    private boolean isNetworkException(Throwable error) {
+        if (error == null) {
+            return false;
+        }
+        
+        String errorClass = error.getClass().getName();
+        
+        return errorClass.contains("IOException")
+                || errorClass.contains("SocketException")
+                || errorClass.contains("UnknownHostException")
+                || errorClass.contains("BindException")
+                || isNetworkException(error.getCause());
     }
 }

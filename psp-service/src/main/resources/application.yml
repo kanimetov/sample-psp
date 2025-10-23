@@ -12,3 +12,8 @@ operator:
   psp:
     token: your-psp-token
     id: your-psp-id
+  timeout:
+    connection: 5000      # Connection timeout in milliseconds (5 seconds)
+    read: 30000          # Read timeout in milliseconds (30 seconds)
+    write: 30000         # Write timeout in milliseconds (30 seconds)
+    response: 60000      # Response timeout in milliseconds (60 seconds)

@@ -102,6 +102,25 @@ curl -X POST http://localhost:8080/in/qr/v1/tx/check \
 - RabbitMQ queues
 - Logging levels
 
+### Логирование
+Структурированное логирование настроено в `logback-spring.xml`:
+
+**Директория логов**: `logs/`
+- `psp-service.log` - основные логи приложения
+- `psp-service-error.log` - только ошибки (ERROR level)
+- `psp-service-audit.log` - аудит операций (90 дней хранения)
+- `psp-service-performance.log` - метрики производительности (7 дней хранения)
+
+**Ротация логов**:
+- Максимальный размер файла: 100MB
+- История: 30 дней для основных логов
+- Общий размер: до 1GB
+
+**Уровни логирования**:
+- `kg.demirbank.psp`: DEBUG (dev), INFO (prod)
+- `org.hibernate.SQL`: DEBUG (dev), WARN (prod)
+- `org.springframework`: INFO (dev), WARN (prod)
+
 ---
 
 **Internal project - Demirbank**

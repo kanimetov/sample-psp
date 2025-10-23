@@ -1,6 +1,8 @@
 package kg.demirbank.psp.util;
 
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +21,10 @@ import java.util.UUID;
 public class LoggingUtil {
     
     private static final DateTimeFormatter ISO_DATE_TIME = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+    
+    // Specialized loggers for different types of logs
+    private static final Logger AUDIT_LOGGER = LoggerFactory.getLogger("AUDIT");
+    private static final Logger PERFORMANCE_LOGGER = LoggerFactory.getLogger("PERFORMANCE");
     
     // MDC Keys for log correlation
     public static final String CORRELATION_ID = "correlationId";
@@ -256,7 +262,7 @@ public class LoggingUtil {
         logData.put("timestamp", LocalDateTime.now().format(ISO_DATE_TIME));
         logData.putAll(properties);
         
-        log.info("Performance metrics: {}", logData);
+        PERFORMANCE_LOGGER.info("Performance metrics: {}", logData);
     }
     
     /**
@@ -272,7 +278,7 @@ public class LoggingUtil {
         logData.put("timestamp", LocalDateTime.now().format(ISO_DATE_TIME));
         logData.putAll(properties);
         
-        log.info("Audit trail: {}", logData);
+        AUDIT_LOGGER.info("Audit trail: {}", logData);
     }
     
     /**

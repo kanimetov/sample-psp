@@ -32,7 +32,7 @@ spring:
           batch_size: 20
         order_inserts: true
         order_updates: true
-  
+        
   # Cache Configuration
   cache:
     type: caffeine
@@ -57,3 +57,23 @@ security:
     operator-public-key-path: /path/to/operator-public-key.pem
     psp-private-key-path: /path/to/psp-private-key.pem
     enabled: true
+
+# Logging Configuration
+logging:
+  level:
+    root: INFO
+    kg.demirbank.psp: DEBUG
+    org.springframework.web: INFO
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{correlationId}] %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{correlationId}] %logger{36} - %msg%n"
+  file:
+    name: logs/psp-service.log
+    max-size: 100MB
+    max-history: 30
+    total-size-cap: 1GB
+  logback:
+    rollingpolicy:
+      file-name-pattern: logs/psp-service.%d{yyyy-MM-dd}.%i.log

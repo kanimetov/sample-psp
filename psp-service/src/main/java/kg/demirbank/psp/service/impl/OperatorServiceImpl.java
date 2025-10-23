@@ -4,11 +4,10 @@ import kg.demirbank.psp.dto.*;
 import kg.demirbank.psp.service.OperatorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-
-import java.util.Collections;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 /**
  * Implementation of OperatorService for handling operator interactions
@@ -17,7 +16,7 @@ import java.util.Collections;
 @RequiredArgsConstructor
 public class OperatorServiceImpl implements OperatorService {
 
-    private final RestTemplate restTemplate;
+    private final WebClient.Builder webClientBuilder;
 
     @Value("${operator.base-url}")
     private String operatorBaseUrl;
@@ -34,82 +33,68 @@ public class OperatorServiceImpl implements OperatorService {
     @Value("${operator.psp.id}")
     private String pspId;
 
-    private HttpHeaders createHeaders() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-        
-        headers.set("H-PSP-TOKEN", pspToken);
-        headers.set("H-PSP-ID", pspId);
-        headers.set("H-SIGNING-VERSION", signingVersion);
+    private WebClient.RequestBodySpec addHeaders(WebClient.RequestBodySpec spec) {
+        return spec
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .header("H-PSP-TOKEN", pspToken)
+                .header("H-PSP-ID", pspId)
+                .header("H-SIGNING-VERSION", signingVersion);
         // Note: hash is not included as it's typically calculated per request
-        
-        return headers;
     }
 
     @Override
-    public CheckResponseDto check(CheckRequestDto request) {
+    public Mono<CheckResponseDto> check(CheckRequestDto request) {
         String url = String.format("%s/psp/api/v1/payment/qr/%s/tx/check", operatorBaseUrl, version);
-        HttpEntity<CheckRequestDto> entity = new HttpEntity<>(request, createHeaders());
-
-        ResponseEntity<CheckResponseDto> response = restTemplate.exchange(
-            url,
-            HttpMethod.POST,
-            entity,
-            CheckResponseDto.class
-        );
-
-        return response.getBody();
+        
+        WebClient webClient = webClientBuilder.baseUrl(operatorBaseUrl).build();
+        
+        return addHeaders(webClient.post().uri(url))
+                .bodyValue(request)
+                .retrieve()
+                .bodyToMono(CheckResponseDto.class);
     }
 
     @Override
-    public CreateResponseDto create(CreateRequestDto request) {
+    public Mono<CreateResponseDto> create(CreateRequestDto request) {
         String url = String.format("%s/psp/api/v1/payment/qr/%s/tx/create", operatorBaseUrl, version);
-        HttpEntity<CreateRequestDto> entity = new HttpEntity<>(request, createHeaders());
-
-        ResponseEntity<CreateResponseDto> response = restTemplate.exchange(
-            url,
-            HttpMethod.POST,
-            entity,
-            CreateResponseDto.class
-        );
-
-        return response.getBody();
+        
+        WebClient webClient = webClientBuilder.baseUrl(operatorBaseUrl).build();
+        
+        return addHeaders(webClient.post().uri(url))
+                .bodyValue(request)
+                .retrieve()
+                .bodyToMono(CreateResponseDto.class);
     }
 
     @Override
-    public StatusDto execute(String transactionId) {
+    public Mono<StatusDto> execute(String transactionId) {
         if (transactionId == null || transactionId.isBlank()) {
-            throw new IllegalArgumentException("Transaction ID not specified");
+            return Mono.error(new IllegalArgumentException("Transaction ID not specified"));
         }
 
         String url = String.format("%s/psp/api/v1/payment/qr/%s/tx/execute/%s", operatorBaseUrl, version, transactionId);
-        HttpEntity<?> entity = new HttpEntity<>(createHeaders());
-
-        ResponseEntity<StatusDto> response = restTemplate.exchange(
-            url,
-            HttpMethod.POST,
-            entity,
-            StatusDto.class
-        );
-
-        return response.getBody();
+        
+        WebClient webClient = webClientBuilder.baseUrl(operatorBaseUrl).build();
+        
+        return addHeaders(webClient.post().uri(url))
+                .retrieve()
+                .bodyToMono(StatusDto.class);
     }
 
     @Override
-    public void update(String transactionId, UpdateDto request) {
+    public Mono<Void> update(String transactionId, UpdateDto request) {
         if (transactionId == null || transactionId.isBlank()) {
-            throw new IllegalArgumentException("Transaction ID not specified");
+            return Mono.error(new IllegalArgumentException("Transaction ID not specified"));
         }
 
         String url = String.format("%s/psp/api/v1/payment/qr/%s/tx/update/%s", operatorBaseUrl, version, transactionId);
-        HttpEntity<UpdateDto> entity = new HttpEntity<>(request, createHeaders());
-
-        restTemplate.exchange(
-            url,
-            HttpMethod.POST,
-            entity,
-            Void.class
-        );
+        
+        WebClient webClient = webClientBuilder.baseUrl(operatorBaseUrl).build();
+        
+        return addHeaders(webClient.post().uri(url))
+                .bodyValue(request)
+                .retrieve()
+                .bodyToMono(Void.class);
     }
 }

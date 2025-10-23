@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import kg.demirbank.psp.dto.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
 
 /**
  * Incoming controller handles:
@@ -17,18 +18,18 @@ public class IncomingController {
     // Base path: /in/qr/{version}/tx
     
     @PostMapping("/in/qr/{version}/tx/check")
-    public ResponseEntity<CheckResponseDto> inboundCheck(
+    public Mono<ResponseEntity<CheckResponseDto>> inboundCheck(
             @PathVariable String version,
             @RequestHeader(name = "H-HASH", required = false) String hash,
             @Valid @RequestBody CheckRequestDto body) {
         CheckResponseDto resp = new CheckResponseDto();
         resp.setBeneficiaryName("c***e A***o");
         resp.setTransactionType(null); // TODO: set proper value
-        return ResponseEntity.ok(resp);
+        return Mono.just(ResponseEntity.ok(resp));
     }
 
     @PostMapping("/in/qr/{version}/tx/create")
-    public ResponseEntity<CreateResponseDto> inboundCreate(
+    public Mono<ResponseEntity<CreateResponseDto>> inboundCreate(
             @PathVariable String version,
             @RequestHeader(name = "H-HASH", required = false) String hash,
             @Valid @RequestBody CreateRequestDto body) {
@@ -42,11 +43,11 @@ public class IncomingController {
         resp.setReceiptId(body.getReceiptId());
         resp.setCreatedDate("2022-11-01T12:00:00Z");
         resp.setExecutedDate("");
-        return ResponseEntity.ok(resp);
+        return Mono.just(ResponseEntity.ok(resp));
     }
 
     @PostMapping("/in/qr/{version}/tx/execute/{transactionId}")
-    public ResponseEntity<StatusDto> inboundExecute(
+    public Mono<ResponseEntity<StatusDto>> inboundExecute(
             @PathVariable String version,
             @PathVariable String transactionId,
             @RequestHeader(name = "H-HASH", required = false) String hash) {
@@ -60,23 +61,23 @@ public class IncomingController {
         resp.setReceiptId("7218199");
         resp.setCreatedDate("2022-11-01T12:00:00Z");
         resp.setExecutedDate("2022-11-01T12:02:00Z");
-        return ResponseEntity.ok(resp);
+        return Mono.just(ResponseEntity.ok(resp));
     }
 
     @PostMapping("/in/qr/{version}/tx/update/{transactionId}")
-    public ResponseEntity<?> inboundUpdate(
+    public Mono<ResponseEntity<?>> inboundUpdate(
             @PathVariable String version,
             @PathVariable String transactionId,
             @RequestHeader(name = "H-HASH", required = false) String hash,
             @Valid @RequestBody UpdateDto body) {
         if (version == null || version.isBlank()) {
-            return ResponseEntity.badRequest().body("QR version not specified");
+            return Mono.just(ResponseEntity.badRequest().body("QR version not specified"));
         }
         if (transactionId == null || transactionId.isBlank()) {
-            return ResponseEntity.badRequest().body("Transaction ID not specified");
+            return Mono.just(ResponseEntity.badRequest().body("Transaction ID not specified"));
         }
         // ACK response (200 OK empty body)
-        return ResponseEntity.ok().build();
+        return Mono.just(ResponseEntity.ok().build());
     }
 }
 

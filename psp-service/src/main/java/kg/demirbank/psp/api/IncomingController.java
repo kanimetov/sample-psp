@@ -4,12 +4,11 @@ import kg.demirbank.psp.dto.*;
 import kg.demirbank.psp.exception.BadRequestException;
 import kg.demirbank.psp.exception.SignatureVerificationException;
 import kg.demirbank.psp.security.SignatureService;
-import kg.demirbank.psp.service.PspTransactionService;
+import kg.demirbank.psp.service.IncomingService;
 import kg.demirbank.psp.util.JsonUtil;
 import kg.demirbank.psp.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
@@ -29,7 +28,7 @@ public class IncomingController {
     private final SignatureService signatureService;
     private final JsonUtil jsonUtil;
     private final ValidationUtil validationUtil;
-    private final PspTransactionService pspTransactionService;
+    private final IncomingService incomingService;
     
     @PostMapping("/in/qr/{version}/tx/check")
     public Mono<ResponseEntity<CheckResponseDto>> inboundCheck(
@@ -58,7 +57,7 @@ public class IncomingController {
         log.debug("Successfully deserialized and validated CheckRequestDto: {}", body);
         
         // Process the request using business service
-        return pspTransactionService.checkTransaction(body)
+        return incomingService.checkTransaction(body)
                 .map(ResponseEntity::ok)
                 .onErrorResume(e -> {
                     log.error("Error processing check transaction", e);
@@ -93,7 +92,7 @@ public class IncomingController {
         log.debug("Successfully deserialized and validated CreateRequestDto: {}", body);
         
         // Process the request using business service
-        return pspTransactionService.createTransaction(body)
+        return incomingService.createTransaction(body)
                 .map(ResponseEntity::ok)
                 .onErrorResume(e -> {
                     log.error("Error processing create transaction", e);
@@ -119,7 +118,7 @@ public class IncomingController {
         }
         
         // Process the request using business service
-        return pspTransactionService.executeTransaction(transactionId)
+        return incomingService.executeTransaction(transactionId)
                 .map(ResponseEntity::ok)
                 .onErrorResume(e -> {
                     log.error("Error processing execute transaction", e);
@@ -162,7 +161,7 @@ public class IncomingController {
         log.debug("Successfully deserialized and validated UpdateDto: {}", body);
         
         // Process the request using business service - ACK response (200 OK empty body)
-        return pspTransactionService.updateTransaction(transactionId, body)
+        return incomingService.updateTransaction(transactionId, body)
                 .then(Mono.just(ResponseEntity.ok("OK")))
                 .onErrorResume(e -> {
                     log.error("Error processing update transaction", e);

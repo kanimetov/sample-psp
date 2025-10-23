@@ -4,10 +4,10 @@ import kg.demirbank.psp.dto.*;
 import reactor.core.publisher.Mono;
 
 /**
- * Service for PSP transaction business logic
- * Handles all PSP transaction operations: check, create, execute, update
+ * Service for incoming transaction business logic
+ * Handles all incoming transaction operations: check, create, execute, update
  */
-public interface PspTransactionService {
+public interface IncomingService {
     
     /**
      * Check transaction request

@@ -4,7 +4,6 @@ import kg.demirbank.psp.dto.*;
 import kg.demirbank.psp.enums.CustomerType;
 import kg.demirbank.psp.enums.Status;
 import kg.demirbank.psp.exception.*;
-import kg.demirbank.psp.service.PspTransactionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -15,13 +14,13 @@ import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 /**
- * Implementation of PSP transaction service
- * Contains business logic for PSP transaction operations
+ * Implementation of incoming service
+ * Contains business logic for incoming transaction operations
  */
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class PspTransactionServiceImpl implements PspTransactionService {
+public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingService {
     
     private static final DateTimeFormatter ISO_DATE_TIME = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
     

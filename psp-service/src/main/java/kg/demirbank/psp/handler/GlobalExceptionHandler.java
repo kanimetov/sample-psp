@@ -452,6 +452,29 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handle Signature Verification Exception (403)
+     */
+    @ExceptionHandler(SignatureVerificationException.class)
+    public Mono<ResponseEntity<ErrorResponseDto>> handleSignatureVerificationException(
+            SignatureVerificationException ex,
+            ServerWebExchange exchange) {
+        
+        log.error("Signature Verification Failed: {}", ex.getMessage(), ex);
+        
+        ErrorResponseDto errorResponse = ErrorResponseDto.builder()
+                .code(403)
+                .message("Signature verification failed")
+                .details(ex.getMessage())
+                .timestamp(LocalDateTime.now())
+                .path(exchange.getRequest().getPath().value())
+                .build();
+        
+        return Mono.just(ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(errorResponse));
+    }
+
+    /**
      * Handle all other unhandled exceptions
      */
     @ExceptionHandler(Exception.class)

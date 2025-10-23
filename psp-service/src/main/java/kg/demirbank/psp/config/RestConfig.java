@@ -3,6 +3,7 @@ package kg.demirbank.psp.config;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
+import kg.demirbank.psp.security.SignatureInterceptor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,6 +29,12 @@ public class RestConfig {
     @Value("${operator.timeout.response:60000}")
     private long responseTimeout;
     
+    private final SignatureInterceptor signatureInterceptor;
+    
+    public RestConfig(SignatureInterceptor signatureInterceptor) {
+        this.signatureInterceptor = signatureInterceptor;
+    }
+    
     @Bean
     public WebClient.Builder webClientBuilder() {
         HttpClient httpClient = HttpClient.create()
@@ -42,6 +49,7 @@ public class RestConfig {
                 );
         
         return WebClient.builder()
-                .clientConnector(new ReactorClientHttpConnector(httpClient));
+                .clientConnector(new ReactorClientHttpConnector(httpClient))
+                .filter(signatureInterceptor);
     }
 }

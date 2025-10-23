@@ -71,7 +71,7 @@ kg.demirbank.psp.dto/
 - beneficiaryName: string (masked, например "c***e A***o")
 - transactionType: CustomerType - Тип транзакции (enum, nullable)
 
-### CreateResponse
+### CreateResponseDto
 
 **Возвращается из:**
 - Create операций (все направления)
@@ -123,7 +123,16 @@ kg.demirbank.psp.dto/
 
 ## Маппинг эндпоинтов
 
-### Исходящие к Оператору (PSP → Operator)
+### Входящие от Оператора (Operator → PSP) - РЕАЛИЗОВАНО
+
+| Операция | Endpoint | Request DTO | Response DTO |
+|----------|----------|-------------|--------------|
+| Check | POST /in/qr/{v}/tx/check | CheckRequestDto | CheckResponseDto |
+| Create | POST /in/qr/{v}/tx/create | CreateRequestDto | CreateResponseDto |
+| Execute | POST /in/qr/{v}/tx/execute/{id} | (empty) | StatusDto |
+| Update | POST /in/qr/{v}/tx/update/{id} | UpdateDto | ACK (200 OK) |
+
+### Исходящие к Оператору (PSP → Operator) - ПЛАНИРУЕТСЯ
 
 | Операция | Endpoint | Request DTO | Response DTO |
 |----------|----------|-------------|--------------|
@@ -131,16 +140,7 @@ kg.demirbank.psp.dto/
 | Create | POST /ipc/operator/.../tx/create | CreateRequestDto | CreateResponseDto |
 | Execute | POST /ipc/operator/.../tx/execute/{id} | (empty) | StatusDto |
 
-### Входящие от Оператора (Operator → PSP)
-
-| Операция | Endpoint | Request DTO | Response DTO |
-|----------|----------|-------------|--------------|
-| Check | POST /in/qr/{v}/tx/check | CheckRequestDto | CheckResponseDto |
-| Create | POST /in/qr/{v}/tx/create | CreateRequestDto | CreateResponseDto |
-| Execute | POST /in/qr/{v}/tx/execute/{id} | (empty) | StatusDto |
-| Update | POST /in/qr/{v}/tx/update/{id} | UpdateDto | ACK |
-
-### Внешние (Client → PSP)
+### Внешние (Client → PSP) - ПЛАНИРУЕТСЯ
 
 | Операция | Endpoint | Request DTO | Response DTO |
 |----------|----------|-------------|--------------|

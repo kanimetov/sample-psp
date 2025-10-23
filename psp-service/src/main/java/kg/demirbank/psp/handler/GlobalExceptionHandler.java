@@ -2,6 +2,7 @@ package kg.demirbank.psp.handler;
 
 import kg.demirbank.psp.dto.ErrorResponseDto;
 import kg.demirbank.psp.exception.*;
+import kg.demirbank.psp.util.LoggingUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,8 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -23,6 +26,18 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
+    
+    /**
+     * Create properties map for exception logging
+     */
+    private Map<String, Object> createExceptionProperties(Exception ex, ServerWebExchange exchange) {
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("exceptionType", ex.getClass().getSimpleName());
+        properties.put("path", exchange.getRequest().getPath().value());
+        properties.put("method", exchange.getRequest().getMethod().name());
+        properties.put("uri", exchange.getRequest().getURI().toString());
+        return properties;
+    }
 
     /**
      * Handle all PSP custom exceptions
@@ -54,7 +69,8 @@ public class GlobalExceptionHandler {
             BadRequestException ex,
             ServerWebExchange exchange) {
         
-        log.error("Bad Request: {}", ex.getMessage(), ex);
+        Map<String, Object> properties = createExceptionProperties(ex, exchange);
+        LoggingUtil.logError("GLOBAL_EXCEPTION_HANDLER", "BAD_REQUEST", ex.getMessage(), ex, properties);
         
         ErrorResponseDto errorResponse = ErrorResponseDto.builder()
                 .code(400)
@@ -192,7 +208,8 @@ public class GlobalExceptionHandler {
             MinAmountNotValidException ex,
             ServerWebExchange exchange) {
         
-        log.error("Min Amount Not Valid: {}", ex.getMessage(), ex);
+        Map<String, Object> properties = createExceptionProperties(ex, exchange);
+        LoggingUtil.logError("GLOBAL_EXCEPTION_HANDLER", "MIN_AMOUNT_INVALID", ex.getMessage(), ex, properties);
         
         ErrorResponseDto errorResponse = ErrorResponseDto.builder()
                 .code(455)
@@ -238,7 +255,8 @@ public class GlobalExceptionHandler {
             SystemErrorException ex,
             ServerWebExchange exchange) {
         
-        log.error("System Error: {}", ex.getMessage(), ex);
+        Map<String, Object> properties = createExceptionProperties(ex, exchange);
+        LoggingUtil.logError("GLOBAL_EXCEPTION_HANDLER", "SYSTEM_ERROR", ex.getMessage(), ex, properties);
         
         ErrorResponseDto errorResponse = ErrorResponseDto.builder()
                 .code(500)
@@ -482,7 +500,8 @@ public class GlobalExceptionHandler {
             SignatureVerificationException ex,
             ServerWebExchange exchange) {
         
-        log.error("Signature Verification Failed: {}", ex.getMessage(), ex);
+        Map<String, Object> properties = createExceptionProperties(ex, exchange);
+        LoggingUtil.logError("GLOBAL_EXCEPTION_HANDLER", "SIGNATURE_VERIFICATION_FAILED", ex.getMessage(), ex, properties);
         
         ErrorResponseDto errorResponse = ErrorResponseDto.builder()
                 .code(403)
@@ -505,7 +524,8 @@ public class GlobalExceptionHandler {
             Exception ex,
             ServerWebExchange exchange) {
         
-        log.error("Unexpected Error: {}", ex.getMessage(), ex);
+        Map<String, Object> properties = createExceptionProperties(ex, exchange);
+        LoggingUtil.logError("GLOBAL_EXCEPTION_HANDLER", "UNEXPECTED_ERROR", ex.getMessage(), ex, properties);
         
         ErrorResponseDto errorResponse = ErrorResponseDto.builder()
                 .code(500)

@@ -1,0 +1,14 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: psp-service
+
+operator:
+  base-url: http://localhost:8080
+  version: v1
+  signing-version: "2"
+  psp:
+    token: your-psp-token
+    id: your-psp-id

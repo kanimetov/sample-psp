@@ -3,6 +3,7 @@ package kg.demirbank.psp.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import kg.demirbank.psp.dto.*;
 import kg.demirbank.psp.security.SignatureService;
+import kg.demirbank.psp.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,7 @@ public class IncomingController {
     
     private final SignatureService signatureService;
     private final ObjectMapper objectMapper;
+    private final ValidationUtil validationUtil;
     
     @PostMapping("/in/qr/{version}/tx/check")
     public Mono<ResponseEntity<?>> inboundCheck(
@@ -47,7 +49,11 @@ public class IncomingController {
             
             // Deserialize JSON after successful signature verification
             CheckRequestDto body = objectMapper.readValue(rawBody, CheckRequestDto.class);
-            log.debug("Successfully deserialized CheckRequestDto: {}", body);
+            
+            // Validate DTO using utility method
+            validationUtil.validateDto(body);
+            
+            log.debug("Successfully deserialized and validated CheckRequestDto: {}", body);
             
             // Process the request
             CheckResponseDto resp = new CheckResponseDto();
@@ -84,6 +90,11 @@ public class IncomingController {
             
             // Deserialize JSON after successful signature verification
             CreateRequestDto body = objectMapper.readValue(rawBody, CreateRequestDto.class);
+            
+            // Validate DTO using utility method
+            validationUtil.validateDto(body);
+            
+            log.debug("Successfully deserialized and validated CreateRequestDto: {}", body);
             
             // Process the request
             CreateResponseDto resp = new CreateResponseDto();
@@ -174,7 +185,11 @@ public class IncomingController {
             
             // Deserialize JSON after successful signature verification
             UpdateDto body = objectMapper.readValue(rawBody, UpdateDto.class);
-            log.debug("Successfully deserialized UpdateDto: {}", body);
+            
+            // Validate DTO using utility method
+            validationUtil.validateDto(body);
+            
+            log.debug("Successfully deserialized and validated UpdateDto: {}", body);
             
             // Process the request - ACK response (200 OK empty body)
             return Mono.just(ResponseEntity.ok().build());

@@ -452,6 +452,29 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handle Validation Exception (400)
+     */
+    @ExceptionHandler(ValidationException.class)
+    public Mono<ResponseEntity<ErrorResponseDto>> handleValidationException(
+            ValidationException ex,
+            ServerWebExchange exchange) {
+        
+        log.warn("DTO Validation Failed: {}", ex.getMessage());
+        
+        ErrorResponseDto errorResponse = ErrorResponseDto.builder()
+                .code(400)
+                .message("Request validation failed")
+                .details(ex.getMessage())
+                .timestamp(LocalDateTime.now())
+                .path(exchange.getRequest().getPath().value())
+                .build();
+        
+        return Mono.just(ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(errorResponse));
+    }
+
+    /**
      * Handle Signature Verification Exception (403)
      */
     @ExceptionHandler(SignatureVerificationException.class)

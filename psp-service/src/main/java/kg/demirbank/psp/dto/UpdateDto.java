@@ -12,6 +12,7 @@ public class UpdateDto {
     @JsonProperty("status")
     private Status status;
 
+    @NotBlank
     @Size(max = 30)
     @JsonProperty("updateDate")
     private String updateDate;

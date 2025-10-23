@@ -6,7 +6,7 @@
   - **IncomingController** - Beneficiary фасад (/in/qr/{version}/tx/*)
   - **SignatureService** - JWS v2 верификация подписей
   - **IncomingService** - Бизнес-логика обработки входящих запросов
-  - **OperatorService** - Клиент для взаимодействия с оператором (планируется)
+  - **OperatorClient** - Клиент для взаимодействия с оператором (планируется)
   - **Oracle** - Основное хранилище (transactions, check_requests, extra_data)
   - **Redis** - Кэширование и идемпотентность (планируется)
   - **RabbitMQ** - Асинхронная обработка (планируется)

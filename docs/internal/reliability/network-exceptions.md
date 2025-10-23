@@ -124,7 +124,7 @@ HttpClient httpClient = HttpClient.create()
 
 ### Error Detection
 
-The `OperatorServiceImpl` class includes helper methods to detect various types of network errors:
+The `OperatorClientImpl` class includes helper methods to detect various types of network errors:
 
 - `isTimeoutException()`: Detects timeout-related errors
 - `isConnectionException()`: Detects connection failures
@@ -135,7 +135,7 @@ These methods traverse the exception chain to identify network issues at any lev
 
 ### Error Mapping
 
-The `mapOperatorError()` method in `OperatorServiceImpl` maps low-level network exceptions to appropriate high-level exceptions:
+The `mapOperatorError()` method in `OperatorClientImpl` maps low-level network exceptions to appropriate high-level exceptions:
 
 ```
 TimeoutException/ReadTimeoutException/WriteTimeoutException → NetworkTimeoutException (504)

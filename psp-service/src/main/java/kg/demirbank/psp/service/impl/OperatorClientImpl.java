@@ -2,7 +2,7 @@ package kg.demirbank.psp.service.impl;
 
 import kg.demirbank.psp.dto.*;
 import kg.demirbank.psp.exception.*;
-import kg.demirbank.psp.service.OperatorService;
+import kg.demirbank.psp.service.OperatorClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,12 +13,12 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import reactor.core.publisher.Mono;
 
 /**
- * Implementation of OperatorService for handling operator interactions
+ * Implementation of OperatorClient for handling operator interactions
  */
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class OperatorServiceImpl implements OperatorService {
+public class OperatorClientImpl implements OperatorClient {
 
     private final WebClient.Builder webClientBuilder;
 

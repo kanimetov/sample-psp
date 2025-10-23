@@ -21,7 +21,7 @@ kg.demirbank.psp.dto/
 
 ## A. Исходящие запросы к Оператору (PSP → Operator)
 
-**Service:** `OperatorService` (через WebClient)  
+**Service:** `OperatorClient` (через WebClient)  
 **Base URL:** `/psp/api/v1/payment/qr/{version}/tx`
 
 ### 1. Check QR реквизитов

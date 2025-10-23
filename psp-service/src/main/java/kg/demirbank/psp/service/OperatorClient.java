@@ -4,9 +4,9 @@ import kg.demirbank.psp.dto.*;
 import reactor.core.publisher.Mono;
 
 /**
- * Service for handling operator interactions
+ * Client for handling operator interactions
  */
-public interface OperatorService {
+public interface OperatorClient {
     /**
      * Validate transaction details
      */

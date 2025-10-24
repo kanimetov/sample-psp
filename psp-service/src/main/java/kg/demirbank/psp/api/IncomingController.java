@@ -105,6 +105,11 @@ public class IncomingController {
             @PathVariable String transactionId,
             @RequestHeader(name = "H-HASH", required = false) String hash) {
         
+        // Validate transaction ID
+        if (transactionId == null || transactionId.trim().isEmpty()) {
+            throw new BadRequestException("Transaction ID is required");
+        }
+        
         // Generate correlation ID for this request
         LoggingUtil.generateAndSetCorrelationId();
         

@@ -1,12 +1,13 @@
-package kg.demirbank.psp.service.clients.impl;
+package kg.demirbank.psp.service.impl;
 
 import kg.demirbank.psp.dto.client.request.ClientCheckRequestDto;
 import kg.demirbank.psp.dto.client.request.ClientMakePaymentRequestDto;
 import kg.demirbank.psp.dto.client.response.ClientCheckResponseDto;
 import kg.demirbank.psp.dto.client.response.ClientMakePaymentResponseDto;
 import kg.demirbank.psp.exception.*;
+import kg.demirbank.psp.repository.OperationRepository;
 import kg.demirbank.psp.service.BankService;
-import kg.demirbank.psp.service.MerchantService;
+import kg.demirbank.psp.service.ClientService;
 import kg.demirbank.psp.service.OperatorService;
 import kg.demirbank.psp.service.clients.QrDecoderClient;
 import lombok.RequiredArgsConstructor;
@@ -17,18 +18,19 @@ import reactor.core.publisher.Mono;
 
 
 /**
- * Implementation of merchant service
- * Contains business logic for merchant check and make payment operations
+ * Implementation of client service
+ * Contains business logic for client check and make payment operations
  */
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class MerchantServiceImpl implements MerchantService {
+public class ClientServiceImpl implements ClientService {
     
     
     private final QrDecoderClient qrDecoderClient;
     private final BankService bankService;
     private final OperatorService operatorService;
+    private final OperationRepository operationRepository;
     
     @Value("${merchant.provider}")
     private String configuredMerchantProvider;
@@ -64,14 +66,23 @@ public class MerchantServiceImpl implements MerchantService {
         log.info("Starting payment for session: {} with amount: {}", 
                 request.getPaymentSessionId(), request.getAmount());
         
-        // For payment, we need to determine the merchant provider from the session
-        // This will be handled by each service internally using operationRepository
-        // We'll try both services and let them handle the session lookup
-        
-        return bankService.makePayment(request)
-                .onErrorResume(bankError -> {
-                    log.debug("Bank service failed, trying operator service: {}", bankError.getMessage());
-                    return operatorService.makePayment(request);
+        // Get operation by paymentSessionId to determine merchant provider
+        return Mono.fromCallable(() -> operationRepository.findByPaymentSessionId(request.getPaymentSessionId()))
+                .flatMap(optional -> optional.map(Mono::just).orElse(Mono.error(new ResourceNotFoundException("Session not found"))))
+                .flatMap(operation -> {
+                    log.debug("Found operation: {} with merchant provider: {}", operation.getId(), operation.getMerchantProvider());
+                    
+                    // Determine which service to use based on merchant provider
+                    String merchantProvider = operation.getMerchantProvider();
+                    log.info("Routing payment to service based on merchant provider: {}", merchantProvider);
+                    
+                    if (isBankProvider(merchantProvider)) {
+                        log.debug("Using bank service for payment");
+                        return bankService.makePayment(request);
+                    } else {
+                        log.debug("Using operator service for payment");
+                        return operatorService.makePayment(request);
+                    }
                 })
                 .onErrorMap(Exception.class, e -> {
                     log.error("Error during payment: {}", e.getMessage(), e);

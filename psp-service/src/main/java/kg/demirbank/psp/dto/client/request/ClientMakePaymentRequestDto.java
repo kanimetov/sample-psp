@@ -10,17 +10,10 @@ import lombok.Data;
 /**
  * Request DTO for client make payment operation
  * Used when client wants to make a payment after checking QR details
+ * Links to previous check operation via paymentSessionId
  */
 @Data
 public class ClientMakePaymentRequestDto {
-    
-    /**
-     * Full QR URI from URL (same as used in check)
-     * Contains the complete QR code data that needs to be decoded
-     */
-    @NotBlank(message = "QR URI is required")
-    @JsonProperty("qrUri")
-    private String qrUri;
     
     /**
      * Payment amount in tyiyns

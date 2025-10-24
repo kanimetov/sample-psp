@@ -4,7 +4,7 @@ import kg.demirbank.psp.dto.client.request.ClientCheckRequestDto;
 import kg.demirbank.psp.dto.client.request.ClientMakePaymentRequestDto;
 import kg.demirbank.psp.dto.client.response.ClientCheckResponseDto;
 import kg.demirbank.psp.dto.client.response.ClientMakePaymentResponseDto;
-import kg.demirbank.psp.service.MerchantService;
+import kg.demirbank.psp.service.ClientService;
 import kg.demirbank.psp.util.LoggingUtil;
 import kg.demirbank.psp.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
@@ -14,17 +14,17 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 /**
- * Merchant controller handles merchant requests for QR payment operations
+ * Client controller handles client requests for QR payment operations
  * Provides endpoints for checking QR details and making payments
  * 
- * Note: No signature verification required for merchant endpoints
+ * Note: No signature verification required for client endpoints
  */
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-public class MerchantController {
+public class ClientController {
     
-    private final MerchantService merchantService;
+    private final ClientService clientService;
     private final ValidationUtil validationUtil;
     
     /**
@@ -47,7 +47,7 @@ public class MerchantController {
         validationUtil.validateDto(request);
         
         // Process the request using business service
-        return merchantService.checkQrPayment(request)
+        return clientService.checkQrPayment(request)
                 .map(ResponseEntity::ok)
                 .onErrorResume(e -> Mono.error(e)); // Let GlobalExceptionHandler handle it
     }
@@ -72,7 +72,7 @@ public class MerchantController {
         validationUtil.validateDto(request);
         
         // Process the request using business service
-        return merchantService.makePayment(request)
+        return clientService.makePayment(request)
                 .map(ResponseEntity::ok)
                 .onErrorResume(e -> Mono.error(e)); // Let GlobalExceptionHandler handle it
     }

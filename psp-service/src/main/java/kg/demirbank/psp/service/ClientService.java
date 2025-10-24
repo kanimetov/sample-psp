@@ -7,10 +7,10 @@ import kg.demirbank.psp.dto.client.response.ClientMakePaymentResponseDto;
 import reactor.core.publisher.Mono;
 
 /**
- * Service for merchant transaction business logic
- * Handles merchant check and make payment operations
+ * Service for client transaction business logic
+ * Handles client check and make payment operations
  */
-public interface MerchantService {
+public interface ClientService {
     
     /**
      * Check QR payment details

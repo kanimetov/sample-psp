@@ -340,7 +340,7 @@ Helper DTO for additional fields in `extra`.
 
 ---
 
-## Transaction Types (CustomerType enum)
+## Transaction Types (TransactionType enum)
 
 | Code | Name | Description |
 |-----|----------|----------|
@@ -351,6 +351,21 @@ Helper DTO for additional fields in `extra`.
 | 50 | B2B | Payment/transfer via QR code/payment link |
 | 60 | BANK_RESERVE | Electronic message about bank reserve placement |
 | 70 | B2G | Government payment (legal entity) via QR code/payment link |
+
+## Transfer Directions
+
+| Code | Name | Description |
+|-----|----------|----------|
+| IN | INCOMING | Incoming transfer to PSP (Operator → PSP) |
+| OUT | OUTGOING | Outgoing transfer from PSP (PSP → Operator) |
+| OWN | INTERNAL | Internal transfer within PSP system |
+
+## Customer Types
+
+| Code | Name | Description |
+|-----|----------|----------|
+| 1 | INDIVIDUAL | Individual customer |
+| 2 | CORPORATE | Corporate customer |
 
 ---
 

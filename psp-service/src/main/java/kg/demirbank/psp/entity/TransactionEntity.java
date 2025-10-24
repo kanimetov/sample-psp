@@ -62,6 +62,9 @@ public class TransactionEntity {
     @Column(name = "qr_comment", length = 32)
     private String qrComment;
 
+    @Column(name = "customer_type", nullable = false, length = 1)
+    private String customerType;
+
     @Column(name = "amount", nullable = false)
     private Long amount;
 
@@ -84,6 +87,9 @@ public class TransactionEntity {
 
     @Column(name = "api_version", length = 10)
     private String apiVersion;
+
+    @Column(name = "transfer_direction", nullable = false, length = 3)
+    private String transferDirection; // IN, OUT, OWN
 
     @OneToMany(mappedBy = "transaction", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<ExtraDataEntity> extraData;
@@ -243,6 +249,13 @@ public class TransactionEntity {
         this.qrComment = qrComment;
     }
 
+    public String getCustomerType() {
+        return customerType;
+    }
+
+    public void setCustomerType(String customerType) {
+        this.customerType = customerType;
+    }
 
     public Long getAmount() {
         return amount;
@@ -298,6 +311,14 @@ public class TransactionEntity {
 
     public void setApiVersion(String apiVersion) {
         this.apiVersion = apiVersion;
+    }
+
+    public String getTransferDirection() {
+        return transferDirection;
+    }
+
+    public void setTransferDirection(String transferDirection) {
+        this.transferDirection = transferDirection;
     }
 
     public List<ExtraDataEntity> getExtraData() {

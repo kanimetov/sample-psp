@@ -6,6 +6,7 @@ import kg.demirbank.psp.dto.common.UpdateDto;
 import kg.demirbank.psp.dto.incoming.response.CheckResponseDto;
 import kg.demirbank.psp.dto.incoming.response.CreateResponseDto;
 import kg.demirbank.psp.dto.incoming.response.StatusDto;
+import kg.demirbank.psp.enums.Status;
 import kg.demirbank.psp.enums.TransactionType;
 import kg.demirbank.psp.exception.*;
 import kg.demirbank.psp.util.LoggingUtil;
@@ -104,7 +105,7 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
             // Simulate transaction creation
             CreateResponseDto response = new CreateResponseDto();
             response.setTransactionId(transactionId);
-            response.setStatus(10); // Status 10 for created
+            response.setStatus(Status.CREATED); // Status 10 for created
             response.setAmount(request.getAmount());
             response.setBeneficiaryName("Sample Beneficiary");
             response.setCustomerType("1"); // Default to Individual customer type
@@ -153,7 +154,7 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
             // Simulate transaction execution
             StatusDto response = new StatusDto();
             response.setTransactionId(transactionId);
-            response.setStatus(20); // Status 20 for success
+            response.setStatus(Status.IN_PROCESS); // Status 20 for success
             response.setAmount(40000L);
             response.setBeneficiaryName("c***e A***o");
             response.setCustomerType("1");

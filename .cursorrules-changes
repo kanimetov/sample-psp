@@ -1,0 +1,21 @@
+# Change Control Rules
+
+## Authorization Required
+
+**NO changes without user permission**
+
+### What Requires Permission:
+- Code modifications
+- File creation/deletion
+- Documentation changes
+- Configuration updates
+- Git commits
+- Any file changes
+
+### Process:
+1. Ask for permission
+2. Wait for approval
+3. Make changes
+4. Ask to commit
+
+**No exceptions.**

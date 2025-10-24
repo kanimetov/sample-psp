@@ -4,20 +4,19 @@
 
 **ALL content MUST be written in English**
 
-This applies to:
-- All documentation files
-- All code comments
-- All API documentation
-- All README files
-- All technical specifications
-- All configuration files
-- All database schemas
-- All migration scripts
-- All test files
-- All user guides
-- All error messages
-- All variable names
-- All function names
-- All class names
+- Documentation
+- Code comments
+- API docs
+- Variable names
+- Function names
+- Everything
 
-**No exceptions. Everything must be in English.**
+**No exceptions.**
+
+## Change Control
+
+**See `.cursorrules-changes`**
+
+- NO changes without permission
+- NO commits without approval
+- Ask first, then act

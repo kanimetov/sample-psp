@@ -1,4 +1,4 @@
-package kg.demirbank.psp.dto.client.request;
+package kg.demirbank.psp.dto.merchant.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
@@ -8,12 +8,12 @@ import kg.demirbank.psp.enums.CustomerType;
 import lombok.Data;
 
 /**
- * Request DTO for client make payment operation
- * Used when client wants to make a payment after checking QR details
+ * Request DTO for merchant make payment operation
+ * Used when merchant wants to make a payment after checking QR details
  * Links to previous check operation via paymentSessionId
  */
 @Data
-public class ClientMakePaymentRequestDto {
+public class MerchantMakePaymentRequestDto {
     
     /**
      * Payment amount in tyiyns

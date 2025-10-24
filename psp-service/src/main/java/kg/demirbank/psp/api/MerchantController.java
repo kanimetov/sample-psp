@@ -1,10 +1,10 @@
 package kg.demirbank.psp.api;
 
-import kg.demirbank.psp.dto.client.request.ClientCheckRequestDto;
-import kg.demirbank.psp.dto.client.request.ClientMakePaymentRequestDto;
-import kg.demirbank.psp.dto.client.response.ClientCheckResponseDto;
-import kg.demirbank.psp.dto.client.response.ClientMakePaymentResponseDto;
-import kg.demirbank.psp.service.ClientService;
+import kg.demirbank.psp.dto.merchant.request.MerchantCheckRequestDto;
+import kg.demirbank.psp.dto.merchant.request.MerchantMakePaymentRequestDto;
+import kg.demirbank.psp.dto.merchant.response.MerchantCheckResponseDto;
+import kg.demirbank.psp.dto.merchant.response.MerchantMakePaymentResponseDto;
+import kg.demirbank.psp.service.MerchantService;
 import kg.demirbank.psp.util.LoggingUtil;
 import kg.demirbank.psp.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
@@ -14,17 +14,17 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 /**
- * Client controller handles client requests for QR payment operations
+ * Merchant controller handles merchant requests for QR payment operations
  * Provides endpoints for checking QR details and making payments
  * 
- * Note: No signature verification required for client endpoints
+ * Note: No signature verification required for merchant endpoints
  */
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-public class ClientController {
+public class MerchantController {
     
-    private final ClientService clientService;
+    private final MerchantService merchantService;
     private final ValidationUtil validationUtil;
     
     /**
@@ -32,13 +32,13 @@ public class ClientController {
      * Decodes QR URI and returns beneficiary information
      * 
      * @param version API version
-     * @param request Client check request with QR URI
+     * @param request Merchant check request with QR URI
      * @return Check response with session ID, ELQR data, and beneficiary info
      */
-    @PostMapping("/out/qr/{version}/check")
-    public Mono<ResponseEntity<ClientCheckResponseDto>> checkQrPayment(
+    @PostMapping("/merchant/qr/{version}/check")
+    public Mono<ResponseEntity<MerchantCheckResponseDto>> checkQrPayment(
             @PathVariable String version,
-            @RequestBody ClientCheckRequestDto request) {
+            @RequestBody MerchantCheckRequestDto request) {
         
         // Generate correlation ID for this request
         LoggingUtil.generateAndSetCorrelationId();
@@ -47,7 +47,7 @@ public class ClientController {
         validationUtil.validateDto(request);
         
         // Process the request using business service
-        return clientService.checkQrPayment(request)
+        return merchantService.checkQrPayment(request)
                 .map(ResponseEntity::ok)
                 .onErrorResume(e -> Mono.error(e)); // Let GlobalExceptionHandler handle it
     }
@@ -57,13 +57,13 @@ public class ClientController {
      * Creates transaction and returns payment confirmation
      * 
      * @param version API version
-     * @param request Client make payment request with QR URI and amount
+     * @param request Merchant make payment request with QR URI and amount
      * @return Payment response with receipt ID and transaction details
      */
-    @PostMapping("/out/qr/{version}/makePayment")
-    public Mono<ResponseEntity<ClientMakePaymentResponseDto>> makePayment(
+    @PostMapping("/merchant/qr/{version}/makePayment")
+    public Mono<ResponseEntity<MerchantMakePaymentResponseDto>> makePayment(
             @PathVariable String version,
-            @RequestBody ClientMakePaymentRequestDto request) {
+            @RequestBody MerchantMakePaymentRequestDto request) {
         
         // Generate correlation ID for this request
         LoggingUtil.generateAndSetCorrelationId();
@@ -72,7 +72,7 @@ public class ClientController {
         validationUtil.validateDto(request);
         
         // Process the request using business service
-        return clientService.makePayment(request)
+        return merchantService.makePayment(request)
                 .map(ResponseEntity::ok)
                 .onErrorResume(e -> Mono.error(e)); // Let GlobalExceptionHandler handle it
     }

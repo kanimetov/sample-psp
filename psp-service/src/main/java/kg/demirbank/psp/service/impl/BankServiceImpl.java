@@ -2,10 +2,10 @@ package kg.demirbank.psp.service.impl;
 
 import kg.demirbank.psp.dto.bank.request.BankCheckRequestDto;
 import kg.demirbank.psp.dto.bank.request.BankCreateRequestDto;
-import kg.demirbank.psp.dto.client.request.ClientCheckRequestDto;
-import kg.demirbank.psp.dto.client.request.ClientMakePaymentRequestDto;
-import kg.demirbank.psp.dto.client.response.ClientCheckResponseDto;
-import kg.demirbank.psp.dto.client.response.ClientMakePaymentResponseDto;
+import kg.demirbank.psp.dto.merchant.request.MerchantCheckRequestDto;
+import kg.demirbank.psp.dto.merchant.request.MerchantMakePaymentRequestDto;
+import kg.demirbank.psp.dto.merchant.response.MerchantCheckResponseDto;
+import kg.demirbank.psp.dto.merchant.response.MerchantMakePaymentResponseDto;
 import kg.demirbank.psp.dto.common.ELQRData;
 import kg.demirbank.psp.entity.OperationEntity;
 import kg.demirbank.psp.enums.CustomerType;
@@ -38,7 +38,7 @@ public class BankServiceImpl implements BankService {
     private final OperationRepository operationRepository;
     
     @Override
-    public Mono<ClientCheckResponseDto> checkQrPayment(ClientCheckRequestDto request) {
+    public Mono<MerchantCheckResponseDto> checkQrPayment(MerchantCheckRequestDto request) {
         log.info("Starting bank QR payment check for URI: {}", request.getQrUri());
         
         return qrDecoderClient.decodeQrUri(request.getQrUri())
@@ -57,7 +57,7 @@ public class BankServiceImpl implements BankService {
                                 log.debug("Operation saved with ID: {}", savedOperation.getId());
                                 
                                 // Create response
-                                ClientCheckResponseDto response = new ClientCheckResponseDto();
+                                MerchantCheckResponseDto response = new MerchantCheckResponseDto();
                                 response.setPaymentSessionId(savedOperation.getPaymentSessionId());
                                 response.setBeneficiaryName(elqrData.getMerchantId());
                                 response.setQrType(elqrData.getQrType());
@@ -84,7 +84,7 @@ public class BankServiceImpl implements BankService {
     }
     
     @Override
-    public Mono<ClientMakePaymentResponseDto> makePayment(ClientMakePaymentRequestDto request) {
+    public Mono<MerchantMakePaymentResponseDto> makePayment(MerchantMakePaymentRequestDto request) {
         log.info("Starting bank payment for session: {} with amount: {}", 
                 request.getPaymentSessionId(), request.getAmount());
         
@@ -153,7 +153,7 @@ public class BankServiceImpl implements BankService {
                                                                 .map(finalOperation -> {
                                                                     log.info("Bank payment completed successfully for session: {}", request.getPaymentSessionId());
                                                                     
-                                                                    ClientMakePaymentResponseDto response = new ClientMakePaymentResponseDto();
+                                                                    MerchantMakePaymentResponseDto response = new MerchantMakePaymentResponseDto();
                                                                     response.setReceiptId(finalOperation.getReceiptId());
                                                                     response.setTransactionId(finalOperation.getTransactionId());
                                                                     response.setAmount(finalOperation.getAmount());

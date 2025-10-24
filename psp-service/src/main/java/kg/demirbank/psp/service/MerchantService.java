@@ -7,13 +7,14 @@ import kg.demirbank.psp.dto.merchant.response.MerchantMakePaymentResponseDto;
 import reactor.core.publisher.Mono;
 
 /**
- * Service for bank operations
- * Handles internal bank transactions and account validation
+ * Service for merchant transaction business logic
+ * Handles merchant check and make payment operations
  */
-public interface BankService {
+public interface MerchantService {
     
     /**
-     * Check QR payment details using bank client
+     * Check QR payment details
+     * Decodes QR, validates data, and returns beneficiary information
      * 
      * @param request Merchant check request with QR URI
      * @return Check response with session ID, ELQR data, and beneficiary info
@@ -21,9 +22,10 @@ public interface BankService {
     Mono<MerchantCheckResponseDto> checkQrPayment(MerchantCheckRequestDto request);
     
     /**
-     * Make payment using bank client
+     * Make payment after checking QR details
+     * Creates transaction and returns payment confirmation
      * 
-     * @param request Merchant make payment request with session ID and amount
+     * @param request Merchant make payment request with QR URI and amount
      * @return Payment response with receipt ID and transaction details
      */
     Mono<MerchantMakePaymentResponseDto> makePayment(MerchantMakePaymentRequestDto request);

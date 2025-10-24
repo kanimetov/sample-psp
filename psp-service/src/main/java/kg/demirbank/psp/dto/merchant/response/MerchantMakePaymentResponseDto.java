@@ -1,15 +1,15 @@
-package kg.demirbank.psp.dto.client.response;
+package kg.demirbank.psp.dto.merchant.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import kg.demirbank.psp.enums.Status;
 import lombok.Data;
 
 /**
- * Response DTO for client make payment operation
- * Used when client makes a payment after checking QR details
+ * Response DTO for merchant make payment operation
+ * Used when merchant makes a payment after checking QR details
  */
 @Data
-public class ClientMakePaymentResponseDto {
+public class MerchantMakePaymentResponseDto {
     
     /**
      * Generated receipt ID for this payment

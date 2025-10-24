@@ -1,4 +1,4 @@
-package kg.demirbank.psp.dto.client.response;
+package kg.demirbank.psp.dto.merchant.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import kg.demirbank.psp.dto.common.ELQRData;
@@ -9,12 +9,12 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * Response DTO for client check operation
- * Used when client checks QR payment details
+ * Response DTO for merchant check operation
+ * Used when merchant checks QR payment details
  * Contains decoded QR data and operator/bank check response
  */
 @Data
-public class ClientCheckResponseDto implements ELQRData {
+public class MerchantCheckResponseDto implements ELQRData {
     
     /**
      * Payment session ID linking to the saved CHECK operation

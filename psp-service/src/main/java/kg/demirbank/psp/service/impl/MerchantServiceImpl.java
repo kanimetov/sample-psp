@@ -1,13 +1,13 @@
 package kg.demirbank.psp.service.impl;
 
-import kg.demirbank.psp.dto.client.request.ClientCheckRequestDto;
-import kg.demirbank.psp.dto.client.request.ClientMakePaymentRequestDto;
-import kg.demirbank.psp.dto.client.response.ClientCheckResponseDto;
-import kg.demirbank.psp.dto.client.response.ClientMakePaymentResponseDto;
+import kg.demirbank.psp.dto.merchant.request.MerchantCheckRequestDto;
+import kg.demirbank.psp.dto.merchant.request.MerchantMakePaymentRequestDto;
+import kg.demirbank.psp.dto.merchant.response.MerchantCheckResponseDto;
+import kg.demirbank.psp.dto.merchant.response.MerchantMakePaymentResponseDto;
 import kg.demirbank.psp.exception.*;
 import kg.demirbank.psp.repository.OperationRepository;
 import kg.demirbank.psp.service.BankService;
-import kg.demirbank.psp.service.ClientService;
+import kg.demirbank.psp.service.MerchantService;
 import kg.demirbank.psp.service.OperatorService;
 import kg.demirbank.psp.service.clients.QrDecoderClient;
 import lombok.RequiredArgsConstructor;
@@ -18,13 +18,13 @@ import reactor.core.publisher.Mono;
 
 
 /**
- * Implementation of client service
- * Contains business logic for client check and make payment operations
+ * Implementation of merchant service
+ * Contains business logic for merchant check and make payment operations
  */
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ClientServiceImpl implements ClientService {
+public class MerchantServiceImpl implements MerchantService {
     
     
     private final QrDecoderClient qrDecoderClient;
@@ -36,7 +36,7 @@ public class ClientServiceImpl implements ClientService {
     private String configuredMerchantProvider;
     
     @Override
-    public Mono<ClientCheckResponseDto> checkQrPayment(ClientCheckRequestDto request) {
+    public Mono<MerchantCheckResponseDto> checkQrPayment(MerchantCheckRequestDto request) {
         log.info("Starting QR payment check for URI: {}", request.getQrUri());
         
         return qrDecoderClient.decodeQrUri(request.getQrUri())
@@ -62,7 +62,7 @@ public class ClientServiceImpl implements ClientService {
     }
     
     @Override
-    public Mono<ClientMakePaymentResponseDto> makePayment(ClientMakePaymentRequestDto request) {
+    public Mono<MerchantMakePaymentResponseDto> makePayment(MerchantMakePaymentRequestDto request) {
         log.info("Starting payment for session: {} with amount: {}", 
                 request.getPaymentSessionId(), request.getAmount());
         

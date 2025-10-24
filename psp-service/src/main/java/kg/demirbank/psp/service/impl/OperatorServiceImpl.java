@@ -1,9 +1,9 @@
 package kg.demirbank.psp.service.impl;
 
-import kg.demirbank.psp.dto.client.request.ClientCheckRequestDto;
-import kg.demirbank.psp.dto.client.request.ClientMakePaymentRequestDto;
-import kg.demirbank.psp.dto.client.response.ClientCheckResponseDto;
-import kg.demirbank.psp.dto.client.response.ClientMakePaymentResponseDto;
+import kg.demirbank.psp.dto.merchant.request.MerchantCheckRequestDto;
+import kg.demirbank.psp.dto.merchant.request.MerchantMakePaymentRequestDto;
+import kg.demirbank.psp.dto.merchant.response.MerchantCheckResponseDto;
+import kg.demirbank.psp.dto.merchant.response.MerchantMakePaymentResponseDto;
 import kg.demirbank.psp.dto.common.ELQRData;
 import kg.demirbank.psp.dto.outgoing.request.OutgoingCheckRequestDto;
 import kg.demirbank.psp.dto.outgoing.request.OutgoingCreateRequestDto;
@@ -38,7 +38,7 @@ public class OperatorServiceImpl implements OperatorService {
     private final OperationRepository operationRepository;
     
     @Override
-    public Mono<ClientCheckResponseDto> checkQrPayment(ClientCheckRequestDto request) {
+    public Mono<MerchantCheckResponseDto> checkQrPayment(MerchantCheckRequestDto request) {
         log.info("Starting operator QR payment check for URI: {}", request.getQrUri());
         
         return qrDecoderClient.decodeQrUri(request.getQrUri())
@@ -57,7 +57,7 @@ public class OperatorServiceImpl implements OperatorService {
                                 log.debug("Operation saved with ID: {}", savedOperation.getId());
                                 
                                 // Create response
-                                ClientCheckResponseDto response = new ClientCheckResponseDto();
+                                MerchantCheckResponseDto response = new MerchantCheckResponseDto();
                                 response.setPaymentSessionId(savedOperation.getPaymentSessionId());
                                 response.setBeneficiaryName(elqrData.getMerchantId());
                                 response.setQrType(elqrData.getQrType());
@@ -84,7 +84,7 @@ public class OperatorServiceImpl implements OperatorService {
     }
     
     @Override
-    public Mono<ClientMakePaymentResponseDto> makePayment(ClientMakePaymentRequestDto request) {
+    public Mono<MerchantMakePaymentResponseDto> makePayment(MerchantMakePaymentRequestDto request) {
         log.info("Starting operator payment for session: {} with amount: {}", 
                 request.getPaymentSessionId(), request.getAmount());
         
@@ -150,7 +150,7 @@ public class OperatorServiceImpl implements OperatorService {
                                                                 .map(finalOperation -> {
                                                                     log.info("Operator payment completed successfully for session: {}", request.getPaymentSessionId());
                                                                     
-                                                                    ClientMakePaymentResponseDto response = new ClientMakePaymentResponseDto();
+                                                                    MerchantMakePaymentResponseDto response = new MerchantMakePaymentResponseDto();
                                                                     response.setReceiptId(finalOperation.getReceiptId());
                                                                     response.setTransactionId(finalOperation.getTransactionId());
                                                                     response.setAmount(finalOperation.getAmount());

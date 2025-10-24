@@ -1,5 +1,6 @@
-package kg.demirbank.psp.exception;
+package kg.demirbank.psp.exception.validation;
 
+import kg.demirbank.psp.exception.PspException;
 import org.springframework.http.HttpStatus;
 
 /**

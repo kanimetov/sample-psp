@@ -2,7 +2,7 @@ package kg.demirbank.psp.util;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
-import kg.demirbank.psp.exception.ValidationException;
+import kg.demirbank.psp.exception.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

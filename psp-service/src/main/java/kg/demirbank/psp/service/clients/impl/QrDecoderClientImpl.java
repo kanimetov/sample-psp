@@ -2,7 +2,7 @@ package kg.demirbank.psp.service.clients.impl;
 
 import kg.demirbank.psp.dto.common.ELQRData;
 import kg.demirbank.psp.dto.common.KeyValueDto;
-import kg.demirbank.psp.exception.BadRequestException;
+import kg.demirbank.psp.exception.validation.BadRequestException;
 import kg.demirbank.psp.service.clients.QrDecoderClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

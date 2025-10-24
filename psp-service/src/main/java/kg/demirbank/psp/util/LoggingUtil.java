@@ -146,16 +146,16 @@ public class LoggingUtil {
      * Check if exception is a known business exception (should not log stack trace)
      */
     public static boolean isBusinessException(Throwable throwable) {
-        return throwable instanceof kg.demirbank.psp.exception.MinAmountNotValidException ||
-               throwable instanceof kg.demirbank.psp.exception.MaxAmountNotValidException ||
-               throwable instanceof kg.demirbank.psp.exception.IncorrectRequestDataException ||
-               throwable instanceof kg.demirbank.psp.exception.BadRequestException ||
-               throwable instanceof kg.demirbank.psp.exception.ValidationException ||
-               throwable instanceof kg.demirbank.psp.exception.AccessDeniedException ||
-               throwable instanceof kg.demirbank.psp.exception.ResourceNotFoundException ||
-               throwable instanceof kg.demirbank.psp.exception.UnprocessableEntityException ||
-               throwable instanceof kg.demirbank.psp.exception.RecipientDataIncorrectException ||
-               throwable instanceof kg.demirbank.psp.exception.SignatureVerificationException;
+        return throwable instanceof kg.demirbank.psp.exception.validation.MinAmountNotValidException ||
+               throwable instanceof kg.demirbank.psp.exception.validation.MaxAmountNotValidException ||
+               throwable instanceof kg.demirbank.psp.exception.validation.IncorrectRequestDataException ||
+               throwable instanceof kg.demirbank.psp.exception.validation.BadRequestException ||
+               throwable instanceof kg.demirbank.psp.exception.validation.ValidationException ||
+               throwable instanceof kg.demirbank.psp.exception.security.AccessDeniedException ||
+               throwable instanceof kg.demirbank.psp.exception.business.ResourceNotFoundException ||
+               throwable instanceof kg.demirbank.psp.exception.business.UnprocessableEntityException ||
+               throwable instanceof kg.demirbank.psp.exception.validation.RecipientDataIncorrectException ||
+               throwable instanceof kg.demirbank.psp.exception.security.SignatureVerificationException;
     }
     
     /**

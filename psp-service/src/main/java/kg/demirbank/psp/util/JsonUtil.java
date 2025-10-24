@@ -1,7 +1,7 @@
 package kg.demirbank.psp.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import kg.demirbank.psp.exception.BadRequestException;
+import kg.demirbank.psp.exception.validation.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

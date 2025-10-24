@@ -7,6 +7,7 @@ This document describes the network exception handling implementation in the PSP
 ## Network Exception Types
 
 ### 1. NetworkTimeoutException (504 Gateway Timeout)
+**Package:** `kg.demirbank.psp.exception.network`
 
 Thrown when a request to the operator service times out.
 
@@ -30,6 +31,7 @@ Thrown when a request to the operator service times out.
 ```
 
 ### 2. NetworkConnectionException (503 Service Unavailable)
+**Package:** `kg.demirbank.psp.exception.network`
 
 Thrown when the service cannot establish a connection to the operator service.
 
@@ -55,6 +57,7 @@ Thrown when the service cannot establish a connection to the operator service.
 ```
 
 ### 3. NetworkException (502 Bad Gateway)
+**Package:** `kg.demirbank.psp.exception.network`
 
 Generic network exception for other network-related errors.
 
@@ -122,29 +125,29 @@ These methods traverse the exception chain to identify network issues at any lev
 The `mapOperatorError()` method in `OperatorClientImpl` maps low-level network exceptions to appropriate high-level exceptions:
 
 ```
-TimeoutException/ReadTimeoutException/WriteTimeoutException → NetworkTimeoutException (504)
-ConnectException/ConnectTimeoutException/NoRouteToHostException/PortUnreachableException → NetworkConnectionException (503)
-SSLException/SSLHandshakeException/CertificateException → NetworkException (502)
-IOException/SocketException/UnknownHostException/BindException → NetworkException (502)
-Other non-network errors → SystemErrorException (500)
+TimeoutException/ReadTimeoutException/WriteTimeoutException → NetworkTimeoutException (504) [network package]
+ConnectException/ConnectTimeoutException/NoRouteToHostException/PortUnreachableException → NetworkConnectionException (503) [network package]
+SSLException/SSLHandshakeException/CertificateException → NetworkException (502) [network package]
+IOException/SocketException/UnknownHostException/BindException → NetworkException (502) [network package]
+Other non-network errors → SystemErrorException (500) [network package]
 ```
 
 ### Interaction with HTTP errors (from operator)
 
 When the operator responds with an HTTP status (i.e., not a transport failure), errors are first mapped directly by status code before network detection:
 
-- 400 → BadRequestException
-- 404 → ResourceNotFoundException
-- 422 → UnprocessableEntityException
-- 452 → RecipientDataIncorrectException
-- 453 → AccessDeniedException
-- 454 → IncorrectRequestDataException
-- 455 → MinAmountNotValidException
-- 456 → MaxAmountNotValidException
-- 500 → SystemErrorException
-- 523 → SupplierNotAvailableException
-- 524 → ExternalServerNotAvailableException
-- default → SystemErrorException (unexpected operator error)
+- 400 → BadRequestException [validation package]
+- 404 → ResourceNotFoundException [business package]
+- 422 → UnprocessableEntityException [business package]
+- 452 → RecipientDataIncorrectException [validation package]
+- 453 → AccessDeniedException [security package]
+- 454 → IncorrectRequestDataException [validation package]
+- 455 → MinAmountNotValidException [validation package]
+- 456 → MaxAmountNotValidException [validation package]
+- 500 → SystemErrorException [network package]
+- 523 → SupplierNotAvailableException [network package]
+- 524 → ExternalServerNotAvailableException [network package]
+- default → SystemErrorException (unexpected operator error) [network package]
 
 ## Retry Strategy
 

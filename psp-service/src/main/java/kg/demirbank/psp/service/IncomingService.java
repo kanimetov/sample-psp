@@ -1,7 +1,7 @@
 package kg.demirbank.psp.service;
 
-import kg.demirbank.psp.dto.incoming.request.CheckRequestDto;
-import kg.demirbank.psp.dto.incoming.request.CreateRequestDto;
+import kg.demirbank.psp.dto.incoming.request.IncomingCheckRequestDto;
+import kg.demirbank.psp.dto.incoming.request.IncomingCreateRequestDto;
 import kg.demirbank.psp.dto.common.UpdateDto;
 import kg.demirbank.psp.dto.incoming.response.IncomingCheckResponseDto;
 import kg.demirbank.psp.dto.incoming.response.IncomingTransactionResponseDto;
@@ -20,7 +20,7 @@ public interface IncomingService {
      * @param request Check request DTO
      * @return Check response with beneficiary name and transaction type
      */
-    Mono<IncomingCheckResponseDto> checkTransaction(CheckRequestDto request);
+    Mono<IncomingCheckResponseDto> checkTransaction(IncomingCheckRequestDto request);
     
     /**
      * Create new transaction
@@ -29,7 +29,7 @@ public interface IncomingService {
      * @param request Create request DTO
      * @return Create response with transaction ID and status
      */
-    Mono<IncomingTransactionResponseDto> createTransaction(CreateRequestDto request);
+    Mono<IncomingTransactionResponseDto> createTransaction(IncomingCreateRequestDto request);
     
     /**
      * Execute transaction

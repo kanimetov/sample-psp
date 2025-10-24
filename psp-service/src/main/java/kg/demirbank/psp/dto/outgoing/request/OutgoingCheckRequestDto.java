@@ -13,7 +13,7 @@ import java.util.List;
  * Used when PSP acts as sender sending check requests to Operator
  */
 @Data
-public class CheckRequestDto {
+public class OutgoingCheckRequestDto {
     /**
      * Payment link type, Field ID=01 from QR
      */

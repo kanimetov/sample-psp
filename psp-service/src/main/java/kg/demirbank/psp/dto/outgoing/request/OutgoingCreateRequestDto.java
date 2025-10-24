@@ -1,4 +1,4 @@
-package kg.demirbank.psp.dto.incoming.request;
+package kg.demirbank.psp.dto.outgoing.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
@@ -10,16 +10,17 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * Incoming create request DTO (Operator → PSP)
- * Used when PSP acts as beneficiary receiving create requests from Operator
+ * Outgoing create request DTO (PSP → Operator)
+ * Used when PSP acts as sender sending create requests to Operator
  */
 @Data
-public class CreateRequestDto {
+public class OutgoingCreateRequestDto {
 
     /**
      * Transaction ID from the Operator's system
      */
     @NotNull
+    @Size(max = 32)
     @JsonProperty("transactionId")
     private String transactionId;
     
@@ -80,7 +81,7 @@ public class CreateRequestDto {
      * Currency, by default always "417", Field ID=53 from QR
      */
     @NotBlank
-    @Size(max = 3)
+    @Pattern(regexp = "\\d{3}")
     @JsonProperty("currencyCode")
     private String currencyCode = "417";
 
@@ -98,26 +99,32 @@ public class CreateRequestDto {
     @JsonProperty("qrComment")
     private String qrComment;
 
+    @NotBlank
+    @Pattern(regexp = "1|2")
+    @JsonProperty("customerType")
+    private String customerType;
+
     /**
      * Transaction id from the Sender's system
      */
     @NotBlank
     @Size(max = 50)
-    @JsonProperty("senderTransactionId")
-    private String senderTransactionId;
+    @JsonProperty("pspTransactionId")
+    private String pspTransactionId;
 
     /**
      * Sender's receipt number
      */
     @NotBlank
     @Size(max = 20)
-    @JsonProperty("senderReceiptId")
-    private String senderReceiptId;
+    @JsonProperty("receiptId")
+    private String receiptId;
 
     /**
      * Payment amount (in tyiyns)
      */
     @NotNull
+    @Digits(integer = 13, fraction = 0)
     @Positive
     @JsonProperty("amount")
     private Long amount;
@@ -126,13 +133,12 @@ public class CreateRequestDto {
      * Last 4 symbols of payment link hash string, Field ID=63 from QR
      */
     @NotBlank
-    @Size(max = 4)
+    @Pattern(regexp = "^[A-Z0-9]{4}$")
     @JsonProperty("qrLinkHash")
     private String qrLinkHash;
 
     /**
      * Transaction type (specified in the table)
-     * Enum: 10, 20, 30, 40, 50, 60, 70
      */
     @NotNull
     @JsonProperty("transactionType")

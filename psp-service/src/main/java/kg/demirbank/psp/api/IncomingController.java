@@ -1,7 +1,7 @@
 package kg.demirbank.psp.api;
 
-import kg.demirbank.psp.dto.incoming.request.CheckRequestDto;
-import kg.demirbank.psp.dto.incoming.request.CreateRequestDto;
+import kg.demirbank.psp.dto.incoming.request.IncomingCheckRequestDto;
+import kg.demirbank.psp.dto.incoming.request.IncomingCreateRequestDto;
 import kg.demirbank.psp.dto.common.UpdateDto;
 import kg.demirbank.psp.dto.incoming.response.IncomingCheckResponseDto;
 import kg.demirbank.psp.dto.incoming.response.IncomingTransactionResponseDto;
@@ -72,7 +72,7 @@ public class IncomingController {
         LoggingUtil.logSignatureVerification(true, "Signature verified successfully", properties);
         
         // Deserialize JSON after successful signature verification
-        CheckRequestDto body = jsonUtil.fromJson(rawBody, CheckRequestDto.class);
+        IncomingCheckRequestDto body = jsonUtil.fromJson(rawBody, IncomingCheckRequestDto.class);
         
         // Validate DTO using utility method
         validationUtil.validateDto(body);
@@ -138,7 +138,7 @@ public class IncomingController {
         LoggingUtil.logSignatureVerification(true, "Signature verified successfully", properties);
         
         // Deserialize JSON after successful signature verification
-        CreateRequestDto body = jsonUtil.fromJson(rawBody, CreateRequestDto.class);
+        IncomingCreateRequestDto body = jsonUtil.fromJson(rawBody, IncomingCreateRequestDto.class);
         
         // Validate DTO using utility method
         validationUtil.validateDto(body);

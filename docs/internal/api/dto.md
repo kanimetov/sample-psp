@@ -4,17 +4,38 @@
 
 All strings UTF‑8; numbers are integers unless specified otherwise. Amounts in tyiyn (minor units).
 
+## DTO Consolidation
+
+The response DTOs have been consolidated to eliminate code duplication and improve maintainability:
+
+- **IncomingTransactionResponseDto**: Consolidates `CreateResponseDto`, `ExecuteResponseDto`, and `StatusDto` for incoming operations
+- **OutgoingTransactionResponseDto**: Consolidates `CreateResponseDto`, `ExecuteResponseDto`, and `StatusDto` for outgoing operations  
+- **IncomingCheckResponseDto**: Renamed from `CheckResponseDto` for incoming check operations
+- **OutgoingCheckResponseDto**: Renamed from `CheckResponseDto` for outgoing check operations
+
+This consolidation maintains full backward compatibility while providing clearer naming conventions that indicate the direction of data flow.
+
 ## DTO Package Structure
 
 ```java
 kg.demirbank.psp.dto/
-├── KeyValueDto.java       - Helper DTO for extra fields
-├── CheckRequestDto.java   - Request for check operation
-├── CreateRequestDto.java  - Request for create operation
-├── CheckResponseDto.java  - Response for check operation
-├── CreateResponseDto.java - Response for create operation
-├── StatusDto.java         - Universal DTO for execute/get responses
-└── UpdateDto.java         - Bidirectional DTO for update operations
+├── common/
+│   ├── KeyValueDto.java       - Helper DTO for extra fields
+│   └── UpdateDto.java         - Bidirectional DTO for update operations
+├── incoming/
+│   ├── request/
+│   │   ├── CheckRequestDto.java   - Request for check operation
+│   │   └── CreateRequestDto.java  - Request for create operation
+│   └── response/
+│       ├── IncomingCheckResponseDto.java      - Response for check operation
+│       └── IncomingTransactionResponseDto.java - Response for create/execute/status operations
+└── outgoing/
+    ├── request/
+    │   ├── CheckRequestDto.java   - Request for check operation
+    │   └── CreateRequestDto.java  - Request for create operation
+    └── response/
+        ├── OutgoingCheckResponseDto.java      - Response for check operation
+        └── OutgoingTransactionResponseDto.java - Response for create/execute/status operations
 ```
 
 ## Common headers (outgoing to Operator)
@@ -62,47 +83,57 @@ kg.demirbank.psp.dto/
 - receiptId: string, max 20 (required, @NotBlank @Size) - Receipt ID
 - transactionType: CustomerType enum (required, @NotNull) - Transaction type
 
-### CheckResponseDto
+### IncomingCheckResponseDto
 
 **Returned from:**
-- Check operations (all directions)
+- Incoming check operations (Operator → PSP)
 
 **Fields:**
 - beneficiaryName: string (masked, e.g. "c***e A***o")
 - transactionType: CustomerType - Transaction type (enum, nullable)
 
-### CreateResponseDto
+### OutgoingCheckResponseDto
 
 **Returned from:**
-- Create operations (all directions)
+- Outgoing check operations (PSP → Operator)
+
+**Fields:**
+- beneficiaryName: string (masked, e.g. "c***e A***o")
+- transactionType: CustomerType - Transaction type (enum, nullable)
+
+### IncomingTransactionResponseDto
+
+**Used in:**
+- Incoming create/execute/status responses (Operator → PSP)
+
+**Fields:**
+- transactionId: string (UUID) - Transaction ID from operator
+- status: Status enum - Transaction status (nullable)
+- amount: Long - Transaction amount in tyiyn
+- beneficiaryName: string - Beneficiary name (masked)
+- customerType: string - Customer type ("1"=Individual, "2"=Corporate)
+- receiptId: string - Receipt ID
+- createdDate: string (ISO8601) - Creation date
+- executedDate: string (ISO8601) - Execution date (empty if not executed)
+
+### OutgoingTransactionResponseDto
+
+**Used in:**
+- Outgoing create/execute/status responses (PSP → Operator)
 
 **Fields:**
 - transactionId: string (UUID) - Transaction ID from operator
 - status: Status enum - Transaction status (nullable)
 - transactionType: CustomerType - Transaction type (enum)
 - amount: Long - Transaction amount in tyiyn
-- beneficiaryName: string - Beneficiary name (masked)
-- customerType: Integer - Customer type (1=Individual, 2=Corporate)
-- receiptId: string - Receipt ID
+- commission: Long - Transaction commission in tyiyn
+- senderTransactionId: string - Payment ID in sender's system
+- senderReceiptId: string - Sender's receipt number
+- senderBic: string - Sender's BIC
+- beneficiaryBic: string - Beneficiary's BIC
 - createdDate: string (ISO8601) - Creation date
-- executedDate: string (ISO8601) - Execution date (default "")
-
-### StatusDto
-
-**Used in:**
-- Execute responses (all directions)
-- Get responses (all directions)
-
-**Fields:**
-- transactionId: string (UUID)
-- status: Status - transaction status enum (nullable)
-- transactionType: CustomerType - transaction type enum (nullable)
-- amount: Long - amount in tyiyn
-- beneficiaryName: string (nullable)
-- customerType: string (nullable) - "1" or "2"
-- receiptId: string (nullable)
-- createdDate: string (ISO8601)
-- executedDate: string (ISO8601, nullable)
+- executedDate: string (ISO8601) - Execution date (empty if not executed)
+- extra: List<KeyValueDto> - Additional fields (max 3 key-value pairs)
 
 ### UpdateDto
 
@@ -127,18 +158,18 @@ kg.demirbank.psp.dto/
 
 | Operation | Endpoint | Request DTO | Response DTO |
 |----------|----------|-------------|--------------|
-| Check | POST /in/qr/{v}/tx/check | CheckRequestDto | CheckResponseDto |
-| Create | POST /in/qr/{v}/tx/create | CreateRequestDto | CreateResponseDto |
-| Execute | POST /in/qr/{v}/tx/execute/{id} | (empty) | StatusDto |
+| Check | POST /in/qr/{v}/tx/check | CheckRequestDto | IncomingCheckResponseDto |
+| Create | POST /in/qr/{v}/tx/create | CreateRequestDto | IncomingTransactionResponseDto |
+| Execute | POST /in/qr/{v}/tx/execute/{id} | (empty) | IncomingTransactionResponseDto |
 | Update | POST /in/qr/{v}/tx/update/{id} | UpdateDto | ACK (200 OK) |
 
-### Outgoing to Operator (PSP → Operator) - PLANNED
+### Outgoing to Operator (PSP → Operator) - IMPLEMENTED
 
 | Operation | Endpoint | Request DTO | Response DTO |
 |----------|----------|-------------|--------------|
-| Check | POST /psp/api/v1/payment/qr/{version}/tx/check | CheckRequestDto | CheckResponseDto |
-| Create | POST /psp/api/v1/payment/qr/{version}/tx/create | CreateRequestDto | CreateResponseDto |
-| Execute | POST /psp/api/v1/payment/qr/{version}/tx/execute/{id} | (empty) | StatusDto |
+| Check | POST /psp/api/v1/payment/qr/{version}/tx/check | CheckRequestDto | OutgoingCheckResponseDto |
+| Create | POST /psp/api/v1/payment/qr/{version}/tx/create | CreateRequestDto | OutgoingTransactionResponseDto |
+| Execute | POST /psp/api/v1/payment/qr/{version}/tx/execute/{id} | (empty) | OutgoingTransactionResponseDto |
 
 ### Architecture Note
 

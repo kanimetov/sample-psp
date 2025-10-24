@@ -1,7 +1,7 @@
 package kg.demirbank.psp.service.impl;
 
-import kg.demirbank.psp.dto.incoming.request.CheckRequestDto;
-import kg.demirbank.psp.dto.incoming.request.CreateRequestDto;
+import kg.demirbank.psp.dto.incoming.request.IncomingCheckRequestDto;
+import kg.demirbank.psp.dto.incoming.request.IncomingCreateRequestDto;
 import kg.demirbank.psp.dto.common.UpdateDto;
 import kg.demirbank.psp.dto.incoming.response.IncomingCheckResponseDto;
 import kg.demirbank.psp.dto.incoming.response.IncomingTransactionResponseDto;
@@ -32,7 +32,7 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
     private static final DateTimeFormatter ISO_DATE_TIME = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
     
     @Override
-    public Mono<IncomingCheckResponseDto> checkTransaction(CheckRequestDto request) {
+    public Mono<IncomingCheckResponseDto> checkTransaction(IncomingCheckRequestDto request) {
         // Set transaction context for logging
         LoggingUtil.setTransactionContext(null, null, null, 
                 request.getMerchantProvider(), request.getMerchantCode(), request.getQrType());
@@ -77,7 +77,7 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
     }
     
     @Override
-    public Mono<IncomingTransactionResponseDto> createTransaction(CreateRequestDto request) {
+    public Mono<IncomingTransactionResponseDto> createTransaction(IncomingCreateRequestDto request) {
         // Set transaction context for logging
         LoggingUtil.setTransactionContext(request.getTransactionId().toString(), request.getSenderTransactionId(), 
                 request.getSenderReceiptId(), request.getMerchantProvider(), 
@@ -224,7 +224,7 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
     /**
      * Validate check request business rules
      */
-    private void validateCheckRequest(CheckRequestDto request) {
+    private void validateCheckRequest(IncomingCheckRequestDto request) {
         // Validate amount limits
         if (request.getAmount() < 100) {
             LoggingUtil.logBusinessValidation("AMOUNT_VALIDATION", false, 
@@ -279,7 +279,7 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
     /**
      * Validate create request business rules
      */
-    private void validateCreateRequest(CreateRequestDto request) {
+    private void validateCreateRequest(IncomingCreateRequestDto request) {
         // Validate amount limits
         if (request.getAmount() < 100) {
             throw new MinAmountNotValidException("Minimum amount is 100");
@@ -325,7 +325,7 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
     /**
      * Lookup beneficiary name based on merchant data
      */
-    private String lookupBeneficiaryName(CheckRequestDto request) {
+    private String lookupBeneficiaryName(IncomingCheckRequestDto request) {
         // Simulate beneficiary lookup logic
         // In real implementation, this would query merchant database
         return "c***e A***o";
@@ -334,7 +334,7 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
     /**
      * Determine transaction type based on request data
      */
-    private TransactionType determineTransactionType(CheckRequestDto request) {
+    private TransactionType determineTransactionType(IncomingCheckRequestDto request) {
         // Simulate transaction type determination
         // In real implementation, this would be based on business rules
         return TransactionType.C2C;

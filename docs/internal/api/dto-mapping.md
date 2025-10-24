@@ -8,14 +8,33 @@ This document describes all PSP system endpoints with detailed mapping of DTOs u
 
 ```
 kg.demirbank.psp.dto/
-├── KeyValueDto.java       - Helper DTO for additional fields
-├── CheckRequestDto.java   - Request for check operation
-├── CreateRequestDto.java  - Request for create operation
-├── CheckResponseDto.java  - Response for check operation
-├── CreateResponseDto.java - Response for create operation
-├── StatusDto.java         - Universal DTO for execute/get responses
-└── UpdateDto.java         - Bidirectional DTO for update operations
+├── common/
+│   ├── KeyValueDto.java       - Helper DTO for additional fields
+│   └── UpdateDto.java         - Bidirectional DTO for update operations
+├── incoming/
+│   ├── request/
+│   │   ├── CheckRequestDto.java   - Request for check operation
+│   │   └── CreateRequestDto.java  - Request for create operation
+│   └── response/
+│       ├── IncomingCheckResponseDto.java      - Response for check operation
+│       └── IncomingTransactionResponseDto.java - Response for create/execute/status operations
+└── outgoing/
+    ├── request/
+    │   ├── CheckRequestDto.java   - Request for check operation
+    │   └── CreateRequestDto.java  - Request for create operation
+    └── response/
+        ├── OutgoingCheckResponseDto.java      - Response for check operation
+        └── OutgoingTransactionResponseDto.java - Response for create/execute/status operations
 ```
+
+## DTO Consolidation
+
+The response DTOs have been consolidated to eliminate code duplication:
+
+- **IncomingTransactionResponseDto**: Consolidates `CreateResponseDto`, `ExecuteResponseDto`, and `StatusDto` for incoming operations
+- **OutgoingTransactionResponseDto**: Consolidates `CreateResponseDto`, `ExecuteResponseDto`, and `StatusDto` for outgoing operations  
+- **IncomingCheckResponseDto**: Renamed from `CheckResponseDto` for incoming check operations
+- **OutgoingCheckResponseDto**: Renamed from `CheckResponseDto` for outgoing check operations
 
 ---
 
@@ -54,7 +73,7 @@ POST /psp/api/v1/payment/qr/{version}/tx/check
 }
 ```
 
-**Response 200:** `CheckResponseDto`
+**Response 200:** `OutgoingCheckResponseDto`
 ```json
 {
   "beneficiaryName": "c***e A***o",
@@ -91,7 +110,7 @@ POST /psp/api/v1/payment/qr/{version}/tx/create
 }
 ```
 
-**Response 200:** `CreateResponseDto`
+**Response 200:** `OutgoingTransactionResponseDto`
 ```json
 {
   "transactionId": "fbded76a-9fc6-42d8-b0a0-e7e7110e0cc7",
@@ -123,7 +142,7 @@ POST /psp/api/v1/payment/qr/{version}/tx/execute/{transactionId}
 
 **Request Body:** Empty
 
-**Response 200:** `StatusDto`
+**Response 200:** `OutgoingTransactionResponseDto`
 ```json
 {
   "transactionId": "fbded76a-9fc6-42d8-b0a0-e7e7110e0cc7",
@@ -160,7 +179,7 @@ POST /in/qr/{version}/tx/check
 
 **Request Body:** `CheckRequestDto` (same as outgoing)
 
-**Response 200:** `CheckResponseDto`
+**Response 200:** `OutgoingCheckResponseDto`
 
 ---
 
@@ -175,7 +194,7 @@ POST /in/qr/{version}/tx/create
 
 **Request Body:** `CreateRequestDto`
 
-**Response 200:** `CreateResponseDto`
+**Response 200:** `OutgoingTransactionResponseDto`
 
 ---
 
@@ -190,7 +209,7 @@ POST /in/qr/{version}/tx/execute/{transactionId}
 
 **Request Body:** Empty
 
-**Response 200:** `StatusDto`
+**Response 200:** `OutgoingTransactionResponseDto`
 
 ---
 
@@ -269,14 +288,14 @@ Additional fields:
 - `receiptId: String` (required, max 20) - Receipt/invoice ID
 - `transactionType: CustomerType` (required, enum) - Transaction type
 
-### CheckResponseDto
+### IncomingCheckResponseDto / OutgoingCheckResponseDto
 
 | Field | Type | Description |
 |------|-----|----------|
 | beneficiaryName | String | Masked beneficiary name (e.g., "c***e A***o") |
 | transactionType | CustomerType | Transaction type (enum, nullable) |
 
-### CreateResponseDto
+### IncomingTransactionResponseDto / OutgoingTransactionResponseDto
 
 Response with transaction creation confirmation.
 
@@ -292,7 +311,7 @@ Response with transaction creation confirmation.
 | createdDate | String | Creation date (ISO8601) |
 | executedDate | String | Execution date (ISO8601, may be empty) |
 
-### StatusDto
+### IncomingTransactionResponseDto / OutgoingTransactionResponseDto
 
 Universal DTO for transaction status (used in execute and get).
 

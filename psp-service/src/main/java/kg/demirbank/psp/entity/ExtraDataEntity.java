@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 /**
- * Entity for storing extra key-value data associated with check requests and transactions.
+ * Entity for storing extra key-value data associated with operations.
  * This table stores additional metadata that can be attached to operations.
  */
 @Entity
@@ -29,15 +29,10 @@ public class ExtraDataEntity {
     @Column(name = "order_index")
     private Integer orderIndex;
 
-    // Many-to-one relationship with CheckRequestEntity
+    // Many-to-one relationship with OperationEntity
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "check_request_id")
-    private CheckRequestEntity checkRequest;
-
-    // Many-to-one relationship with TransactionEntity
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "transaction_id")
-    private TransactionEntity transaction;
+    @JoinColumn(name = "operation_id")
+    private OperationEntity operation;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -92,20 +87,12 @@ public class ExtraDataEntity {
         this.orderIndex = orderIndex;
     }
 
-    public CheckRequestEntity getCheckRequest() {
-        return checkRequest;
+    public OperationEntity getOperation() {
+        return operation;
     }
 
-    public void setCheckRequest(CheckRequestEntity checkRequest) {
-        this.checkRequest = checkRequest;
-    }
-
-    public TransactionEntity getTransaction() {
-        return transaction;
-    }
-
-    public void setTransaction(TransactionEntity transaction) {
-        this.transaction = transaction;
+    public void setOperation(OperationEntity operation) {
+        this.operation = operation;
     }
 
     public LocalDateTime getCreatedAt() {

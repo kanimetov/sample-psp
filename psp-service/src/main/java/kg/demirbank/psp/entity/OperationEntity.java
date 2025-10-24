@@ -1,6 +1,7 @@
 package kg.demirbank.psp.entity;
 
 import jakarta.persistence.*;
+import kg.demirbank.psp.enums.OperationType;
 import kg.demirbank.psp.enums.TransactionType;
 import kg.demirbank.psp.enums.Status;
 import org.hibernate.annotations.CreationTimestamp;
@@ -11,89 +12,176 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Entity for storing transaction operations (create/execute/update).
- * This table stores all transaction lifecycle operations in the PSP service.
+ * Unified entity for storing all PSP operations (check, create, execute, update).
+ * This table consolidates check requests and transactions into a single table
+ * with proper direction tracking and field nullability based on operation type.
  */
 @Entity
-@Table(name = "transactions")
-public class TransactionEntity {
+@Table(name = "operations")
+public class OperationEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "transactions_seq")
-    @SequenceGenerator(name = "transactions_seq", sequenceName = "TRANSACTIONS_SEQ", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "operations_seq")
+    @SequenceGenerator(name = "operations_seq", sequenceName = "OPERATIONS_SEQ", allocationSize = 1)
     private Long id;
 
-    @Column(name = "transaction_id", nullable = false, unique = true, length = 32)
-    private String transactionId;
-
+    /**
+     * PSP's unified transaction identifier
+     * For INCOMING: uses senderTransactionId from request
+     * For OUTGOING: generated UUID
+     * For CHECK: always generated UUID
+     */
     @Column(name = "psp_transaction_id", nullable = false, unique = true, length = 50)
     private String pspTransactionId;
 
-    @Column(name = "receipt_id", nullable = false, unique = true, length = 20)
+    /**
+     * Operation type: CHECK, CREATE, EXECUTE, UPDATE
+     */
+    @Enumerated(EnumType.ORDINAL)
+    @Column(name = "operation_type", nullable = false)
+    private OperationType operationType;
+
+    /**
+     * Transfer direction: IN (incoming to PSP), OUT (outgoing from PSP), OWN (internal)
+     */
+    @Column(name = "transfer_direction", nullable = false, length = 3)
+    private String transferDirection;
+
+    /**
+     * Operator's transaction ID
+     * NULL for CHECK operations
+     * Populated after CREATE for transactions
+     */
+    @Column(name = "transaction_id", unique = true, length = 32)
+    private String transactionId;
+
+    /**
+     * Unified receipt ID
+     * For INCOMING: uses senderReceiptId from request
+     * For OUTGOING: generated receipt ID
+     * NULL for CHECK operations
+     */
+    @Column(name = "receipt_id", unique = true, length = 20)
     private String receiptId;
 
+    /**
+     * Payment link type, Field ID=01 from QR
+     */
     @Column(name = "qr_type", nullable = false, length = 32)
     private String qrType;
 
+    /**
+     * Unique identificator of merchant provider, Field ID=32, SubID=00 from QR
+     */
     @Column(name = "merchant_provider", nullable = false, length = 32)
     private String merchantProvider;
 
+    /**
+     * Service provider name, Field ID=59 from QR
+     */
     @Column(name = "merchant_id", length = 32)
     private String merchantId;
 
+    /**
+     * Service code in the Payment system, Field ID=32, SubID=01 from QR
+     */
     @Column(name = "service_id", length = 32)
     private String serviceId;
 
+    /**
+     * Service name in the Payment system, Field ID=33 SubID=01 from QR
+     */
     @Column(name = "service_name", length = 32)
     private String serviceName;
 
+    /**
+     * Unique identifier of the payer within the service, Field ID=32, SubID=10 from QR
+     */
     @Column(name = "beneficiary_account_number", length = 32)
     private String beneficiaryAccountNumber;
 
+    /**
+     * Service provider code (MCC), Field ID=52 from QR
+     */
     @Column(name = "merchant_code", nullable = false)
     private Integer merchantCode;
 
+    /**
+     * Currency, by default always "417", Field ID=53 from QR
+     */
     @Column(name = "currency_code", nullable = false, length = 3)
     private String currencyCode;
 
-    @Column(name = "qr_transaction_id", unique = true, length = 32)
+    /**
+     * Transaction ID from QR, Field ID=32, SubID=11 from QR
+     */
+    @Column(name = "qr_transaction_id", length = 32)
     private String qrTransactionId;
 
-    @Column(name = "qr_comment", length = 32)
+    /**
+     * Comment for payment, Field ID=34
+     */
+    @Column(name = "qr_comment", length = 99)
     private String qrComment;
 
+    /**
+     * Customer type: 1=Individual, 2=Corporate
+     * Required for all operations
+     */
     @Column(name = "customer_type", nullable = false, length = 1)
     private String customerType;
 
+    /**
+     * Payment amount (in tyiyns)
+     */
     @Column(name = "amount", nullable = false)
     private Long amount;
 
+    /**
+     * Last 4 symbols of payment link hash string, Field ID=63 from QR
+     */
     @Column(name = "qr_link_hash", nullable = false, length = 4)
     private String qrLinkHash;
 
+    /**
+     * Transaction type - nullable for checks
+     */
     @Enumerated(EnumType.ORDINAL)
-    @Column(name = "transaction_type", nullable = false)
+    @Column(name = "transaction_type")
     private TransactionType transactionType;
 
+    /**
+     * Transaction status - nullable for checks, required for transactions
+     */
     @Enumerated(EnumType.ORDINAL)
-    @Column(name = "status", nullable = false)
+    @Column(name = "status")
     private Status status;
 
+    /**
+     * Beneficiary name - from check response
+     */
     @Column(name = "beneficiary_name", length = 100)
     private String beneficiaryName;
 
+    /**
+     * Request hash for signature verification
+     */
     @Column(name = "request_hash", length = 255)
     private String requestHash;
 
+    /**
+     * API version used for the request
+     */
     @Column(name = "api_version", length = 10)
     private String apiVersion;
 
-    @Column(name = "transfer_direction", nullable = false, length = 3)
-    private String transferDirection; // IN, OUT, OWN
-
-    @OneToMany(mappedBy = "transaction", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    /**
+     * Extra data associated with this operation
+     */
+    @OneToMany(mappedBy = "operation", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<ExtraDataEntity> extraData;
 
+    // Timestamps
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -108,6 +196,7 @@ public class TransactionEntity {
     @Column(name = "last_status_update_at")
     private LocalDateTime lastStatusUpdateAt;
 
+    // Error handling and retry logic
     @Column(name = "error_message", length = 500)
     private String errorMessage;
 
@@ -134,7 +223,7 @@ public class TransactionEntity {
     private String userAgent;
 
     // Constructors
-    public TransactionEntity() {}
+    public OperationEntity() {}
 
     // Getters and Setters
     public Long getId() {
@@ -145,20 +234,36 @@ public class TransactionEntity {
         this.id = id;
     }
 
-    public String getTransactionId() {
-        return transactionId;
-    }
-
-    public void setTransactionId(String transactionId) {
-        this.transactionId = transactionId;
-    }
-
     public String getPspTransactionId() {
         return pspTransactionId;
     }
 
     public void setPspTransactionId(String pspTransactionId) {
         this.pspTransactionId = pspTransactionId;
+    }
+
+    public OperationType getOperationType() {
+        return operationType;
+    }
+
+    public void setOperationType(OperationType operationType) {
+        this.operationType = operationType;
+    }
+
+    public String getTransferDirection() {
+        return transferDirection;
+    }
+
+    public void setTransferDirection(String transferDirection) {
+        this.transferDirection = transferDirection;
+    }
+
+    public String getTransactionId() {
+        return transactionId;
+    }
+
+    public void setTransactionId(String transactionId) {
+        this.transactionId = transactionId;
     }
 
     public String getReceiptId() {
@@ -313,14 +418,6 @@ public class TransactionEntity {
         this.apiVersion = apiVersion;
     }
 
-    public String getTransferDirection() {
-        return transferDirection;
-    }
-
-    public void setTransferDirection(String transferDirection) {
-        this.transferDirection = transferDirection;
-    }
-
     public List<ExtraDataEntity> getExtraData() {
         return extraData;
     }
@@ -429,7 +526,7 @@ public class TransactionEntity {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        TransactionEntity that = (TransactionEntity) o;
+        OperationEntity that = (OperationEntity) o;
         return Objects.equals(id, that.id);
     }
 
@@ -440,10 +537,11 @@ public class TransactionEntity {
 
     @Override
     public String toString() {
-        return "TransactionEntity{" +
+        return "OperationEntity{" +
                 "id=" + id +
-                ", transactionId='" + transactionId + '\'' +
                 ", pspTransactionId='" + pspTransactionId + '\'' +
+                ", operationType=" + operationType +
+                ", transferDirection='" + transferDirection + '\'' +
                 ", amount=" + amount +
                 ", status=" + status +
                 ", createdAt=" + createdAt +

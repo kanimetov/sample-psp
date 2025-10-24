@@ -18,6 +18,7 @@
   - error-catalog.md — error codes and handling
 - **design/** — architecture and flows
   - architecture.md — system architecture
+  - service-architecture.md — service layer organization and client structure
   - flows.md — business process flows
   - decisions/ — architecture decision records (ADRs)
 - **security/** — crypto, keys, access control

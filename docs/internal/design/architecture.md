@@ -4,9 +4,14 @@
 
 - **PSP Service** (Spring Boot, stateless, 6–10 instances)
   - **IncomingController** - Beneficiary facade (/in/qr/{version}/tx/*)
+  - **MerchantController** - Merchant facade (/out/qr/{version}/*)
   - **SignatureService** - JWS v2 signature verification
   - **IncomingService** - Business logic for processing incoming requests
-  - **OperatorClient** - Client for operator interaction (planned)
+  - **MerchantService** - Business logic for merchant operations
+  - **clients/** - External service clients
+    - **BankClient** - Internal bank operations
+    - **OperatorClient** - External operator interaction
+    - **QrDecoderClient** - QR code parsing and validation
   - **Oracle** - Main storage (transactions, check_requests, extra_data)
   - **Redis** - Caching and idempotency (planned)
   - **RabbitMQ** - Asynchronous processing (planned)
@@ -14,6 +19,8 @@
 ### Implemented Components
 
 - ✅ **Incoming APIs** - processing requests from operator
+- ✅ **Merchant APIs** - processing requests from merchants
+- ✅ **Client Services** - organized external service clients
 - ✅ **Signature verification** - JWS v2 with detailed logging
 - ✅ **DTO validation** - comprehensive validation of incoming data
 - ✅ **Structured logging** - detailed operation tracking
@@ -30,6 +37,8 @@
 ### Hot Path (Current)
 
 **Incoming requests**: `/in/qr/{version}/tx/*` → signature verification → DTO validation → business logic → response
+
+**Merchant requests**: `/out/qr/{version}/*` → DTO validation → QR decoding → service routing → response
 
 **Planned**: API → validation → idempotency → JWS/JWE → operator → mapping → response
 

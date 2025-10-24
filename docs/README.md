@@ -24,6 +24,9 @@ This is a project rule that applies to:
 - **runtime/** — Configuration and operational documentation
 - **testing/** — Testing strategies and procedures
 - **compliance/** — Regulatory compliance documentation
+- **messaging/** — Message broker and outbox pattern documentation
+- **reliability/** — Resilience patterns and error handling
+- **product/** — Product requirements and roadmap
 
 ### External Documentation (`external/`)
 - **api/** — Public API documentation for consumers

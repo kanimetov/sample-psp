@@ -4,12 +4,13 @@
 
 ## Overview
 
-This document provides the definitive list of all API endpoints in the PSP system. The PSP system has only **two communication directions**:
+This document provides the definitive list of all API endpoints in the PSP system. The PSP system has **three communication directions**:
 
 1. **Incoming (Operator → PSP)** - handled by `IncomingController.java`
 2. **Outgoing (PSP → Operator)** - handled by `OperatorClient.java`
+3. **Merchant (Merchant → PSP)** - handled by `MerchantController.java`
 
-**Note:** PSP does not expose direct client-facing APIs. It acts as an intermediary between the Operator and bank systems.
+**Note:** PSP acts as an intermediary between Operators, Merchants, and bank systems.
 
 ## Endpoint Categories
 
@@ -29,7 +30,21 @@ This document provides the definitive list of all API endpoints in the PSP syste
 
 ---
 
-### 2. Outgoing (PSP → Operator) - 🔄 PLANNED
+### 2. Merchant (Merchant → PSP) - ✅ IMPLEMENTED
+
+**Implementation:** `MerchantController.java`  
+**Base URL:** `/out/qr/{version}`
+
+| Operation | Method | Endpoint | Status | Description |
+|-----------|--------|----------|--------|-------------|
+| Check | POST | `/out/qr/{version}/check` | ✅ | QR code verification for merchants |
+| Make Payment | POST | `/out/qr/{version}/makePayment` | ✅ | Payment processing for merchants |
+
+**Security:** No signature verification required (public merchant API)
+
+---
+
+### 3. Outgoing (PSP → Operator) - 🔄 PLANNED
 
 **Implementation:** `OperatorClient.java`  
 **Base URL:** `/psp/api/v1/payment/qr/{version}/tx`
@@ -79,7 +94,7 @@ H-SIGNING-VERSION: "2"
 H-HASH: <JWS v2 signature of request body>
 ```
 
-### For External APIs (Client → PSP)
+### For Merchant APIs (Merchant → PSP)
 ```
 Content-Type: application/json
 Accept: application/json
@@ -87,6 +102,7 @@ Accept: application/json
 
 ## Request/Response DTOs
 
+### Incoming APIs (Operator → PSP)
 | Endpoint | Request DTO | Response DTO |
 |----------|-------------|--------------|
 | Check | `CheckRequestDto` | `CheckResponseDto` |
@@ -95,11 +111,17 @@ Accept: application/json
 | Get | `(none)` | `StatusDto` |
 | Update | `UpdateDto` | `ACK (200 OK)` |
 
+### Merchant APIs (Merchant → PSP)
+| Endpoint | Request DTO | Response DTO |
+|----------|-------------|--------------|
+| Check | `ClientCheckRequestDto` | `ClientCheckResponseDto` |
+| Make Payment | `ClientMakePaymentRequestDto` | `ClientMakePaymentResponseDto` |
+
 ## Implementation Status
 
 - ✅ **IMPLEMENTED:** Incoming APIs (Operator → PSP) - `IncomingController.java`
+- ✅ **IMPLEMENTED:** Merchant APIs (Merchant → PSP) - `MerchantController.java`
 - 🔄 **PLANNED:** Outgoing APIs (PSP → Operator) - `OperatorClient.java`
-- ❌ **NOT APPLICABLE:** External APIs (Client → PSP) - PSP acts as intermediary only
 
 ## Related Documentation
 

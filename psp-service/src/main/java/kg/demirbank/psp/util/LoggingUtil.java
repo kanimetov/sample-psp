@@ -86,18 +86,6 @@ public class LoggingUtil {
         MDC.clear();
     }
     
-    /**
-     * Log operation start - simplified version
-     */
-    public static void logOperationStart(String operationType, String pspTransactionId, 
-                                       String transferDirection, Integer merchantCode) {
-        Map<String, Object> logData = createBaseLogData("operation_start", operationType);
-        logData.put("pspTransactionId", pspTransactionId);
-        logData.put("transferDirection", transferDirection);
-        logData.put("merchantCode", merchantCode);
-        
-        log.info("Operation started: {}", logData);
-    }
     
     /**
      * Log operation success - simplified version

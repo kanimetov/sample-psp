@@ -57,6 +57,9 @@ public class MerchantServiceImpl implements MerchantService {
                 })
                 .onErrorMap(Exception.class, e -> {
                     log.error("Error during QR check: {}", e.getMessage(), e);
+                    if (e instanceof PspException) {
+                        return e;
+                    }
                     return new SystemErrorException("Failed to process QR check request");
                 });
     }

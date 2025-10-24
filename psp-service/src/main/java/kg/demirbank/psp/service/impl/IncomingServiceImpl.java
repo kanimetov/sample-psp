@@ -13,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
-import java.util.UUID;
 
 /**
  * Implementation of incoming service
@@ -28,19 +27,13 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
     
     @Override
     public Mono<IncomingCheckResponseDto> checkTransaction(IncomingCheckRequestDto request) {
-        
-        // Set transaction context for logging
-        LoggingUtil.setTransactionContext(null, null, null, "CHECK", 
-                "IN", request.getMerchantCode(), 
-                request.getAmount(), null);
-        
-        LoggingUtil.logOperationStart("CHECK", null, 
-                "IN", request.getMerchantCode());
+        log.info("Starting incoming transaction check for merchant: {} with amount: {}", 
+                request.getMerchantCode(), request.getAmount());
         
         return bankService.checkIncomingTransaction(request)
                 .doOnSuccess(_ -> {
-                    // Log successful response
-                    LoggingUtil.logOperationSuccess("CHECK", null, null, "SUCCESS");
+                    log.info("Incoming transaction check completed successfully for merchant: {}", 
+                            request.getMerchantCode());
                 })
                 .onErrorMap(throwable -> {
                    // Log error with structured data - no stack trace for business errors
@@ -60,22 +53,13 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
     
     @Override
     public Mono<IncomingTransactionResponseDto> createTransaction(IncomingCreateRequestDto request) {
-        // Use transactionId from request as pspTransactionId for incoming transactions
-        String pspTransactionId = request.getTransactionId();
-        
-        // Set transaction context for logging
-        LoggingUtil.setTransactionContext(pspTransactionId, request.getTransactionId(), 
-                request.getSenderReceiptId(), "CREATE", "IN", 
-                request.getMerchantCode(), request.getAmount(), "CREATED");
-        
-        LoggingUtil.logOperationStart("CREATE", pspTransactionId, 
-                "IN", request.getMerchantCode());
+        log.info("Starting incoming transaction creation for transaction: {} with amount: {}", 
+                request.getTransactionId(), request.getAmount());
         
         return bankService.createIncomingTransaction(request)
-                .doOnSuccess(response -> {
-                    // Log successful response
-                    LoggingUtil.logOperationSuccess("CREATE", pspTransactionId, 
-                            response.getTransactionId(), "CREATED");
+                .doOnSuccess(_ -> {
+                    log.info("Incoming transaction created successfully for transaction: {}", 
+                            request.getTransactionId());
                 })
                 .onErrorMap(throwable -> {
                     // Log error with structured data - no stack trace for business errors
@@ -83,7 +67,7 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
                     String errorMessage = throwable.getMessage();
                     String errorCode = isPspException ? 
                         ((PspException) throwable).getCode().toString() : "UNKNOWN_ERROR";
-                    LoggingUtil.logError("CREATE", pspTransactionId, errorCode, errorMessage, throwable);
+                    LoggingUtil.logError("CREATE", null, errorCode, errorMessage, throwable);
                     
                     if (isPspException) {
                         return throwable; // Preserve original PspException
@@ -95,18 +79,11 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
     
     @Override
     public Mono<IncomingTransactionResponseDto> executeTransaction(String transactionId) {
-        String pspTransactionId = UUID.randomUUID().toString();
-        
-        // Set transaction context for logging
-        LoggingUtil.setTransactionContext(pspTransactionId, transactionId, null, "EXECUTE", 
-                "IN", null, 40000L, "IN_PROCESS");
-        
-        LoggingUtil.logOperationStart("EXECUTE", pspTransactionId, "IN", null);
+        log.info("Starting incoming transaction execution for transaction: {}", transactionId);
         
         return bankService.executeIncomingTransaction(transactionId)
-                .doOnSuccess(response -> {
-                    // Log successful response
-                    LoggingUtil.logOperationSuccess("EXECUTE", pspTransactionId, transactionId, response.getStatus().name());
+                .doOnSuccess(_ -> {
+                    log.info("Incoming transaction executed successfully for transaction: {}", transactionId);
                 })
                 .onErrorMap(throwable -> {
                     // Log error with structured data - no stack trace for business errors
@@ -114,7 +91,7 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
                     String errorMessage = throwable.getMessage();
                     String errorCode = isPspException ? 
                         ((PspException) throwable).getCode().toString() : "UNKNOWN_ERROR";
-                    LoggingUtil.logError("EXECUTE", pspTransactionId, errorCode, errorMessage, throwable);
+                    LoggingUtil.logError("EXECUTE", transactionId, errorCode, errorMessage, throwable);
                     
                     if (isPspException) {
                         return throwable;
@@ -127,15 +104,12 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
     
     @Override
     public Mono<Void> updateTransaction(String transactionId, UpdateDto updateRequest) {
-        
-        // Set transaction context for logging
-        LoggingUtil.setTransactionContext(null, transactionId, null, "UPDATE", 
-                "IN", null, null, updateRequest.getStatus().name());
-        
-        LoggingUtil.logOperationStart("UPDATE", null, "IN", null);
+        log.info("Starting incoming transaction update for transaction: {} with status: {}", 
+                transactionId, updateRequest.getStatus());
         
         return bankService.updateIncomingTransaction(transactionId, updateRequest)
-        .doOnSuccess(_ -> LoggingUtil.logOperationSuccess("UPDATE", null, transactionId, updateRequest.getStatus().name()))
+        .doOnSuccess(_ -> log.info("Incoming transaction updated successfully for transaction: {} with status: {}", 
+                transactionId, updateRequest.getStatus()))
         .onErrorMap(throwable -> {
             // Log error with structured data - no stack trace for business errors
             boolean isPspException = throwable instanceof PspException;

@@ -77,9 +77,12 @@ public class OperatorServiceImpl implements OperatorService {
                                 return Mono.just(response);
                             });
                 })
-                .onErrorMap(Exception.class, e -> {
-                    log.error("Error during operator QR check: {}", e.getMessage(), e);
-                    return new SystemErrorException("Failed to process operator QR check request");
+                .onErrorMap(throwable -> {
+                    if (throwable instanceof PspException) {
+                        return throwable; // Preserve original PspException
+                    }
+                    log.error("Error during operator QR check: {}", throwable.getMessage(), throwable);
+                    return new SystemErrorException("Failed to process operator QR check request", throwable);
                 });
     }
     
@@ -162,12 +165,12 @@ public class OperatorServiceImpl implements OperatorService {
                                         });
                             });
                 })
-                .onErrorMap(Exception.class, e -> {
-                    log.error("Error during operator payment: {}", e.getMessage(), e);
-                    if (e instanceof PspException) {
-                        return e;
+                .onErrorMap(throwable -> {
+                    if (throwable instanceof PspException) {
+                        return throwable; // Preserve original PspException
                     }
-                    return new SystemErrorException("Failed to process operator payment request");
+                    log.error("Error during operator payment: {}", throwable.getMessage(), throwable);
+                    return new SystemErrorException("Failed to process operator payment request", throwable);
                 });
     }
     

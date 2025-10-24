@@ -51,41 +51,59 @@ public class BankServiceImpl implements BankService {
                 .flatMap(elqrData -> {
                     log.debug("QR decoded successfully, ELQR data: {}", elqrData);
                     
-                    // Create operation entity for tracking
-                    OperationEntity operation = createOperationEntity(
-                            OperationType.CHECK, 
-                            request.getQrUri(), 
-                            elqrData
-                    );
+                    // First check if client exists through BankClient
+                    BankCheckRequestDto bankCheckRequest = new BankCheckRequestDto();
+                    bankCheckRequest.setMerchantId(elqrData.getMerchantId());
+                    bankCheckRequest.setBeneficiaryAccountNumber(elqrData.getBeneficiaryAccountNumber());
+                    bankCheckRequest.setMerchantCode(elqrData.getMerchantCode());
+                    bankCheckRequest.setAmount(0L); // For CHECK operation amount = 0
                     
-                    return Mono.fromCallable(() -> operationRepository.save(operation))
-                            .flatMap(savedOperation -> {
-                                log.debug("Operation saved with ID: {}", savedOperation.getId());
+                    return bankClient.checkAccount(bankCheckRequest)
+                            .flatMap(bankCheckResponse -> {
+                                // Validate account exists
+                                if (!Boolean.TRUE.equals(bankCheckResponse.getAccountValid())) {
+                                    return Mono.error(new BadRequestException("Account check failed"));
+                                }
                                 
-                                // Create response
-                                MerchantCheckResponseDto response = new MerchantCheckResponseDto();
-                                response.setPaymentSessionId(savedOperation.getPaymentSessionId());
-                                response.setBeneficiaryName(elqrData.getMerchantId());
-                                response.setQrType(elqrData.getQrType());
-                                response.setMerchantProvider(elqrData.getMerchantProvider());
-                                response.setMerchantId(elqrData.getMerchantId());
-                                response.setServiceId(elqrData.getServiceId());
-                                response.setServiceName(elqrData.getServiceName());
-                                response.setBeneficiaryAccountNumber(elqrData.getBeneficiaryAccountNumber());
-                                response.setMerchantCode(elqrData.getMerchantCode());
-                                response.setCurrencyCode(elqrData.getCurrencyCode());
-                                response.setQrTransactionId(elqrData.getQrTransactionId());
-                                response.setQrComment(elqrData.getQrComment());
-                                response.setQrLinkHash(elqrData.getQrLinkHash());
-                                response.setExtra(elqrData.getExtra());
+                                // Only after successful validation create and save operation
+                                OperationEntity operation = createOperationEntity(
+                                        OperationType.CHECK, 
+                                        request.getQrUri(), 
+                                        elqrData
+                                );
                                 
-                                log.info("Bank QR check completed successfully for session: {}", response.getPaymentSessionId());
-                                return Mono.just(response);
+                                return Mono.fromCallable(() -> operationRepository.save(operation))
+                                        .map(savedOperation -> {
+                                            log.debug("Operation saved with ID: {}", savedOperation.getId());
+                                            
+                                            // Create response
+                                            MerchantCheckResponseDto response = new MerchantCheckResponseDto();
+                                            response.setPaymentSessionId(savedOperation.getPaymentSessionId());
+                                            response.setBeneficiaryName(elqrData.getMerchantId());
+                                            response.setQrType(elqrData.getQrType());
+                                            response.setMerchantProvider(elqrData.getMerchantProvider());
+                                            response.setMerchantId(elqrData.getMerchantId());
+                                            response.setServiceId(elqrData.getServiceId());
+                                            response.setServiceName(elqrData.getServiceName());
+                                            response.setBeneficiaryAccountNumber(elqrData.getBeneficiaryAccountNumber());
+                                            response.setMerchantCode(elqrData.getMerchantCode());
+                                            response.setCurrencyCode(elqrData.getCurrencyCode());
+                                            response.setQrTransactionId(elqrData.getQrTransactionId());
+                                            response.setQrComment(elqrData.getQrComment());
+                                            response.setQrLinkHash(elqrData.getQrLinkHash());
+                                            response.setExtra(elqrData.getExtra());
+                                            
+                                            log.info("Bank QR check completed successfully for session: {}", response.getPaymentSessionId());
+                                            return response;
+                                        });
                             });
                 })
-                .onErrorMap(Exception.class, e -> {
-                    log.error("Error during bank QR check: {}", e.getMessage(), e);
-                    return new SystemErrorException("Failed to process bank QR check request");
+                .onErrorMap(throwable -> {
+                    if (throwable instanceof PspException) {
+                        return throwable; // Preserve original PspException
+                    }
+                    log.error("Error during bank QR check: {}", throwable.getMessage(), throwable);
+                    return new SystemErrorException("Failed to process bank QR check request", throwable);
                 });
     }
     
@@ -207,9 +225,12 @@ public class BankServiceImpl implements BankService {
                             request.getMerchantCode());
                     return response;
                 })
-                .onErrorMap(Exception.class, e -> {
-                    log.error("Error during incoming transaction check: {}", e.getMessage(), e);
-                    return new SystemErrorException("Failed to process incoming transaction check request");
+                .onErrorMap(throwable -> {
+                    if (throwable instanceof PspException) {
+                        return throwable; // Preserve original PspException
+                    }
+                    log.error("Error during incoming transaction check: {}", throwable.getMessage(), throwable);
+                    return new SystemErrorException("Failed to process incoming transaction check request", throwable);
                 });
     }
     
@@ -388,6 +409,44 @@ public class BankServiceImpl implements BankService {
             response.setExecutedDate(operation.getExecutedAt().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) + "Z");
             
             return response;
+        });
+    }
+    
+    @Override
+    public Mono<Void> updateIncomingTransaction(String transactionId, kg.demirbank.psp.dto.common.UpdateDto updateRequest) {
+        log.info("Starting incoming transaction update for transaction: {} with status: {}", 
+                transactionId, updateRequest.getStatus());
+        
+        return Mono.fromCallable(() -> {
+            // Find the operation by transaction ID
+            OperationEntity operation = operationRepository.findByTransactionId(transactionId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Transaction not found: " + transactionId));
+            
+            // Validate that this is an incoming transaction
+            if (!"IN".equals(operation.getTransferDirection())) {
+                throw new BadRequestException("Only incoming transactions can be updated");
+            }
+            
+            // Update operation status
+            operation.setStatus(updateRequest.getStatus());
+            operation.setUpdatedAt(LocalDateTime.now());
+            operation.setLastStatusUpdateAt(LocalDateTime.now());
+            operation.setUpdatedBy("BANK_SERVICE");
+            
+            // Save the updated operation
+            operationRepository.save(operation);
+            
+            log.info("Incoming transaction updated successfully for transaction: {} with status: {}", 
+                    transactionId, updateRequest.getStatus());
+            return null; // Return null for Void
+        })
+        .then()
+        .onErrorMap(throwable -> {
+            if (throwable instanceof PspException) {
+                return throwable; // Preserve original PspException
+            }
+            log.error("Error during incoming transaction update: {}", throwable.getMessage(), throwable);
+            return new SystemErrorException("Failed to process incoming transaction update request", throwable);
         });
     }
 }

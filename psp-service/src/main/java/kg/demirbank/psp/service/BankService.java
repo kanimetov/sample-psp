@@ -55,4 +55,13 @@ public interface BankService {
      * @return Transaction response with execution status
      */
     Mono<IncomingTransactionResponseDto> executeIncomingTransaction(String transactionId);
+    
+    /**
+     * Update incoming transaction status
+     * 
+     * @param transactionId Transaction ID to update
+     * @param updateRequest Update request with new status
+     * @return Void when update is successful
+     */
+    Mono<Void> updateIncomingTransaction(String transactionId, kg.demirbank.psp.dto.common.UpdateDto updateRequest);
 }

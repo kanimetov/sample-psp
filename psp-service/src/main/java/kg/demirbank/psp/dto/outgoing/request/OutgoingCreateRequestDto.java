@@ -5,6 +5,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import kg.demirbank.psp.dto.common.ELQRData;
 import kg.demirbank.psp.dto.common.KeyValueDto;
+import kg.demirbank.psp.enums.CustomerType;
 import kg.demirbank.psp.enums.TransactionType;
 import lombok.Data;
 
@@ -100,10 +101,9 @@ public class OutgoingCreateRequestDto implements ELQRData {
     @JsonProperty("qrComment")
     private String qrComment;
 
-    @NotBlank
-    @Pattern(regexp = "1|2")
+    @NotNull
     @JsonProperty("customerType")
-    private String customerType;
+    private CustomerType customerType;
 
     /**
      * Transaction id from the Sender's system

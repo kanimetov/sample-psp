@@ -1,6 +1,7 @@
 package kg.demirbank.psp.dto.incoming.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import kg.demirbank.psp.enums.CustomerType;
 import kg.demirbank.psp.enums.Status;
 import lombok.Data;
 
@@ -40,7 +41,7 @@ public class IncomingTransactionResponseDto {
      * 1 - Individual; 2 - Corp
      */
     @JsonProperty("customerType")
-    private String customerType;
+    private CustomerType customerType;
 
     /**
      * Receipt number from Beneficiary system

@@ -1,6 +1,7 @@
 package kg.demirbank.psp.entity;
 
 import jakarta.persistence.*;
+import kg.demirbank.psp.enums.CustomerType;
 import kg.demirbank.psp.enums.OperationType;
 import kg.demirbank.psp.enums.TransactionType;
 import kg.demirbank.psp.enums.Status;
@@ -129,7 +130,8 @@ public class OperationEntity {
      * Required for all operations
      */
     @Column(name = "customer_type", nullable = false, length = 1)
-    private String customerType;
+    @Enumerated(EnumType.STRING)
+    private CustomerType customerType;
 
     /**
      * Payment amount (in tyiyns)
@@ -349,11 +351,11 @@ public class OperationEntity {
         this.qrComment = qrComment;
     }
 
-    public String getCustomerType() {
+    public CustomerType getCustomerType() {
         return customerType;
     }
 
-    public void setCustomerType(String customerType) {
+    public void setCustomerType(CustomerType customerType) {
         this.customerType = customerType;
     }
 

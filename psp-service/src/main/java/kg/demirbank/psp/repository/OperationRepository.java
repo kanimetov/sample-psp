@@ -1,6 +1,7 @@
 package kg.demirbank.psp.repository;
 
 import kg.demirbank.psp.entity.OperationEntity;
+import kg.demirbank.psp.enums.CustomerType;
 import kg.demirbank.psp.enums.OperationType;
 import kg.demirbank.psp.enums.Status;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -77,7 +78,7 @@ public interface OperationRepository extends JpaRepository<OperationEntity, Long
     /**
      * Find operations by customer type
      */
-    List<OperationEntity> findByCustomerType(String customerType);
+    List<OperationEntity> findByCustomerType(CustomerType customerType);
 
     /**
      * Find operations that are not final (for retry logic)
@@ -157,7 +158,7 @@ public interface OperationRepository extends JpaRepository<OperationEntity, Long
                                                    @Param("transferDirection") String transferDirection,
                                                    @Param("status") Status status,
                                                    @Param("merchantCode") Integer merchantCode,
-                                                   @Param("customerType") String customerType,
+                                                   @Param("customerType") CustomerType customerType,
                                                    @Param("startDate") LocalDateTime startDate,
                                                    @Param("endDate") LocalDateTime endDate);
 }

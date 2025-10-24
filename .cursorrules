@@ -13,6 +13,17 @@
 
 **No exceptions.**
 
+## Code Comments
+
+**Comments must explain WHAT the code does, not WHAT changes were made**
+
+- Explain functionality and purpose
+- Describe business logic
+- Clarify complex algorithms
+- Document parameters and return values
+- Do NOT describe git history or changes
+- Do NOT write "Added this" or "Modified that"
+
 ## Change Control
 
 **See `.cursorrules-changes`**

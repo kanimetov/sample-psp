@@ -38,7 +38,6 @@ public class LoggingUtil {
     public static final String STATUS = "status";
     public static final String AMOUNT = "amount";
     public static final String CURRENCY_CODE = "currencyCode";
-    public static final String CUSTOMER_TYPE = "customerType";
     public static final String API_VERSION = "apiVersion";
     public static final String RESPONSE_TIME_MS = "responseTimeMs";
     public static final String ERROR_CODE = "errorCode";
@@ -92,12 +91,11 @@ public class LoggingUtil {
      */
     public static void setOperationContext(String operationType, String status, 
                                          Long amount, String currencyCode, 
-                                         String customerType, String apiVersion) {
+                                         String apiVersion) {
         if (operationType != null) MDC.put(OPERATION_TYPE, operationType);
         if (status != null) MDC.put(STATUS, status);
         if (amount != null) MDC.put(AMOUNT, amount.toString());
         if (currencyCode != null) MDC.put(CURRENCY_CODE, currencyCode);
-        if (customerType != null) MDC.put(CUSTOMER_TYPE, customerType);
         if (apiVersion != null) MDC.put(API_VERSION, apiVersion);
     }
     
@@ -291,8 +289,7 @@ public class LoggingUtil {
                                                                 Integer merchantCode,
                                                                 String qrType,
                                                                 Long amount,
-                                                                String currencyCode,
-                                                                String customerType) {
+                                                                String currencyCode) {
         Map<String, Object> properties = new HashMap<>();
         if (transactionId != null) properties.put("transactionId", transactionId);
         if (pspTransactionId != null) properties.put("pspTransactionId", pspTransactionId);
@@ -302,7 +299,6 @@ public class LoggingUtil {
         if (qrType != null) properties.put("qrType", qrType);
         if (amount != null) properties.put("amount", amount);
         if (currencyCode != null) properties.put("currencyCode", currencyCode);
-        if (customerType != null) properties.put("customerType", customerType);
         return properties;
     }
     

@@ -49,7 +49,7 @@ public class LoggingFilter implements WebFilter {
         // Set request context in MDC
         LoggingUtil.setRequestContext(ipAddress, userAgent, null, null);
         if (apiVersion != null) {
-            LoggingUtil.setOperationContext("HTTP_REQUEST", null, null, null, null, apiVersion);
+            LoggingUtil.setOperationContext("HTTP_REQUEST", null, null, null, apiVersion);
         }
         
         long startTime = System.currentTimeMillis();

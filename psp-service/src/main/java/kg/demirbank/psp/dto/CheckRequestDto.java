@@ -53,10 +53,6 @@ public class CheckRequestDto {
     @JsonProperty("qrComment")
     private String qrComment;
 
-    @NotBlank
-    @Pattern(regexp = "1|2")
-    @JsonProperty("customerType")
-    private String customerType;
 
     @NotNull
     @Digits(integer = 13, fraction = 0)

@@ -14,14 +14,14 @@ Redis is a **mandatory** component in the PSP system, used for idempotency, cach
 
 | Operation | Key Pattern | TTL | Description |
 |-----------|-------------|-----|-------------|
-| Check | `idem:check:{pspId}:{merchantProvider}:{qrTxId}:{amount}` | 120s | Check operation idempotency |
+| Check | `idem:check:{merchantProvider}:{qrTransactionId}:{amount}` | 120s | Check operation idempotency |
 | Create | `idem:create:{pspTransactionId}` | 24h | Create operation idempotency |
 | Execute | `idem:execute:{transactionId}` | 24h | Execute operation idempotency |
 | Update | `idem:update:{transactionId}:{status}` | 24h | Update operation idempotency |
 
 **Example:**
 ```
-idem:check:PSP001:DEMO_MERCHANT:QR123:100000
+idem:check:DEMO_MERCHANT:QR123:100000
 idem:create:PSP-TX-123456
 idem:execute:fbded76a-9fc6-42d8-b0a0-e7e7110e0cc7
 idem:update:fbded76a-9fc6-42d8-b0a0-e7e7110e0cc7:50
@@ -92,8 +92,10 @@ lock:process:PSP-TX-123456
 
 **Idempotency Keys:**
 ```redis
-SET idem:check:{key} "1" NX EX 120
-SET idem:create:{key} "1" NX EX 86400
+SET idem:check:{merchantProvider}:{qrTransactionId}:{amount} "1" NX EX 120
+SET idem:create:{pspTransactionId} "1" NX EX 86400
+SET idem:execute:{transactionId} "1" NX EX 86400
+SET idem:update:{transactionId}:{status} "1" NX EX 86400
 ```
 
 **Cache Values:**

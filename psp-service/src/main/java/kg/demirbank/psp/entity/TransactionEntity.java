@@ -62,9 +62,6 @@ public class TransactionEntity {
     @Column(name = "qr_comment", length = 32)
     private String qrComment;
 
-    @Column(name = "customer_type", nullable = false, length = 1)
-    private String customerType;
-
     @Column(name = "amount", nullable = false)
     private Long amount;
 
@@ -246,13 +243,6 @@ public class TransactionEntity {
         this.qrComment = qrComment;
     }
 
-    public String getCustomerType() {
-        return customerType;
-    }
-
-    public void setCustomerType(String customerType) {
-        this.customerType = customerType;
-    }
 
     public Long getAmount() {
         return amount;

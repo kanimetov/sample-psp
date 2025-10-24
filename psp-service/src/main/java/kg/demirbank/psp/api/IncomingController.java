@@ -43,7 +43,7 @@ public class IncomingController {
         long startTime = System.currentTimeMillis();
         
         // Set operation context
-        LoggingUtil.setOperationContext("CHECK_TRANSACTION", null, null, null, null, version);
+        LoggingUtil.setOperationContext("CHECK_TRANSACTION", null, null, null, version);
         
         // Create properties for structured logging
         Map<String, Object> properties = new HashMap<>();
@@ -80,7 +80,6 @@ public class IncomingController {
         requestProperties.put("qrType", body.getQrType());
         requestProperties.put("amount", body.getAmount());
         requestProperties.put("currencyCode", body.getCurrencyCode());
-        requestProperties.put("customerType", body.getCustomerType());
         
         LoggingUtil.logOperationStart("CHECK_TRANSACTION", requestProperties);
         
@@ -110,7 +109,7 @@ public class IncomingController {
         long startTime = System.currentTimeMillis();
         
         // Set operation context
-        LoggingUtil.setOperationContext("CREATE_TRANSACTION", null, null, null, null, version);
+        LoggingUtil.setOperationContext("CREATE_TRANSACTION", null, null, null, version);
         
         // Create properties for structured logging
         Map<String, Object> properties = new HashMap<>();
@@ -150,7 +149,6 @@ public class IncomingController {
         requestProperties.put("qrType", body.getQrType());
         requestProperties.put("amount", body.getAmount());
         requestProperties.put("currencyCode", body.getCurrencyCode());
-        requestProperties.put("customerType", body.getCustomerType());
         
         LoggingUtil.logOperationStart("CREATE_TRANSACTION", requestProperties);
         
@@ -180,7 +178,7 @@ public class IncomingController {
         long startTime = System.currentTimeMillis();
         
         // Set operation context
-        LoggingUtil.setOperationContext("EXECUTE_TRANSACTION", null, null, null, null, version);
+        LoggingUtil.setOperationContext("EXECUTE_TRANSACTION", null, null, null, version);
         LoggingUtil.setTransactionContext(transactionId, null, null, null, null, null);
         
         // Create properties for structured logging
@@ -239,7 +237,7 @@ public class IncomingController {
         }
         
         // Set operation context
-        LoggingUtil.setOperationContext("UPDATE_TRANSACTION", null, null, null, null, version);
+        LoggingUtil.setOperationContext("UPDATE_TRANSACTION", null, null, null, version);
         LoggingUtil.setTransactionContext(transactionId, null, null, null, null, null);
         
         // Create properties for structured logging

@@ -33,13 +33,13 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
         LoggingUtil.setTransactionContext(null, null, null, 
                 request.getMerchantProvider(), request.getMerchantCode(), request.getQrType());
         LoggingUtil.setOperationContext("CHECK_TRANSACTION", null, 
-                request.getAmount(), request.getCurrencyCode(), request.getCustomerType(), null);
+                request.getAmount(), request.getCurrencyCode(), null);
         
         // Create properties for structured logging
         Map<String, Object> properties = LoggingUtil.createTransactionProperties(
                 null, null, null, request.getMerchantProvider(), 
                 request.getMerchantCode(), request.getQrType(), 
-                request.getAmount(), request.getCurrencyCode(), request.getCustomerType());
+                request.getAmount(), request.getCurrencyCode());
         
         LoggingUtil.logOperationStart("CHECK_TRANSACTION", properties);
         
@@ -79,13 +79,13 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
                 request.getReceiptId(), request.getMerchantProvider(), 
                 request.getMerchantCode(), request.getQrType());
         LoggingUtil.setOperationContext("CREATE_TRANSACTION", Status.CREATED.name(), 
-                request.getAmount(), request.getCurrencyCode(), request.getCustomerType(), null);
+                request.getAmount(), request.getCurrencyCode(), null);
         
         // Create properties for structured logging
         Map<String, Object> properties = LoggingUtil.createTransactionProperties(
                 request.getTransactionId(), request.getPspTransactionId(), request.getReceiptId(),
                 request.getMerchantProvider(), request.getMerchantCode(), request.getQrType(), 
-                request.getAmount(), request.getCurrencyCode(), request.getCustomerType());
+                request.getAmount(), request.getCurrencyCode());
         
         LoggingUtil.logOperationStart("CREATE_TRANSACTION", properties);
         
@@ -104,7 +104,7 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
             response.setTransactionType(request.getTransactionType());
             response.setAmount(request.getAmount());
             response.setBeneficiaryName("Sample Beneficiary");
-            response.setCustomerType(Integer.parseInt(request.getCustomerType()));
+            response.setCustomerType(1); // Default to Individual customer type
             response.setReceiptId(request.getReceiptId());
             response.setCreatedDate(LocalDateTime.now().format(ISO_DATE_TIME) + "Z");
             response.setExecutedDate("");
@@ -132,7 +132,7 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
         // Set transaction context for logging
         LoggingUtil.setTransactionContext(transactionId, null, null, null, null, null);
         LoggingUtil.setOperationContext("EXECUTE_TRANSACTION", Status.SUCCESS.name(), 
-                40000L, "417", "1", null);
+                40000L, "417", null);
         
         // Create properties for structured logging
         Map<String, Object> properties = new HashMap<>();
@@ -184,7 +184,7 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
         // Set transaction context for logging
         LoggingUtil.setTransactionContext(transactionId, null, null, null, null, null);
         LoggingUtil.setOperationContext("UPDATE_TRANSACTION", updateRequest.getStatus().name(), 
-                null, null, null, null);
+                null, null, null);
         
         // Create properties for structured logging
         Map<String, Object> properties = new HashMap<>();
@@ -230,7 +230,7 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
                     LoggingUtil.createTransactionProperties(null, null, null, 
                             request.getMerchantProvider(), request.getMerchantCode(), 
                             request.getQrType(), request.getAmount(), 
-                            request.getCurrencyCode(), request.getCustomerType()));
+                            request.getCurrencyCode()));
             throw new MinAmountNotValidException("Minimum amount is 100");
         }
         if (request.getAmount() > 1000000) {
@@ -239,7 +239,7 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
                     LoggingUtil.createTransactionProperties(null, null, null, 
                             request.getMerchantProvider(), request.getMerchantCode(), 
                             request.getQrType(), request.getAmount(), 
-                            request.getCurrencyCode(), request.getCustomerType()));
+                            request.getCurrencyCode()));
             throw new MaxAmountNotValidException("Maximum amount is 1000000");
         }
         
@@ -250,7 +250,7 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
                     LoggingUtil.createTransactionProperties(null, null, null, 
                             request.getMerchantProvider(), request.getMerchantCode(), 
                             request.getQrType(), request.getAmount(), 
-                            request.getCurrencyCode(), request.getCustomerType()));
+                            request.getCurrencyCode()));
             throw new IncorrectRequestDataException("Merchant code must be between 0 and 9999");
         }
         
@@ -261,7 +261,7 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
                     LoggingUtil.createTransactionProperties(null, null, null, 
                             request.getMerchantProvider(), request.getMerchantCode(), 
                             request.getQrType(), request.getAmount(), 
-                            request.getCurrencyCode(), request.getCustomerType()));
+                            request.getCurrencyCode()));
             throw new IncorrectRequestDataException("Only KGS currency (417) is supported");
         }
         
@@ -271,7 +271,7 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
                 LoggingUtil.createTransactionProperties(null, null, null, 
                         request.getMerchantProvider(), request.getMerchantCode(), 
                         request.getQrType(), request.getAmount(), 
-                        request.getCurrencyCode(), request.getCustomerType()));
+                        request.getCurrencyCode()));
     }
     
     /**

@@ -1,4 +1,4 @@
-package kg.demirbank.psp.service.impl;
+package kg.demirbank.psp.service.clients.impl;
 
 import kg.demirbank.psp.dto.bank.request.BankCheckRequestDto;
 import kg.demirbank.psp.dto.bank.request.BankCreateRequestDto;
@@ -6,7 +6,7 @@ import kg.demirbank.psp.dto.bank.response.BankCheckResponseDto;
 import kg.demirbank.psp.dto.bank.response.BankTransactionResponseDto;
 import kg.demirbank.psp.enums.Status;
 import kg.demirbank.psp.enums.TransactionType;
-import kg.demirbank.psp.service.BankClient;
+import kg.demirbank.psp.service.clients.BankClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

@@ -1,4 +1,4 @@
-package kg.demirbank.psp.service;
+package kg.demirbank.psp.service.clients;
 
 import kg.demirbank.psp.dto.outgoing.request.OutgoingCheckRequestDto;
 import kg.demirbank.psp.dto.outgoing.request.OutgoingCreateRequestDto;

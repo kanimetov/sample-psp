@@ -1,4 +1,4 @@
-package kg.demirbank.psp.service.impl;
+package kg.demirbank.psp.service.clients.impl;
 
 import kg.demirbank.psp.dto.outgoing.request.OutgoingCheckRequestDto;
 import kg.demirbank.psp.dto.outgoing.request.OutgoingCreateRequestDto;
@@ -6,7 +6,7 @@ import kg.demirbank.psp.dto.common.UpdateDto;
 import kg.demirbank.psp.dto.outgoing.response.OutgoingCheckResponseDto;
 import kg.demirbank.psp.dto.outgoing.response.OutgoingTransactionResponseDto;
 import kg.demirbank.psp.exception.*;
-import kg.demirbank.psp.service.OperatorClient;
+import kg.demirbank.psp.service.clients.OperatorClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

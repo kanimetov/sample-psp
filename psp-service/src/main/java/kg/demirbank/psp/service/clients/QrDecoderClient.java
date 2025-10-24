@@ -1,4 +1,4 @@
-package kg.demirbank.psp.service;
+package kg.demirbank.psp.service.clients;
 
 import kg.demirbank.psp.dto.common.ELQRData;
 import reactor.core.publisher.Mono;

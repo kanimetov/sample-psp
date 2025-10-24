@@ -1,4 +1,4 @@
-package kg.demirbank.psp.service.impl;
+package kg.demirbank.psp.service.clients.impl;
 
 import kg.demirbank.psp.dto.client.request.ClientCheckRequestDto;
 import kg.demirbank.psp.dto.client.request.ClientMakePaymentRequestDto;
@@ -6,9 +6,9 @@ import kg.demirbank.psp.dto.client.response.ClientCheckResponseDto;
 import kg.demirbank.psp.dto.client.response.ClientMakePaymentResponseDto;
 import kg.demirbank.psp.exception.*;
 import kg.demirbank.psp.service.BankService;
-import kg.demirbank.psp.service.ClientService;
+import kg.demirbank.psp.service.MerchantService;
 import kg.demirbank.psp.service.OperatorService;
-import kg.demirbank.psp.service.QrDecoderClient;
+import kg.demirbank.psp.service.clients.QrDecoderClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,13 +17,13 @@ import reactor.core.publisher.Mono;
 
 
 /**
- * Implementation of client service
- * Contains business logic for client check and make payment operations
+ * Implementation of merchant service
+ * Contains business logic for merchant check and make payment operations
  */
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ClientServiceImpl implements ClientService {
+public class MerchantServiceImpl implements MerchantService {
     
     
     private final QrDecoderClient qrDecoderClient;

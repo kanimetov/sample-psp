@@ -4,12 +4,18 @@
 
 ## Overview
 
-This document provides the definitive list of all API endpoints in the PSP system, organized by direction and implementation status.
+This document provides the definitive list of all API endpoints in the PSP system. The PSP system has only **two communication directions**:
+
+1. **Incoming (Operator → PSP)** - handled by `IncomingController.java`
+2. **Outgoing (PSP → Operator)** - handled by `OperatorClient.java`
+
+**Note:** PSP does not expose direct client-facing APIs. It acts as an intermediary between the Operator and bank systems.
 
 ## Endpoint Categories
 
-### 1. Incoming (Operator → PSP, Beneficiary) - ✅ IMPLEMENTED
+### 1. Incoming (Operator → PSP) - ✅ IMPLEMENTED
 
+**Implementation:** `IncomingController.java`  
 **Base URL:** `/in/qr/{version}/tx`
 
 | Operation | Method | Endpoint | Status | Description |
@@ -25,6 +31,7 @@ This document provides the definitive list of all API endpoints in the PSP syste
 
 ### 2. Outgoing (PSP → Operator) - 🔄 PLANNED
 
+**Implementation:** `OperatorClient.java`  
 **Base URL:** `/psp/api/v1/payment/qr/{version}/tx`
 
 | Operation | Method | Endpoint | Status | Description |
@@ -40,21 +47,6 @@ This document provides the definitive list of all API endpoints in the PSP syste
 - `H-PSP-ID` (PSP identifier)
 - `H-SIGNING-VERSION: "2"` (signature version)
 - `H-HASH` (JWS v2 signature)
-
----
-
-### 3. External (Client → PSP) - 🔄 PLANNED
-
-**Base URL:** `/api/qr/tx`
-
-| Operation | Method | Endpoint | Status | Description |
-|-----------|--------|----------|--------|-------------|
-| Check | POST | `/api/qr/tx/check` | 🔄 | QR code verification |
-| Create | POST | `/api/qr/tx/create` | 🔄 | Transaction creation |
-| Execute | POST | `/api/qr/tx/execute/{transactionId}` | 🔄 | Transaction execution |
-| Get | GET | `/api/qr/tx/{transactionId}` | 🔄 | Status retrieval |
-
-**Security:** Standard HTTP headers only (no crypto headers)
 
 ---
 
@@ -105,9 +97,9 @@ Accept: application/json
 
 ## Implementation Status
 
-- ✅ **IMPLEMENTED:** Incoming APIs (Operator → PSP)
-- 🔄 **PLANNED:** Outgoing APIs (PSP → Operator)
-- 🔄 **PLANNED:** External APIs (Client → PSP)
+- ✅ **IMPLEMENTED:** Incoming APIs (Operator → PSP) - `IncomingController.java`
+- 🔄 **PLANNED:** Outgoing APIs (PSP → Operator) - `OperatorClient.java`
+- ❌ **NOT APPLICABLE:** External APIs (Client → PSP) - PSP acts as intermediary only
 
 ## Related Documentation
 

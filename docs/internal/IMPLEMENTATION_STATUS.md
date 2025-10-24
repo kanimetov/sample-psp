@@ -4,6 +4,10 @@
 
 PSP Service is in MVP (Minimum Viable Product) stage with implemented incoming APIs for processing requests from the operator.
 
+**Architecture:** PSP system has only two communication directions:
+- **Incoming (Operator → PSP)** - `IncomingController.java` ✅ IMPLEMENTED
+- **Outgoing (PSP → Operator)** - `OperatorClient.java` 🔄 PLANNED
+
 ## ✅ Implemented Components
 
 ### API Layer

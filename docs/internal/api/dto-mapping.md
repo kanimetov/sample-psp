@@ -217,60 +217,22 @@ POST /in/qr/{version}/tx/update/{transactionId}
 
 ---
 
-## C. External APIs for Clients (Client → PSP)
+## C. Architecture Note
 
-**Controller:** `IncomingController` (external methods)  
-**Base URL:** `/api/qr/tx`
+**PSP System Architecture:**
 
-Public endpoints for client applications (without crypto headers).
+The PSP system has only **two communication directions**:
 
-### 1. Check QR
+1. **Outgoing (PSP → Operator)** - `OperatorClient.java` interface
+2. **Incoming (Operator → PSP)** - `IncomingController.java` implementation
 
+**No External APIs:** PSP does not expose direct client-facing APIs. It acts as an intermediary between the Operator and bank systems. Bank clients interact with PSP through the bank's internal systems, which then communicate with PSP using the Operator protocol.
+
+**Communication Flow:**
 ```
-POST /api/qr/tx/check
+Bank Client → Bank System → PSP (IncomingController) ↔ Operator
+Bank Client → Bank System → PSP (OperatorClient) → Operator
 ```
-
-**Headers:** None (standard HTTP headers)
-
-**Request Body:** `CheckRequestDto`
-
-**Response 200:** `CheckResponseDto`
-
----
-
-### 2. Create Transaction
-
-```
-POST /api/qr/tx/create
-```
-
-**Request Body:** `CreateRequestDto`
-
-**Response 200:** `CreateResponseDto`
-
----
-
-### 3. Execute Transaction
-
-```
-POST /api/qr/tx/execute/{transactionId}
-```
-
-**Request Body:** Empty
-
-**Response 200:** `StatusDto`
-
----
-
-### 4. Get Status
-
-```
-GET /api/qr/tx/{transactionId}
-```
-
-**Request Body:** None
-
-**Response 200:** `StatusDto`
 
 ---
 

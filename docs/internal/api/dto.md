@@ -140,14 +140,14 @@ kg.demirbank.psp.dto/
 | Create | POST /psp/api/v1/payment/qr/{version}/tx/create | CreateRequestDto | CreateResponseDto |
 | Execute | POST /psp/api/v1/payment/qr/{version}/tx/execute/{id} | (empty) | StatusDto |
 
-### External (Client → PSP) - PLANNED
+### Architecture Note
 
-| Operation | Endpoint | Request DTO | Response DTO |
-|----------|----------|-------------|--------------|
-| Check | POST /api/qr/tx/check | CheckRequestDto | CheckResponseDto |
-| Create | POST /api/qr/tx/create | CreateRequestDto | CreateResponseDto |
-| Execute | POST /api/qr/tx/execute/{id} | (empty) | StatusDto |
-| Get | GET /api/qr/tx/{id} | (none) | StatusDto |
+**PSP System has only two communication directions:**
+
+1. **Incoming (Operator → PSP)** - `IncomingController.java`
+2. **Outgoing (PSP → Operator)** - `OperatorClient.java`
+
+**No External APIs:** PSP does not expose direct client-facing APIs. It acts as an intermediary between the Operator and bank systems.
 
 ## Idempotency
 

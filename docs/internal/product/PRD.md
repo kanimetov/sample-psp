@@ -25,23 +25,23 @@
 - Beneficiary: Accept Check/Create/Execute → Execution → (if no final status) outgoing UPDATE to Operator.
 
 ### 5. Endpoints
-- External (PSP → clients)
-  - POST /api/qr/tx/check
-  - POST /api/qr/tx/create
-  - POST /api/qr/tx/execute/{transactionId}
-  - GET  /api/qr/tx/{transactionId}
-- Outgoing (PSP → Operator)
-  - POST /psp/api/v1/payment/qr/{version}/tx/check
-  - POST /psp/api/v1/payment/qr/{version}/tx/create
-  - POST /psp/api/v1/payment/qr/{version}/tx/execute/{transactionId}
-  - GET  /psp/api/v1/payment/qr/{version}/tx/get/{transactionId}
-  - POST /psp/api/v1/payment/qr/{version}/tx/update/{transactionId}
-- Incoming (Operator → PSP, Beneficiary)
-  - POST /in/qr/{version}/tx/check
-  - POST /in/qr/{version}/tx/create
-  - POST /in/qr/{version}/tx/execute/{transactionId}
-  - GET  /in/qr/{version}/tx/get/{transactionId}
-  - POST /qr/{version}/tx/update/{transactionId}
+
+**PSP System has only two communication directions:**
+
+#### Outgoing (PSP → Operator) - OperatorClient.java
+- POST /psp/api/v1/payment/qr/{version}/tx/check
+- POST /psp/api/v1/payment/qr/{version}/tx/create
+- POST /psp/api/v1/payment/qr/{version}/tx/execute/{transactionId}
+- GET  /psp/api/v1/payment/qr/{version}/tx/get/{transactionId}
+- POST /psp/api/v1/payment/qr/{version}/tx/update/{transactionId}
+
+#### Incoming (Operator → PSP) - IncomingController.java
+- POST /in/qr/{version}/tx/check
+- POST /in/qr/{version}/tx/create
+- POST /in/qr/{version}/tx/execute/{transactionId}
+- POST /in/qr/{version}/tx/update/{transactionId}
+
+**Note:** No direct client-facing APIs. PSP acts as intermediary between Operator and bank systems.
 
 Notes on headers/security:
 - Only H‑SIGNING‑VERSION=2 is supported. H‑HASH — JWS signature according to v2 rules.

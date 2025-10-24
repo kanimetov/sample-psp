@@ -5,6 +5,7 @@ import kg.demirbank.psp.dto.incoming.request.IncomingCreateRequestDto;
 import kg.demirbank.psp.dto.common.UpdateDto;
 import kg.demirbank.psp.dto.incoming.response.IncomingCheckResponseDto;
 import kg.demirbank.psp.dto.incoming.response.IncomingTransactionResponseDto;
+import kg.demirbank.psp.enums.CustomerType;
 import kg.demirbank.psp.enums.Status;
 import kg.demirbank.psp.enums.TransactionType;
 import kg.demirbank.psp.exception.*;
@@ -92,7 +93,7 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
             response.setStatus(Status.CREATED); // Status 10 for created
             response.setAmount(request.getAmount());
             response.setBeneficiaryName("Sample Beneficiary");
-            response.setCustomerType("1"); // Default to Individual customer type
+            response.setCustomerType(CustomerType.INDIVIDUAL); // Default to Individual customer type
             response.setReceiptId(request.getSenderReceiptId());
             response.setCreatedDate(LocalDateTime.now().format(ISO_DATE_TIME) + "Z");
             response.setExecutedDate(null);
@@ -132,7 +133,7 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
             response.setStatus(Status.IN_PROCESS); // Status 20 for success
             response.setAmount(40000L);
             response.setBeneficiaryName("c***e A***o");
-            response.setCustomerType("1");
+            response.setCustomerType(CustomerType.INDIVIDUAL);
             response.setReceiptId("7218199");
             response.setCreatedDate("2022-11-01T12:00:00Z");
             response.setExecutedDate(LocalDateTime.now().format(ISO_DATE_TIME) + "Z");

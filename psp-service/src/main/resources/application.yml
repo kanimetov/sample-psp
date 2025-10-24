@@ -52,6 +52,20 @@ operator:
     write: 30000         # Write timeout in milliseconds (30 seconds)
     response: 60000      # Response timeout in milliseconds (60 seconds)
 
+# Merchant Provider Configuration
+merchant:
+  provider: "demirbank"  # Provider identifier for direction determination
+
+# QR Decoder Configuration
+qr:
+  decoder:
+    base-url: ""  # For future external QR decoder service
+
+# Bank Service Configuration  
+bank:
+  service:
+    base-url: ""  # For future bank service integration
+
 security:
   signature:
     operator-public-key-path: /path/to/operator-public-key.pem

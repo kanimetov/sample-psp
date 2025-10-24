@@ -161,4 +161,19 @@ public interface OperationRepository extends JpaRepository<OperationEntity, Long
                                                    @Param("customerType") CustomerType customerType,
                                                    @Param("startDate") LocalDateTime startDate,
                                                    @Param("endDate") LocalDateTime endDate);
+
+    /**
+     * Find recent CHECK operation by QR link hash and merchant provider
+     * Used to link makePayment to previous check when checkSessionId is not provided
+     */
+    @Query("SELECT o FROM OperationEntity o WHERE " +
+           "o.operationType = 'CHECK' AND " +
+           "o.transferDirection = 'OUT' AND " +
+           "o.qrLinkHash = :qrLinkHash AND " +
+           "o.merchantProvider = :merchantProvider AND " +
+           "o.createdAt >= :since " +
+           "ORDER BY o.createdAt DESC")
+    List<OperationEntity> findRecentCheckByQrHash(@Param("qrLinkHash") String qrLinkHash,
+                                                  @Param("merchantProvider") String merchantProvider,
+                                                  @Param("since") LocalDateTime since);
 }

@@ -2,43 +2,31 @@
 
 ## Обзор
 
-PSP сервис использует структурированное логирование для обеспечения эффективного анализа логов, мониторинга и отладки. Все логи содержат ключевые свойства, которые позволяют легко фильтровать, агрегировать и анализировать данные.
+PSP сервис использует упрощенное структурированное логирование, сфокусированное на данных, необходимых для эффективного анализа ошибок и мониторинга. Система логирования была значительно упрощена для повышения производительности и читаемости.
 
 ## Ключевые свойства для анализа логов
 
 ### Основные идентификаторы
 - `correlationId` - Уникальный идентификатор для трассировки запроса через все компоненты
-- `transactionId` - Идентификатор транзакции PSP
-- `pspTransactionId` - Идентификатор транзакции от PSP провайдера
+- `pspTransactionId` - Основной идентификатор PSP транзакции
+- `transactionId` - Идентификатор транзакции оператора
 - `receiptId` - Идентификатор чека
 
 ### Контекст операции
-- `operationType` - Тип операции (CHECK_TRANSACTION, CREATE_TRANSACTION, EXECUTE_TRANSACTION, UPDATE_TRANSACTION)
+- `operationType` - Тип операции (CHECK, CREATE, EXECUTE, UPDATE)
 - `status` - Статус операции
-- `apiVersion` - Версия API
-- `uri` - URI запроса
+- `transferDirection` - Направление транзакции (IN, OUT, OWN)
 
 ### Данные транзакции
-- `merchantProvider` - Провайдер мерчанта
 - `merchantCode` - Код мерчанта
-- `qrType` - Тип QR кода (staticQr, dynamicQr)
 - `amount` - Сумма транзакции
-- `currencyCode` - Код валюты
-- `customerType` - Тип клиента (1, 2)
-
-### Производительность
-- `responseTimeMs` - Время ответа в миллисекундах
-- `timestamp` - Временная метка события
-
-### Безопасность
-- `signatureVerified` - Результат проверки подписи
-- `requestHash` - Хеш запроса
-- `ipAddress` - IP адрес клиента
-- `userAgent` - User Agent клиента
 
 ### Ошибки
 - `errorCode` - Код ошибки
 - `errorMessage` - Сообщение об ошибке
+
+### Временные метки
+- `timestamp` - Временная метка события
 
 ## Типы событий
 
@@ -48,12 +36,11 @@ PSP сервис использует структурированное лог�
 ```json
 {
   "event": "operation_start",
-  "operationType": "CHECK_TRANSACTION",
+  "operationType": "CHECK",
   "timestamp": "2024-01-15T10:30:00",
-  "correlationId": "uuid-123",
-  "merchantProvider": "provider1",
-  "merchantCode": 1234,
-  "amount": 50000
+  "pspTransactionId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "transferDirection": "IN",
+  "merchantCode": 1234
 }
 ```
 
@@ -63,96 +50,52 @@ PSP сервис использует структурированное лог�
 ```json
 {
   "event": "operation_success",
-  "operationType": "CHECK_TRANSACTION",
+  "operationType": "CHECK",
   "timestamp": "2024-01-15T10:30:01",
-  "correlationId": "uuid-123",
-  "responseTimeMs": 150,
-  "beneficiaryName": "c***e A***o",
-  "transactionType": "C2C"
+  "pspTransactionId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "transactionId": "OP-2024-001",
+  "status": "SUCCESS"
 }
 ```
 
-### 3. business_error
+### 3. operation_error (business_error)
 Логируется при известных бизнес-ошибках (без stack trace).
 
 ```json
 {
-  "event": "business_error",
-  "operationType": "CHECK_TRANSACTION",
+  "event": "operation_error",
+  "operationType": "CHECK",
   "timestamp": "2024-01-15T10:30:01",
-  "correlationId": "uuid-123",
+  "pspTransactionId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
   "errorCode": "MIN_AMOUNT_INVALID",
-  "errorMessage": "Minimum amount is 100",
-  "amount": 50
+  "errorMessage": "Minimum amount is 100"
 }
 ```
 
-### 4. system_error
+### 4. operation_error (system_error)
 Логируется при системных ошибках (с stack trace).
 
 ```json
 {
-  "event": "system_error",
-  "operationType": "CHECK_TRANSACTION",
+  "event": "operation_error",
+  "operationType": "CHECK",
   "timestamp": "2024-01-15T10:30:01",
-  "correlationId": "uuid-123",
+  "pspTransactionId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
   "errorCode": "NETWORK_ERROR",
-  "errorMessage": "Connection timeout",
-  "exception": "NetworkTimeoutException"
+  "errorMessage": "Connection timeout"
 }
 ```
 
-### 5. business_validation
-Логируется при бизнес-валидации.
-
-```json
-{
-  "event": "business_validation",
-  "validationType": "AMOUNT_VALIDATION",
-  "isValid": false,
-  "details": "Amount below minimum: 50",
-  "timestamp": "2024-01-15T10:30:00",
-  "correlationId": "uuid-123"
-}
-```
-
-### 6. signature_verification
-Логируется при проверке подписи.
-
-```json
-{
-  "event": "signature_verification",
-  "isVerified": true,
-  "details": "Signature verified successfully",
-  "timestamp": "2024-01-15T10:30:00",
-  "correlationId": "uuid-123"
-}
-```
-
-### 7. performance_metrics
-Логируется для метрик производительности.
-
-```json
-{
-  "event": "performance_metrics",
-  "operationType": "CHECK_TRANSACTION",
-  "responseTimeMs": 150,
-  "timestamp": "2024-01-15T10:30:01",
-  "correlationId": "uuid-123"
-}
-```
-
-### 8. audit_trail
+### 5. audit_trail
 Логируется для аудита изменений.
 
 ```json
 {
   "event": "audit_trail",
-  "action": "UPDATE_TRANSACTION",
-  "entityType": "TRANSACTION",
-  "entityId": "tx-123",
-  "timestamp": "2024-01-15T10:30:01",
-  "correlationId": "uuid-123"
+  "action": "UPDATE",
+  "pspTransactionId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "details": "Transaction updated",
+  "timestamp": "2024-01-15T10:30:01"
 }
 ```
 
@@ -186,26 +129,31 @@ PSP сервис использует структурированное лог�
 
 ## Использование в коде
 
-### LoggingUtil
+### LoggingUtil (упрощенная версия)
 Основной класс для структурированного логирования:
 
 ```java
-// Установка контекста транзакции
-LoggingUtil.setTransactionContext(transactionId, pspTransactionId, receiptId, 
-    merchantProvider, merchantCode, qrType);
+// Генерация correlation ID
+String correlationId = LoggingUtil.generateAndSetCorrelationId();
 
-// Установка контекста операции
-LoggingUtil.setOperationContext(operationType, status, amount, 
-    currencyCode, customerType, apiVersion);
+// Установка контекста транзакции
+LoggingUtil.setTransactionContext(pspTransactionId, transactionId, receiptId, 
+    operationType, transferDirection, merchantCode, amount, status);
 
 // Логирование начала операции
-LoggingUtil.logOperationStart("CHECK_TRANSACTION", properties);
+LoggingUtil.logOperationStart("CHECK", pspTransactionId, transferDirection, merchantCode);
 
 // Логирование успешного завершения
-LoggingUtil.logOperationSuccess("CHECK_TRANSACTION", properties);
+LoggingUtil.logOperationSuccess("CHECK", pspTransactionId, transactionId, status);
 
 // Логирование ошибки (автоматически определяет тип и уровень)
-LoggingUtil.logError("CHECK_TRANSACTION", errorCode, errorMessage, throwable, properties);
+LoggingUtil.logError("CHECK", pspTransactionId, errorCode, errorMessage, throwable);
+
+// Аудит
+LoggingUtil.logAuditTrail("UPDATE", pspTransactionId, "Transaction updated");
+
+// Очистка контекста
+LoggingUtil.clearContext();
 ```
 
 ### LoggingFilter
@@ -214,10 +162,11 @@ LoggingUtil.logError("CHECK_TRANSACTION", errorCode, errorMessage, throwable, pr
 ```java
 @Component
 @Order(1)
-public class LoggingFilter extends OncePerRequestFilter {
+public class LoggingFilter implements WebFilter {
     // Автоматически генерирует correlation ID
     // Логирует начало и конец HTTP запросов
     // Измеряет время ответа
+    // Очищает MDC контекст
 }
 ```
 
@@ -247,7 +196,7 @@ grep "merchantCode.*1234.*errorCode" application.log
 ### Анализ по типу операции
 ```bash
 # Найти все операции создания транзакций
-grep "operationType.*CREATE_TRANSACTION" application.log
+grep "operationType.*CREATE" application.log
 ```
 
 ### Анализ по статусу
@@ -258,14 +207,14 @@ grep "event.*operation_success" application.log
 
 ### Анализ по типам ошибок
 ```bash
-# Найти только бизнес-ошибки (без stack trace)
-grep "event.*business_error" application.log
-
-# Найти системные ошибки (с stack trace)
-grep "event.*system_error" application.log
+# Найти все ошибки операций
+grep "event.*operation_error" application.log
 
 # Найти ошибки валидации
 grep "errorCode.*VALIDATION" application.log
+
+# Найти ошибки по направлению транзакции
+grep "transferDirection.*IN.*errorCode" application.log
 ```
 
 ## Мониторинг и алерты
@@ -297,15 +246,37 @@ logging:
 ```
 
 ### MDC (Mapped Diagnostic Context)
-Все ключевые свойства автоматически добавляются в MDC для включения в каждый лог:
+Ключевые свойства автоматически добавляются в MDC для включения в каждый лог:
 
 ```java
 // Автоматически добавляется в каждый лог
 MDC.put("correlationId", correlationId);
+MDC.put("pspTransactionId", pspTransactionId);
 MDC.put("transactionId", transactionId);
-MDC.put("merchantProvider", merchantProvider);
-// ... другие свойства
+MDC.put("receiptId", receiptId);
+MDC.put("operationType", operationType);
+MDC.put("transferDirection", transferDirection);
+MDC.put("merchantCode", merchantCode);
+MDC.put("amount", amount);
+MDC.put("status", status);
+MDC.put("errorCode", errorCode);
 ```
+
+## Изменения в системе логирования
+
+### Упрощения (v2.0)
+1. **Удалены поля безопасности** - `ipAddress` и `userAgent` (доступ ограничен доверенными источниками)
+2. **Заменен `merchantProvider` на `transferDirection`** - более семантически точное поле
+3. **Упрощены типы операций** - `CHECK_TRANSACTION` → `CHECK`, `CREATE_TRANSACTION` → `CREATE`
+4. **Сокращено количество MDC полей** - с 20+ до 9 основных полей
+5. **Упрощены методы логирования** - с 20+ до 5 основных методов
+6. **Удалены сложные properties maps** - фокус на простых параметрах
+
+### Преимущества упрощения
+- **Производительность** - меньше операций с MDC и логированием
+- **Читаемость** - проще понимать и использовать
+- **Фокус** - только необходимые данные для анализа ошибок
+- **Безопасность** - соответствие архитектуре с доверенными источниками
 
 ## Рекомендации
 
@@ -314,8 +285,8 @@ MDC.put("merchantProvider", merchantProvider);
 3. **Используйте соответствующие уровни логирования** (DEBUG, INFO, WARN, ERROR)
 4. **Включайте correlation ID** во все логи для трассировки
 5. **Логируйте ключевые бизнес-события** для аудита
-6. **Мониторьте производительность** через метрики времени ответа
-7. **Различайте бизнес и системные ошибки** - бизнес-ошибки не должны засорять логи stack trace
-8. **Используйте LoggingUtil.logError()** для автоматического определения типа ошибки
-9. **Настройте алерты** на системные ошибки, но не на бизнес-ошибки
-10. **Анализируйте частоту бизнес-ошибок** для выявления проблем в клиентском коде
+6. **Различайте бизнес и системные ошибки** - бизнес-ошибки не должны засорять логи stack trace
+7. **Используйте LoggingUtil.logError()** для автоматического определения типа ошибки
+8. **Настройте алерты** на системные ошибки, но не на бизнес-ошибки
+9. **Анализируйте частоту бизнес-ошибок** для выявления проблем в клиентском коде
+10. **Используйте transferDirection** для анализа направления транзакций

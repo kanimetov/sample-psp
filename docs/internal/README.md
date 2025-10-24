@@ -38,6 +38,8 @@
 - **runtime/** — deployment and operations
   - configuration-reference.md — **MASTER** config reference
   - observability.md — monitoring and logging
+  - structured-logging.md — **MASTER** logging reference
+  - logging-migration.md — logging system migration guide
   - operations.md — deployment procedures
 - **testing/** — testing strategy
   - test-plan.md — comprehensive testing approach

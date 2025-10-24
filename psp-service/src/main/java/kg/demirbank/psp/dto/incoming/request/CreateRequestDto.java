@@ -8,7 +8,6 @@ import kg.demirbank.psp.enums.TransactionType;
 import lombok.Data;
 
 import java.util.List;
-import java.util.UUID;
 
 /**
  * Incoming create request DTO (Operator → PSP)
@@ -22,7 +21,7 @@ public class CreateRequestDto {
      */
     @NotNull
     @JsonProperty("transactionId")
-    private UUID transactionId;
+    private String transactionId;
     
     /**
      * Payment link type, Field ID=01 from QR

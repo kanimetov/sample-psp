@@ -1,15 +1,15 @@
-package kg.demirbank.psp.dto.incoming.response;
+package kg.demirbank.psp.dto.outgoing.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import kg.demirbank.psp.enums.TransactionType;
 import lombok.Data;
 
 /**
- * Incoming check response DTO (PSP → Operator)
- * Used when PSP acts as beneficiary responding to check requests from Operator
+ * Outgoing check response DTO (Operator → PSP)
+ * Used when PSP acts as sender receiving check responses from Operator
  */
 @Data
-public class CheckResponseDto {
+public class OutgoingCheckResponseDto {
     @JsonProperty("beneficiaryName")
     private String beneficiaryName;
 

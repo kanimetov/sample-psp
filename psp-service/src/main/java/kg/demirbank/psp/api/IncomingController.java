@@ -3,9 +3,8 @@ package kg.demirbank.psp.api;
 import kg.demirbank.psp.dto.incoming.request.CheckRequestDto;
 import kg.demirbank.psp.dto.incoming.request.CreateRequestDto;
 import kg.demirbank.psp.dto.common.UpdateDto;
-import kg.demirbank.psp.dto.incoming.response.CheckResponseDto;
-import kg.demirbank.psp.dto.incoming.response.CreateResponseDto;
-import kg.demirbank.psp.dto.incoming.response.StatusDto;
+import kg.demirbank.psp.dto.incoming.response.IncomingCheckResponseDto;
+import kg.demirbank.psp.dto.incoming.response.IncomingTransactionResponseDto;
 import kg.demirbank.psp.exception.BadRequestException;
 import kg.demirbank.psp.exception.SignatureVerificationException;
 import kg.demirbank.psp.security.SignatureService;
@@ -40,7 +39,7 @@ public class IncomingController {
     private final IncomingService incomingService;
     
     @PostMapping("/in/qr/{version}/tx/check")
-    public Mono<ResponseEntity<CheckResponseDto>> inboundCheck(
+    public Mono<ResponseEntity<IncomingCheckResponseDto>> inboundCheck(
             @PathVariable String version,
             @RequestHeader(name = "H-HASH", required = false) String hash,
             @RequestBody String rawBody) {
@@ -106,7 +105,7 @@ public class IncomingController {
     }
 
     @PostMapping("/in/qr/{version}/tx/create")
-    public Mono<ResponseEntity<CreateResponseDto>> inboundCreate(
+    public Mono<ResponseEntity<IncomingTransactionResponseDto>> inboundCreate(
             @PathVariable String version,
             @RequestHeader(name = "H-HASH", required = false) String hash,
             @RequestBody String rawBody) {
@@ -175,7 +174,7 @@ public class IncomingController {
     }
 
     @PostMapping("/in/qr/{version}/tx/execute/{transactionId}")
-    public Mono<ResponseEntity<StatusDto>> inboundExecute(
+    public Mono<ResponseEntity<IncomingTransactionResponseDto>> inboundExecute(
             @PathVariable String version,
             @PathVariable String transactionId,
             @RequestHeader(name = "H-HASH", required = false) String hash) {

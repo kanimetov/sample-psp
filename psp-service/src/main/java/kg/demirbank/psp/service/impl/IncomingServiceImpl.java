@@ -3,9 +3,8 @@ package kg.demirbank.psp.service.impl;
 import kg.demirbank.psp.dto.incoming.request.CheckRequestDto;
 import kg.demirbank.psp.dto.incoming.request.CreateRequestDto;
 import kg.demirbank.psp.dto.common.UpdateDto;
-import kg.demirbank.psp.dto.incoming.response.CheckResponseDto;
-import kg.demirbank.psp.dto.incoming.response.CreateResponseDto;
-import kg.demirbank.psp.dto.incoming.response.StatusDto;
+import kg.demirbank.psp.dto.incoming.response.IncomingCheckResponseDto;
+import kg.demirbank.psp.dto.incoming.response.IncomingTransactionResponseDto;
 import kg.demirbank.psp.enums.Status;
 import kg.demirbank.psp.enums.TransactionType;
 import kg.demirbank.psp.exception.*;
@@ -33,7 +32,7 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
     private static final DateTimeFormatter ISO_DATE_TIME = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
     
     @Override
-    public Mono<CheckResponseDto> checkTransaction(CheckRequestDto request) {
+    public Mono<IncomingCheckResponseDto> checkTransaction(CheckRequestDto request) {
         // Set transaction context for logging
         LoggingUtil.setTransactionContext(null, null, null, 
                 request.getMerchantProvider(), request.getMerchantCode(), request.getQrType());
@@ -56,7 +55,7 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
             String beneficiaryName = lookupBeneficiaryName(request);
             TransactionType transactionType = determineTransactionType(request);
             
-            CheckResponseDto response = new CheckResponseDto();
+            IncomingCheckResponseDto response = new IncomingCheckResponseDto();
             response.setBeneficiaryName(beneficiaryName);
             response.setTransactionType(transactionType);
             
@@ -78,7 +77,7 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
     }
     
     @Override
-    public Mono<CreateResponseDto> createTransaction(CreateRequestDto request) {
+    public Mono<IncomingTransactionResponseDto> createTransaction(CreateRequestDto request) {
         // Set transaction context for logging
         LoggingUtil.setTransactionContext(request.getTransactionId().toString(), request.getSenderTransactionId(), 
                 request.getSenderReceiptId(), request.getMerchantProvider(), 
@@ -103,7 +102,7 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
                     request.getTransactionId().toString() : generateTransactionId();
             
             // Simulate transaction creation
-            CreateResponseDto response = new CreateResponseDto();
+            IncomingTransactionResponseDto response = new IncomingTransactionResponseDto();
             response.setTransactionId(transactionId);
             response.setStatus(Status.CREATED); // Status 10 for created
             response.setAmount(request.getAmount());
@@ -132,7 +131,7 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
     }
     
     @Override
-    public Mono<StatusDto> executeTransaction(String transactionId) {
+    public Mono<IncomingTransactionResponseDto> executeTransaction(String transactionId) {
         // Set transaction context for logging
         LoggingUtil.setTransactionContext(transactionId, null, null, null, null, null);
         LoggingUtil.setOperationContext("EXECUTE_TRANSACTION", "20", 
@@ -152,7 +151,7 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
             }
             
             // Simulate transaction execution
-            StatusDto response = new StatusDto();
+            IncomingTransactionResponseDto response = new IncomingTransactionResponseDto();
             response.setTransactionId(transactionId);
             response.setStatus(Status.IN_PROCESS); // Status 20 for success
             response.setAmount(40000L);

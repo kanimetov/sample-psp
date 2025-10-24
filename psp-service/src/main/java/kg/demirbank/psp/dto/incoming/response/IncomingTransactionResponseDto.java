@@ -5,11 +5,11 @@ import kg.demirbank.psp.enums.Status;
 import lombok.Data;
 
 /**
- * Incoming create response DTO (PSP → Operator)
- * Used when PSP acts as beneficiary responding to create requests from Operator
+ * Incoming transaction response DTO (PSP → Operator)
+ * Used when PSP acts as beneficiary responding to create/execute requests from Operator
  */
 @Data
-public class CreateResponseDto {
+public class IncomingTransactionResponseDto {
     /**
      * Transaction ID from the Operator's system
      */

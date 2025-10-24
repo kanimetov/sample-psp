@@ -9,11 +9,11 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * Outgoing create response DTO (Operator → PSP)
- * Used when PSP acts as sender receiving create responses from Operator
+ * Outgoing transaction response DTO (Operator → PSP)
+ * Used when PSP acts as sender receiving create/execute responses from Operator
  */
 @Data
-public class CreateResponseDto {
+public class OutgoingTransactionResponseDto {
     /**
      * Transaction ID from the Operator's system
      */

@@ -3,9 +3,8 @@ package kg.demirbank.psp.service.impl;
 import kg.demirbank.psp.dto.outgoing.request.CheckRequestDto;
 import kg.demirbank.psp.dto.outgoing.request.CreateRequestDto;
 import kg.demirbank.psp.dto.common.UpdateDto;
-import kg.demirbank.psp.dto.outgoing.response.CheckResponseDto;
-import kg.demirbank.psp.dto.outgoing.response.CreateResponseDto;
-import kg.demirbank.psp.dto.outgoing.response.StatusDto;
+import kg.demirbank.psp.dto.outgoing.response.OutgoingCheckResponseDto;
+import kg.demirbank.psp.dto.outgoing.response.OutgoingTransactionResponseDto;
 import kg.demirbank.psp.exception.*;
 import kg.demirbank.psp.service.OperatorClient;
 import lombok.RequiredArgsConstructor;
@@ -53,7 +52,7 @@ public class OperatorClientImpl implements OperatorClient {
     }
 
     @Override
-    public Mono<CheckResponseDto> check(CheckRequestDto request) {
+    public Mono<OutgoingCheckResponseDto> check(CheckRequestDto request) {
         String url = String.format("%s/psp/api/v1/payment/qr/%s/tx/check", operatorBaseUrl, version);
         
         WebClient webClient = webClientBuilder.baseUrl(operatorBaseUrl).build();
@@ -61,12 +60,12 @@ public class OperatorClientImpl implements OperatorClient {
         return addHeaders(webClient.post().uri(url))
                 .bodyValue(request)
                 .retrieve()
-                .bodyToMono(CheckResponseDto.class)
+                .bodyToMono(OutgoingCheckResponseDto.class)
                 .onErrorMap(this::mapOperatorError);
     }
 
     @Override
-    public Mono<CreateResponseDto> create(CreateRequestDto request) {
+    public Mono<OutgoingTransactionResponseDto> create(CreateRequestDto request) {
         String url = String.format("%s/psp/api/v1/payment/qr/%s/tx/create", operatorBaseUrl, version);
         
         WebClient webClient = webClientBuilder.baseUrl(operatorBaseUrl).build();
@@ -74,12 +73,12 @@ public class OperatorClientImpl implements OperatorClient {
         return addHeaders(webClient.post().uri(url))
                 .bodyValue(request)
                 .retrieve()
-                .bodyToMono(CreateResponseDto.class)
+                .bodyToMono(OutgoingTransactionResponseDto.class)
                 .onErrorMap(this::mapOperatorError);
     }
 
     @Override
-    public Mono<StatusDto> execute(String transactionId) {
+    public Mono<OutgoingTransactionResponseDto> execute(String transactionId) {
         if (transactionId == null || transactionId.isBlank()) {
             return Mono.error(new BadRequestException("Transaction ID not specified"));
         }
@@ -90,7 +89,7 @@ public class OperatorClientImpl implements OperatorClient {
         
         return addHeaders(webClient.post().uri(url))
                 .retrieve()
-                .bodyToMono(StatusDto.class)
+                .bodyToMono(OutgoingTransactionResponseDto.class)
                 .onErrorMap(this::mapOperatorError);
     }
 

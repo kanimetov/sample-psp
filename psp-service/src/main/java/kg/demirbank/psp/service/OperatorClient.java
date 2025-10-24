@@ -3,10 +3,8 @@ package kg.demirbank.psp.service;
 import kg.demirbank.psp.dto.outgoing.request.CheckRequestDto;
 import kg.demirbank.psp.dto.outgoing.request.CreateRequestDto;
 import kg.demirbank.psp.dto.common.UpdateDto;
-import kg.demirbank.psp.dto.outgoing.response.CheckResponseDto;
-import kg.demirbank.psp.dto.outgoing.response.CreateResponseDto;
-import kg.demirbank.psp.dto.outgoing.response.ExecuteResponseDto;
-import kg.demirbank.psp.dto.outgoing.response.StatusDto;
+import kg.demirbank.psp.dto.outgoing.response.OutgoingCheckResponseDto;
+import kg.demirbank.psp.dto.outgoing.response.OutgoingTransactionResponseDto;
 import reactor.core.publisher.Mono;
 
 /**
@@ -16,17 +14,17 @@ public interface OperatorClient {
     /**
      * Validate transaction details
      */
-    Mono<CheckResponseDto> check(CheckRequestDto request);
+    Mono<OutgoingCheckResponseDto> check(CheckRequestDto request);
 
     /**
      * Create new transaction
      */
-    Mono<CreateResponseDto> create(CreateRequestDto request);
+    Mono<OutgoingTransactionResponseDto> create(CreateRequestDto request);
 
     /**
      * Execute transaction
      */
-    Mono<ExecuteResponseDto> execute(String transactionId);
+    Mono<OutgoingTransactionResponseDto> execute(String transactionId);
 
     /**
      * Update transaction status

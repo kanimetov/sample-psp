@@ -3,9 +3,8 @@ package kg.demirbank.psp.service;
 import kg.demirbank.psp.dto.incoming.request.CheckRequestDto;
 import kg.demirbank.psp.dto.incoming.request.CreateRequestDto;
 import kg.demirbank.psp.dto.common.UpdateDto;
-import kg.demirbank.psp.dto.incoming.response.CheckResponseDto;
-import kg.demirbank.psp.dto.incoming.response.CreateResponseDto;
-import kg.demirbank.psp.dto.incoming.response.StatusDto;
+import kg.demirbank.psp.dto.incoming.response.IncomingCheckResponseDto;
+import kg.demirbank.psp.dto.incoming.response.IncomingTransactionResponseDto;
 import reactor.core.publisher.Mono;
 
 /**
@@ -21,7 +20,7 @@ public interface IncomingService {
      * @param request Check request DTO
      * @return Check response with beneficiary name and transaction type
      */
-    Mono<CheckResponseDto> checkTransaction(CheckRequestDto request);
+    Mono<IncomingCheckResponseDto> checkTransaction(CheckRequestDto request);
     
     /**
      * Create new transaction
@@ -30,7 +29,7 @@ public interface IncomingService {
      * @param request Create request DTO
      * @return Create response with transaction ID and status
      */
-    Mono<CreateResponseDto> createTransaction(CreateRequestDto request);
+    Mono<IncomingTransactionResponseDto> createTransaction(CreateRequestDto request);
     
     /**
      * Execute transaction
@@ -39,7 +38,7 @@ public interface IncomingService {
      * @param transactionId Transaction ID to execute
      * @return Status response with transaction details
      */
-    Mono<StatusDto> executeTransaction(String transactionId);
+    Mono<IncomingTransactionResponseDto> executeTransaction(String transactionId);
     
     /**
      * Update transaction status

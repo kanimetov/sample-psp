@@ -1,113 +1,106 @@
-package kg.demirbank.psp.dto.incoming.request;
+package kg.demirbank.psp.dto.common;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
-import kg.demirbank.psp.dto.common.ELQRData;
-import kg.demirbank.psp.dto.common.KeyValueDto;
-import lombok.Data;
 
 import java.util.List;
 
 /**
- * Incoming check request DTO (Operator → PSP)
- * Used when PSP acts as beneficiary receiving check requests from Operator
+ * ELQR (Electronic QR) Data Interface
+ * Contains all QR code properties extracted from QR codes
+ * Used across all request DTOs that process QR code data
  */
-@Data
-public class IncomingCheckRequestDto implements ELQRData {
+public interface ELQRData {
+    
     /**
      * Payment link type, Field ID=01 from QR
      */
     @NotBlank
     @Pattern(regexp = "staticQr|dynamicQr")
     @JsonProperty("qrType")
-    private String qrType;
-
+    String getQrType();
+    
     /**
      * Unique identificator of merchant provider (QR Acquirer), Field ID=32, SubID=00 from QR
      */
     @NotBlank
     @Size(max = 32)
     @JsonProperty("merchantProvider")
-    private String merchantProvider;
-
+    String getMerchantProvider();
+    
     /**
      * Service provider name, Field ID=59 from QR
      */
     @Size(max = 32)
     @JsonProperty("merchantId")
-    private String merchantId;
-
+    String getMerchantId();
+    
     /**
      * Service code in the Payment system of QR Acquirer, Field ID=32, SubID=01 from QR
      */
     @Size(max = 32)
     @JsonProperty("serviceId")
-    private String serviceId;
-
+    String getServiceId();
+    
     /**
      * Service name in the Payment system, Field ID=33 SubID=01 from QR
      */
     @Size(max = 32)
     @JsonProperty("serviceName")
-    private String serviceName;
-
+    String getServiceName();
+    
     /**
      * Unique identifier of the payer within the service (лицевой счет), Field ID=32, SubID=10 from QR
      */
     @Size(max = 32)
     @JsonProperty("beneficiaryAccountNumber")
-    private String beneficiaryAccountNumber;
-
+    String getBeneficiaryAccountNumber();
+    
     /**
      * Service provider code (MCC), Field ID=52 from QR
      */
     @NotNull
     @Min(0) @Max(9999)
     @JsonProperty("merchantCode")
-    private Integer merchantCode;
-
+    Integer getMerchantCode();
+    
     /**
      * Currency, by default always "417", Field ID=53 from QR
      */
     @NotBlank
     @Pattern(regexp = "\\d{3}")
     @JsonProperty("currencyCode")
-    private String currencyCode = "417";
-
+    String getCurrencyCode();
+    
     /**
      * Transaction ID in the QR Acquirer system, Field ID=32, SubID=11 from QR
      */
     @Size(max = 32)
     @JsonProperty("qrTransactionId")
-    private String qrTransactionId;
-
+    String getQrTransactionId();
+    
     /**
      * Comment for payment, Field ID=34
      */
-    @Size(max = 32)
+    @Size(max = 99)
     @JsonProperty("qrComment")
-    private String qrComment;
-
-    /**
-     * Payment amount (in tyiyns), could be from QR or from Payment App/ Sender Bank
-     */
-    @NotNull
-    @Digits(integer = 13, fraction = 0)
-    @Positive
-    @JsonProperty("amount")
-    private Long amount;
-
+    String getQrComment();
+    
     /**
      * Last 4 symbols of payment link hash string, Field ID=63 from QR
      */
     @NotBlank
     @Pattern(regexp = "^[A-Z0-9]{4}$")
     @JsonProperty("qrLinkHash")
-    private String qrLinkHash;
-
+    String getQrLinkHash();
+    
+    /**
+     * Additional QR code data (extra fields)
+     * Maximum of 5 additional key-value pairs can be stored
+     */
     @Size(max = 5)
     @Valid
     @JsonProperty("extra")
-    private List<KeyValueDto> extra;
+    List<KeyValueDto> getExtra();
 }

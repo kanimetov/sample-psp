@@ -3,6 +3,7 @@ package kg.demirbank.psp.dto.outgoing.request;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
+import kg.demirbank.psp.dto.common.ELQRData;
 import kg.demirbank.psp.dto.common.KeyValueDto;
 import kg.demirbank.psp.enums.TransactionType;
 import lombok.Data;
@@ -14,7 +15,7 @@ import java.util.List;
  * Used when PSP acts as sender sending create requests to Operator
  */
 @Data
-public class OutgoingCreateRequestDto {
+public class OutgoingCreateRequestDto implements ELQRData {
 
     /**
      * Transaction ID from the Operator's system

@@ -3,6 +3,7 @@ package kg.demirbank.psp.dto.outgoing.request;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
+import kg.demirbank.psp.dto.common.ELQRData;
 import kg.demirbank.psp.dto.common.KeyValueDto;
 import lombok.Data;
 
@@ -13,7 +14,7 @@ import java.util.List;
  * Used when PSP acts as sender sending check requests to Operator
  */
 @Data
-public class OutgoingCheckRequestDto {
+public class OutgoingCheckRequestDto implements ELQRData {
     /**
      * Payment link type, Field ID=01 from QR
      */

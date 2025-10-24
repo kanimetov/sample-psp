@@ -1,76 +1,9 @@
 # Runtime Documentation Rules
 
 ## Language Requirement
+
 **ALL runtime documentation MUST be written in English**
 
-### Scope
-This rule applies to ALL files in `docs/internal/runtime/` directory:
-- Configuration documentation
-- Observability and monitoring
-- Logging documentation
-- Operational procedures
-- Deployment guides
-- Performance documentation
+This applies to ALL files in `docs/internal/runtime/` directory.
 
-### Specific Requirements
-
-#### 1. Configuration Documentation
-- All configuration parameters in English
-- Environment variable descriptions in English
-- Configuration examples with English comments
-- Default values and descriptions in English
-
-#### 2. Observability Documentation
-- Monitoring setup in English
-- Alert configuration in English
-- Metrics documentation in English
-- Dashboard descriptions in English
-
-#### 3. Logging Documentation
-- Log format specifications in English
-- Log level descriptions in English
-- Structured logging examples in English
-- Log analysis guides in English
-
-#### 4. Operational Procedures
-- Deployment steps in English
-- Troubleshooting guides in English
-- Maintenance procedures in English
-- Backup and recovery in English
-
-### Examples
-
-#### ✅ Correct
-```markdown
-# Structured Logging
-
-## Log Format
-The system uses JSON format for structured logging.
-
-### Example Log Entry
-```json
-{
-  "timestamp": "2024-01-15T10:30:00Z",
-  "level": "INFO",
-  "message": "Operation started",
-  "correlationId": "req-12345",
-  "pspTransactionId": "tx-67890",
-  "operationType": "CHECK",
-  "transferDirection": "IN"
-}
-```
-```
-
-#### ❌ Incorrect
-```markdown
-# Структурированное логирование
-
-## Формат логов
-Система использует JSON формат для структурированного логирования.
-```
-
-### Enforcement
-- All runtime documentation must be in English
-- Configuration examples must use English comments
-- Log examples must use English field names
-- Operational procedures must be in English
+**No exceptions. Everything must be in English.**

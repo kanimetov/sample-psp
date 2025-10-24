@@ -16,8 +16,6 @@ import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -33,19 +31,15 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
     
     @Override
     public Mono<IncomingCheckResponseDto> checkTransaction(IncomingCheckRequestDto request) {
+        String pspTransactionId = UUID.randomUUID().toString();
+        
         // Set transaction context for logging
-        LoggingUtil.setTransactionContext(null, null, null, 
-                request.getMerchantProvider(), request.getMerchantCode(), request.getQrType());
-        LoggingUtil.setOperationContext("CHECK_TRANSACTION", null, 
-                request.getAmount(), request.getCurrencyCode(), null);
+        LoggingUtil.setTransactionContext(pspTransactionId, null, null, "CHECK", 
+                "IN", request.getMerchantCode(), 
+                request.getAmount(), null);
         
-        // Create properties for structured logging
-        Map<String, Object> properties = LoggingUtil.createTransactionProperties(
-                null, null, null, request.getMerchantProvider(), 
-                request.getMerchantCode(), request.getQrType(), 
-                request.getAmount(), request.getCurrencyCode());
-        
-        LoggingUtil.logOperationStart("CHECK_TRANSACTION", properties);
+        LoggingUtil.logOperationStart("CHECK", pspTransactionId, 
+                "IN", request.getMerchantCode());
         
         return Mono.fromCallable(() -> {
             // Business logic validation
@@ -60,10 +54,7 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
             response.setTransactionType(transactionType);
             
             // Log successful response
-            Map<String, Object> responseProperties = new HashMap<>(properties);
-            responseProperties.put("beneficiaryName", beneficiaryName);
-            responseProperties.put("transactionType", transactionType);
-            LoggingUtil.logOperationSuccess("CHECK_TRANSACTION", responseProperties);
+            LoggingUtil.logOperationSuccess("CHECK", pspTransactionId, null, "SUCCESS");
             
             return response;
         })
@@ -71,27 +62,21 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
             // Log error with structured data - no stack trace for business errors
             String errorCode = getErrorCode(error);
             String errorMessage = error.getMessage();
-            LoggingUtil.setErrorContext(errorCode, errorMessage);
-            LoggingUtil.logError("CHECK_TRANSACTION", errorCode, errorMessage, error, properties);
+            LoggingUtil.logError("CHECK", pspTransactionId, errorCode, errorMessage, error);
         });
     }
     
     @Override
     public Mono<IncomingTransactionResponseDto> createTransaction(IncomingCreateRequestDto request) {
+        String pspTransactionId = UUID.randomUUID().toString();
+        
         // Set transaction context for logging
-        LoggingUtil.setTransactionContext(request.getTransactionId().toString(), request.getSenderTransactionId(), 
-                request.getSenderReceiptId(), request.getMerchantProvider(), 
-                request.getMerchantCode(), request.getQrType());
-        LoggingUtil.setOperationContext("CREATE_TRANSACTION", "10", 
-                request.getAmount(), request.getCurrencyCode(), null);
+        LoggingUtil.setTransactionContext(pspTransactionId, request.getTransactionId().toString(), 
+                request.getSenderReceiptId(), "CREATE", "IN", 
+                request.getMerchantCode(), request.getAmount(), "CREATED");
         
-        // Create properties for structured logging
-        Map<String, Object> properties = LoggingUtil.createTransactionProperties(
-                request.getTransactionId().toString(), request.getSenderTransactionId(), request.getSenderReceiptId(),
-                request.getMerchantProvider(), request.getMerchantCode(), request.getQrType(), 
-                request.getAmount(), request.getCurrencyCode());
-        
-        LoggingUtil.logOperationStart("CREATE_TRANSACTION", properties);
+        LoggingUtil.logOperationStart("CREATE", pspTransactionId, 
+                "IN", request.getMerchantCode());
         
         return Mono.fromCallable(() -> {
             // Business logic validation
@@ -113,11 +98,7 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
             response.setExecutedDate(null);
             
             // Log successful response
-            Map<String, Object> responseProperties = new HashMap<>(properties);
-            responseProperties.put("generatedTransactionId", transactionId);
-            responseProperties.put("status", "10");
-            responseProperties.put("beneficiaryName", "Sample Beneficiary");
-            LoggingUtil.logOperationSuccess("CREATE_TRANSACTION", responseProperties);
+            LoggingUtil.logOperationSuccess("CREATE", pspTransactionId, transactionId, "CREATED");
             
             return response;
         })
@@ -125,24 +106,19 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
             // Log error with structured data - no stack trace for business errors
             String errorCode = getErrorCode(error);
             String errorMessage = error.getMessage();
-            LoggingUtil.setErrorContext(errorCode, errorMessage);
-            LoggingUtil.logError("CREATE_TRANSACTION", errorCode, errorMessage, error, properties);
+            LoggingUtil.logError("CREATE", pspTransactionId, errorCode, errorMessage, error);
         });
     }
     
     @Override
     public Mono<IncomingTransactionResponseDto> executeTransaction(String transactionId) {
+        String pspTransactionId = UUID.randomUUID().toString();
+        
         // Set transaction context for logging
-        LoggingUtil.setTransactionContext(transactionId, null, null, null, null, null);
-        LoggingUtil.setOperationContext("EXECUTE_TRANSACTION", "20", 
-                40000L, "417", null);
+        LoggingUtil.setTransactionContext(pspTransactionId, transactionId, null, "EXECUTE", 
+                "IN", null, 40000L, "IN_PROCESS");
         
-        // Create properties for structured logging
-        Map<String, Object> properties = new HashMap<>();
-        properties.put("transactionId", transactionId);
-        properties.put("operationType", "EXECUTE_TRANSACTION");
-        
-        LoggingUtil.logOperationStart("EXECUTE_TRANSACTION", properties);
+        LoggingUtil.logOperationStart("EXECUTE", pspTransactionId, "IN", null);
         
         return Mono.fromCallable(() -> {
             // Validate transaction ID
@@ -162,13 +138,7 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
             response.setExecutedDate(LocalDateTime.now().format(ISO_DATE_TIME) + "Z");
             
             // Log successful response
-            Map<String, Object> responseProperties = new HashMap<>(properties);
-            responseProperties.put("status", "20");
-            responseProperties.put("amount", 40000L);
-            responseProperties.put("beneficiaryName", "c***e A***o");
-            responseProperties.put("customerType", "1");
-            responseProperties.put("receiptId", "7218199");
-            LoggingUtil.logOperationSuccess("EXECUTE_TRANSACTION", responseProperties);
+            LoggingUtil.logOperationSuccess("EXECUTE", pspTransactionId, transactionId, "IN_PROCESS");
             
             return response;
         })
@@ -176,26 +146,19 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
             // Log error with structured data - no stack trace for business errors
             String errorCode = getErrorCode(error);
             String errorMessage = error.getMessage();
-            LoggingUtil.setErrorContext(errorCode, errorMessage);
-            LoggingUtil.logError("EXECUTE_TRANSACTION", errorCode, errorMessage, error, properties);
+            LoggingUtil.logError("EXECUTE", pspTransactionId, errorCode, errorMessage, error);
         });
     }
     
     @Override
     public Mono<Void> updateTransaction(String transactionId, UpdateDto updateRequest) {
+        String pspTransactionId = UUID.randomUUID().toString();
+        
         // Set transaction context for logging
-        LoggingUtil.setTransactionContext(transactionId, null, null, null, null, null);
-        LoggingUtil.setOperationContext("UPDATE_TRANSACTION", updateRequest.getStatus().name(), 
-                null, null, null);
+        LoggingUtil.setTransactionContext(pspTransactionId, transactionId, null, "UPDATE", 
+                "IN", null, null, updateRequest.getStatus().name());
         
-        // Create properties for structured logging
-        Map<String, Object> properties = new HashMap<>();
-        properties.put("transactionId", transactionId);
-        properties.put("operationType", "UPDATE_TRANSACTION");
-        properties.put("newStatus", updateRequest.getStatus().name());
-        properties.put("updateDate", updateRequest.getUpdateDate());
-        
-        LoggingUtil.logOperationStart("UPDATE_TRANSACTION", properties);
+        LoggingUtil.logOperationStart("UPDATE", pspTransactionId, "IN", null);
         
         return Mono.fromCallable(() -> {
             // Validate transaction ID
@@ -207,17 +170,16 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
             validateUpdateRequest(updateRequest);
             
             // Simulate transaction update
-            LoggingUtil.logAuditTrail("UPDATE_TRANSACTION", "TRANSACTION", transactionId, properties);
+            LoggingUtil.logAuditTrail("UPDATE", pspTransactionId, "Transaction updated");
             return null; // Return null for Void
         })
         .then()
-        .doOnSuccess(unused -> LoggingUtil.logOperationSuccess("UPDATE_TRANSACTION", properties))
+        .doOnSuccess(__ -> LoggingUtil.logOperationSuccess("UPDATE", pspTransactionId, transactionId, updateRequest.getStatus().name()))
         .doOnError(error -> {
             // Log error with structured data - no stack trace for business errors
             String errorCode = getErrorCode(error);
             String errorMessage = error.getMessage();
-            LoggingUtil.setErrorContext(errorCode, errorMessage);
-            LoggingUtil.logError("UPDATE_TRANSACTION", errorCode, errorMessage, error, properties);
+            LoggingUtil.logError("UPDATE", pspTransactionId, errorCode, errorMessage, error);
         });
     }
     
@@ -227,53 +189,21 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
     private void validateCheckRequest(IncomingCheckRequestDto request) {
         // Validate amount limits
         if (request.getAmount() < 100) {
-            LoggingUtil.logBusinessValidation("AMOUNT_VALIDATION", false, 
-                    "Amount below minimum: " + request.getAmount(), 
-                    LoggingUtil.createTransactionProperties(null, null, null, 
-                            request.getMerchantProvider(), request.getMerchantCode(), 
-                            request.getQrType(), request.getAmount(), 
-                            request.getCurrencyCode()));
             throw new MinAmountNotValidException("Minimum amount is 100");
         }
         if (request.getAmount() > 1000000) {
-            LoggingUtil.logBusinessValidation("AMOUNT_VALIDATION", false, 
-                    "Amount above maximum: " + request.getAmount(), 
-                    LoggingUtil.createTransactionProperties(null, null, null, 
-                            request.getMerchantProvider(), request.getMerchantCode(), 
-                            request.getQrType(), request.getAmount(), 
-                            request.getCurrencyCode()));
             throw new MaxAmountNotValidException("Maximum amount is 1000000");
         }
         
         // Validate merchant code
         if (request.getMerchantCode() < 0 || request.getMerchantCode() > 9999) {
-            LoggingUtil.logBusinessValidation("MERCHANT_CODE_VALIDATION", false, 
-                    "Invalid merchant code: " + request.getMerchantCode(), 
-                    LoggingUtil.createTransactionProperties(null, null, null, 
-                            request.getMerchantProvider(), request.getMerchantCode(), 
-                            request.getQrType(), request.getAmount(), 
-                            request.getCurrencyCode()));
             throw new IncorrectRequestDataException("Merchant code must be between 0 and 9999");
         }
         
         // Validate currency code
         if (!"417".equals(request.getCurrencyCode())) {
-            LoggingUtil.logBusinessValidation("CURRENCY_VALIDATION", false, 
-                    "Unsupported currency: " + request.getCurrencyCode(), 
-                    LoggingUtil.createTransactionProperties(null, null, null, 
-                            request.getMerchantProvider(), request.getMerchantCode(), 
-                            request.getQrType(), request.getAmount(), 
-                            request.getCurrencyCode()));
             throw new IncorrectRequestDataException("Only KGS currency (417) is supported");
         }
-        
-        // Log successful validation
-        LoggingUtil.logBusinessValidation("CHECK_REQUEST_VALIDATION", true, 
-                "All validations passed", 
-                LoggingUtil.createTransactionProperties(null, null, null, 
-                        request.getMerchantProvider(), request.getMerchantCode(), 
-                        request.getQrType(), request.getAmount(), 
-                        request.getCurrencyCode()));
     }
     
     /**

@@ -15,8 +15,6 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -27,17 +25,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class GlobalExceptionHandler {
     
-    /**
-     * Create properties map for exception logging
-     */
-    private Map<String, Object> createExceptionProperties(Exception ex, ServerWebExchange exchange) {
-        Map<String, Object> properties = new HashMap<>();
-        properties.put("exceptionType", ex.getClass().getSimpleName());
-        properties.put("path", exchange.getRequest().getPath().value());
-        properties.put("method", exchange.getRequest().getMethod().name());
-        properties.put("uri", exchange.getRequest().getURI().toString());
-        return properties;
-    }
 
     /**
      * Handle all PSP custom exceptions
@@ -69,8 +56,7 @@ public class GlobalExceptionHandler {
             BadRequestException ex,
             ServerWebExchange exchange) {
         
-        Map<String, Object> properties = createExceptionProperties(ex, exchange);
-        LoggingUtil.logError("GLOBAL_EXCEPTION_HANDLER", "BAD_REQUEST", ex.getMessage(), ex, properties);
+        LoggingUtil.logError("GLOBAL_EXCEPTION_HANDLER", null, "BAD_REQUEST", ex.getMessage(), ex);
         
         ErrorResponseDto errorResponse = ErrorResponseDto.builder()
                 .code(400)
@@ -208,8 +194,7 @@ public class GlobalExceptionHandler {
             MinAmountNotValidException ex,
             ServerWebExchange exchange) {
         
-        Map<String, Object> properties = createExceptionProperties(ex, exchange);
-        LoggingUtil.logError("GLOBAL_EXCEPTION_HANDLER", "MIN_AMOUNT_INVALID", ex.getMessage(), ex, properties);
+        LoggingUtil.logError("GLOBAL_EXCEPTION_HANDLER", null, "MIN_AMOUNT_INVALID", ex.getMessage(), ex);
         
         ErrorResponseDto errorResponse = ErrorResponseDto.builder()
                 .code(455)
@@ -255,8 +240,7 @@ public class GlobalExceptionHandler {
             SystemErrorException ex,
             ServerWebExchange exchange) {
         
-        Map<String, Object> properties = createExceptionProperties(ex, exchange);
-        LoggingUtil.logError("GLOBAL_EXCEPTION_HANDLER", "SYSTEM_ERROR", ex.getMessage(), ex, properties);
+        LoggingUtil.logError("GLOBAL_EXCEPTION_HANDLER", null, "SYSTEM_ERROR", ex.getMessage(), ex);
         
         ErrorResponseDto errorResponse = ErrorResponseDto.builder()
                 .code(500)
@@ -500,8 +484,7 @@ public class GlobalExceptionHandler {
             SignatureVerificationException ex,
             ServerWebExchange exchange) {
         
-        Map<String, Object> properties = createExceptionProperties(ex, exchange);
-        LoggingUtil.logError("GLOBAL_EXCEPTION_HANDLER", "SIGNATURE_VERIFICATION_FAILED", ex.getMessage(), ex, properties);
+        LoggingUtil.logError("GLOBAL_EXCEPTION_HANDLER", null, "SIGNATURE_VERIFICATION_FAILED", ex.getMessage(), ex);
         
         ErrorResponseDto errorResponse = ErrorResponseDto.builder()
                 .code(403)
@@ -524,8 +507,7 @@ public class GlobalExceptionHandler {
             Exception ex,
             ServerWebExchange exchange) {
         
-        Map<String, Object> properties = createExceptionProperties(ex, exchange);
-        LoggingUtil.logError("GLOBAL_EXCEPTION_HANDLER", "UNEXPECTED_ERROR", ex.getMessage(), ex, properties);
+        LoggingUtil.logError("GLOBAL_EXCEPTION_HANDLER", null, "UNEXPECTED_ERROR", ex.getMessage(), ex);
         
         ErrorResponseDto errorResponse = ErrorResponseDto.builder()
                 .code(500)

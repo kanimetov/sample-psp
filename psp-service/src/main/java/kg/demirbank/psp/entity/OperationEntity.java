@@ -216,11 +216,6 @@ public class OperationEntity {
     @Column(name = "updated_by", length = 50)
     private String updatedBy;
 
-    @Column(name = "ip_address", length = 45)
-    private String ipAddress;
-
-    @Column(name = "user_agent", length = 500)
-    private String userAgent;
 
     // Constructors
     public OperationEntity() {}
@@ -506,21 +501,6 @@ public class OperationEntity {
         this.updatedBy = updatedBy;
     }
 
-    public String getIpAddress() {
-        return ipAddress;
-    }
-
-    public void setIpAddress(String ipAddress) {
-        this.ipAddress = ipAddress;
-    }
-
-    public String getUserAgent() {
-        return userAgent;
-    }
-
-    public void setUserAgent(String userAgent) {
-        this.userAgent = userAgent;
-    }
 
     @Override
     public boolean equals(Object o) {

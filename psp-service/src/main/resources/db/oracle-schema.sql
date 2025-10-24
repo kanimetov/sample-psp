@@ -38,8 +38,6 @@ CREATE TABLE operations (
     is_final NUMBER(1) NOT NULL DEFAULT 0,
     created_by VARCHAR2(50),
     updated_by VARCHAR2(50),
-    ip_address VARCHAR2(45),
-    user_agent VARCHAR2(500),
     CONSTRAINT pk_operations PRIMARY KEY (id),
     CONSTRAINT uk_operations_psp_transaction_id UNIQUE (psp_transaction_id),
     CONSTRAINT uk_operations_transaction_id UNIQUE (transaction_id),

@@ -18,9 +18,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * Incoming controller handles:
  * 1. External API from clients (PSP external endpoints)
@@ -44,18 +41,8 @@ public class IncomingController {
             @RequestHeader(name = "H-HASH", required = false) String hash,
             @RequestBody String rawBody) {
         
-        long startTime = System.currentTimeMillis();
-        
-        // Set operation context
-        LoggingUtil.setOperationContext("CHECK_TRANSACTION", null, null, null, version);
-        
-        // Create properties for structured logging
-        Map<String, Object> properties = new HashMap<>();
-        properties.put("operationType", "CHECK_TRANSACTION");
-        properties.put("apiVersion", version);
-        properties.put("uri", "/in/qr/" + version + "/tx/check");
-        
-        LoggingUtil.logOperationStart("CHECK_TRANSACTION", properties);
+        // Generate correlation ID for this request
+        LoggingUtil.generateAndSetCorrelationId();
         
         // Verify signature first
         byte[] bodyBytes = rawBody.getBytes(java.nio.charset.StandardCharsets.UTF_8);
@@ -65,11 +52,8 @@ public class IncomingController {
                 signatureService.verifySignatureWithDetails(bodyBytes, hash, uri);
         
         if (!verificationResult.isSuccess()) {
-            LoggingUtil.logSignatureVerification(false, verificationResult.getErrorMessage(), properties);
             return Mono.error(new SignatureVerificationException(verificationResult.getErrorMessage()));
         }
-        
-        LoggingUtil.logSignatureVerification(true, "Signature verified successfully", properties);
         
         // Deserialize JSON after successful signature verification
         IncomingCheckRequestDto body = jsonUtil.fromJson(rawBody, IncomingCheckRequestDto.class);
@@ -77,31 +61,10 @@ public class IncomingController {
         // Validate DTO using utility method
         validationUtil.validateDto(body);
         
-        // Add request properties to logging context
-        Map<String, Object> requestProperties = new HashMap<>(properties);
-        requestProperties.put("merchantProvider", body.getMerchantProvider());
-        requestProperties.put("merchantCode", body.getMerchantCode());
-        requestProperties.put("qrType", body.getQrType());
-        requestProperties.put("amount", body.getAmount());
-        requestProperties.put("currencyCode", body.getCurrencyCode());
-        
-        LoggingUtil.logOperationStart("CHECK_TRANSACTION", requestProperties);
-        
         // Process the request using business service
         return incomingService.checkTransaction(body)
-                .map(response -> {
-                    long responseTime = System.currentTimeMillis() - startTime;
-                    LoggingUtil.setResponseTime(responseTime);
-                    LoggingUtil.logOperationSuccess("CHECK_TRANSACTION", requestProperties);
-                    return ResponseEntity.ok(response);
-                })
-                .onErrorResume(e -> {
-                    long responseTime = System.currentTimeMillis() - startTime;
-                    LoggingUtil.setResponseTime(responseTime);
-                    LoggingUtil.logError("CHECK_TRANSACTION", "CONTROLLER_ERROR", 
-                            e.getMessage(), e, requestProperties);
-                    return Mono.error(e); // Let GlobalExceptionHandler handle it
-                });
+                .map(ResponseEntity::ok)
+                .onErrorResume(e -> Mono.error(e)); // Let GlobalExceptionHandler handle it
     }
 
     @PostMapping("/in/qr/{version}/tx/create")
@@ -110,18 +73,8 @@ public class IncomingController {
             @RequestHeader(name = "H-HASH", required = false) String hash,
             @RequestBody String rawBody) {
         
-        long startTime = System.currentTimeMillis();
-        
-        // Set operation context
-        LoggingUtil.setOperationContext("CREATE_TRANSACTION", null, null, null, version);
-        
-        // Create properties for structured logging
-        Map<String, Object> properties = new HashMap<>();
-        properties.put("operationType", "CREATE_TRANSACTION");
-        properties.put("apiVersion", version);
-        properties.put("uri", "/in/qr/" + version + "/tx/create");
-        
-        LoggingUtil.logOperationStart("CREATE_TRANSACTION", properties);
+        // Generate correlation ID for this request
+        LoggingUtil.generateAndSetCorrelationId();
         
         // Verify signature first
         byte[] bodyBytes = rawBody.getBytes(java.nio.charset.StandardCharsets.UTF_8);
@@ -131,11 +84,8 @@ public class IncomingController {
                 signatureService.verifySignatureWithDetails(bodyBytes, hash, uri);
         
         if (!verificationResult.isSuccess()) {
-            LoggingUtil.logSignatureVerification(false, verificationResult.getErrorMessage(), properties);
             return Mono.error(new SignatureVerificationException(verificationResult.getErrorMessage()));
         }
-        
-        LoggingUtil.logSignatureVerification(true, "Signature verified successfully", properties);
         
         // Deserialize JSON after successful signature verification
         IncomingCreateRequestDto body = jsonUtil.fromJson(rawBody, IncomingCreateRequestDto.class);
@@ -143,34 +93,10 @@ public class IncomingController {
         // Validate DTO using utility method
         validationUtil.validateDto(body);
         
-        // Add request properties to logging context
-        Map<String, Object> requestProperties = new HashMap<>(properties);
-        requestProperties.put("transactionId", body.getTransactionId());
-        requestProperties.put("senderTransactionId", body.getSenderTransactionId());
-        requestProperties.put("senderReceiptId", body.getSenderReceiptId());
-        requestProperties.put("merchantProvider", body.getMerchantProvider());
-        requestProperties.put("merchantCode", body.getMerchantCode());
-        requestProperties.put("qrType", body.getQrType());
-        requestProperties.put("amount", body.getAmount());
-        requestProperties.put("currencyCode", body.getCurrencyCode());
-        
-        LoggingUtil.logOperationStart("CREATE_TRANSACTION", requestProperties);
-        
         // Process the request using business service
         return incomingService.createTransaction(body)
-                .map(response -> {
-                    long responseTime = System.currentTimeMillis() - startTime;
-                    LoggingUtil.setResponseTime(responseTime);
-                    LoggingUtil.logOperationSuccess("CREATE_TRANSACTION", requestProperties);
-                    return ResponseEntity.ok(response);
-                })
-                .onErrorResume(e -> {
-                    long responseTime = System.currentTimeMillis() - startTime;
-                    LoggingUtil.setResponseTime(responseTime);
-                    LoggingUtil.logError("CREATE_TRANSACTION", "CONTROLLER_ERROR", 
-                            e.getMessage(), e, requestProperties);
-                    return Mono.error(e); // Let GlobalExceptionHandler handle it
-                });
+                .map(ResponseEntity::ok)
+                .onErrorResume(e -> Mono.error(e)); // Let GlobalExceptionHandler handle it
     }
 
     @PostMapping("/in/qr/{version}/tx/execute/{transactionId}")
@@ -179,20 +105,8 @@ public class IncomingController {
             @PathVariable String transactionId,
             @RequestHeader(name = "H-HASH", required = false) String hash) {
         
-        long startTime = System.currentTimeMillis();
-        
-        // Set operation context
-        LoggingUtil.setOperationContext("EXECUTE_TRANSACTION", null, null, null, version);
-        LoggingUtil.setTransactionContext(transactionId, null, null, null, null, null);
-        
-        // Create properties for structured logging
-        Map<String, Object> properties = new HashMap<>();
-        properties.put("operationType", "EXECUTE_TRANSACTION");
-        properties.put("apiVersion", version);
-        properties.put("transactionId", transactionId);
-        properties.put("uri", "/in/qr/" + version + "/tx/execute/" + transactionId);
-        
-        LoggingUtil.logOperationStart("EXECUTE_TRANSACTION", properties);
+        // Generate correlation ID for this request
+        LoggingUtil.generateAndSetCorrelationId();
         
         // Verify signature for URI (no body for this request)
         String uri = "/in/qr/" + version + "/tx/execute/" + transactionId;
@@ -201,27 +115,13 @@ public class IncomingController {
                 signatureService.verifySignatureWithDetails(null, hash, uri);
         
         if (!verificationResult.isSuccess()) {
-            LoggingUtil.logSignatureVerification(false, verificationResult.getErrorMessage(), properties);
             return Mono.error(new SignatureVerificationException(verificationResult.getErrorMessage()));
         }
         
-        LoggingUtil.logSignatureVerification(true, "Signature verified successfully", properties);
-        
         // Process the request using business service
         return incomingService.executeTransaction(transactionId)
-                .map(response -> {
-                    long responseTime = System.currentTimeMillis() - startTime;
-                    LoggingUtil.setResponseTime(responseTime);
-                    LoggingUtil.logOperationSuccess("EXECUTE_TRANSACTION", properties);
-                    return ResponseEntity.ok(response);
-                })
-                .onErrorResume(e -> {
-                    long responseTime = System.currentTimeMillis() - startTime;
-                    LoggingUtil.setResponseTime(responseTime);
-                    LoggingUtil.logError("EXECUTE_TRANSACTION", "CONTROLLER_ERROR", 
-                            e.getMessage(), e, properties);
-                    return Mono.error(e); // Let GlobalExceptionHandler handle it
-                });
+                .map(ResponseEntity::ok)
+                .onErrorResume(e -> Mono.error(e)); // Let GlobalExceptionHandler handle it
     }
 
     @PostMapping("/in/qr/{version}/tx/update/{transactionId}")
@@ -231,8 +131,6 @@ public class IncomingController {
             @RequestHeader(name = "H-HASH", required = false) String hash,
             @RequestBody String rawBody) {
         
-        long startTime = System.currentTimeMillis();
-        
         if (version == null || version.isBlank()) {
             return Mono.error(new BadRequestException("QR version not specified"));
         }
@@ -240,18 +138,8 @@ public class IncomingController {
             return Mono.error(new BadRequestException("Transaction ID not specified"));
         }
         
-        // Set operation context
-        LoggingUtil.setOperationContext("UPDATE_TRANSACTION", null, null, null, version);
-        LoggingUtil.setTransactionContext(transactionId, null, null, null, null, null);
-        
-        // Create properties for structured logging
-        Map<String, Object> properties = new HashMap<>();
-        properties.put("operationType", "UPDATE_TRANSACTION");
-        properties.put("apiVersion", version);
-        properties.put("transactionId", transactionId);
-        properties.put("uri", "/in/qr/" + version + "/tx/update/" + transactionId);
-        
-        LoggingUtil.logOperationStart("UPDATE_TRANSACTION", properties);
+        // Generate correlation ID for this request
+        LoggingUtil.generateAndSetCorrelationId();
         
         // Verify signature first
         byte[] bodyBytes = rawBody.getBytes(java.nio.charset.StandardCharsets.UTF_8);
@@ -261,11 +149,8 @@ public class IncomingController {
                 signatureService.verifySignatureWithDetails(bodyBytes, hash, uri);
         
         if (!verificationResult.isSuccess()) {
-            LoggingUtil.logSignatureVerification(false, verificationResult.getErrorMessage(), properties);
             return Mono.error(new SignatureVerificationException(verificationResult.getErrorMessage()));
         }
-        
-        LoggingUtil.logSignatureVerification(true, "Signature verified successfully", properties);
         
         // Deserialize JSON after successful signature verification
         UpdateDto body = jsonUtil.fromJson(rawBody, UpdateDto.class);
@@ -273,28 +158,9 @@ public class IncomingController {
         // Validate DTO using utility method
         validationUtil.validateDto(body);
         
-        // Add request properties to logging context
-        Map<String, Object> requestProperties = new HashMap<>(properties);
-        requestProperties.put("newStatus", body.getStatus().name());
-        requestProperties.put("updateDate", body.getUpdateDate());
-        
-        LoggingUtil.logOperationStart("UPDATE_TRANSACTION", requestProperties);
-        
         // Process the request using business service - ACK response (200 OK empty body)
         return incomingService.updateTransaction(transactionId, body)
                 .then(Mono.just(ResponseEntity.ok("OK")))
-                .doOnSuccess(unused -> {
-                    long responseTime = System.currentTimeMillis() - startTime;
-                    LoggingUtil.setResponseTime(responseTime);
-                    LoggingUtil.logOperationSuccess("UPDATE_TRANSACTION", requestProperties);
-                })
-                .onErrorResume(e -> {
-                    long responseTime = System.currentTimeMillis() - startTime;
-                    LoggingUtil.setResponseTime(responseTime);
-                    LoggingUtil.logError("UPDATE_TRANSACTION", "CONTROLLER_ERROR", 
-                            e.getMessage(), e, requestProperties);
-                    return Mono.error(e);
-                });
+                .onErrorResume(e -> Mono.error(e));
     }
 }
-

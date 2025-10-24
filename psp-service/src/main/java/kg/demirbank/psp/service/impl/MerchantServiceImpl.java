@@ -10,6 +10,7 @@ import kg.demirbank.psp.service.BankService;
 import kg.demirbank.psp.service.MerchantService;
 import kg.demirbank.psp.service.OperatorService;
 import kg.demirbank.psp.service.clients.QrDecoderClient;
+import kg.demirbank.psp.util.LoggingUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -55,12 +56,19 @@ public class MerchantServiceImpl implements MerchantService {
                         return operatorService.checkQrPayment(request);
                     }
                 })
-                .onErrorMap(Exception.class, e -> {
-                    log.error("Error during QR check: {}", e.getMessage(), e);
-                    if (e instanceof PspException) {
-                        return e;
+                .onErrorMap(throwable -> {
+                    // Log error with structured data - no stack trace for business errors
+                    boolean isPspException = throwable instanceof PspException;
+                    String errorMessage = throwable.getMessage();
+                    String errorCode = isPspException ? 
+                        ((PspException) throwable).getCode().toString() : "UNKNOWN_ERROR";
+                    LoggingUtil.logError("QR_CHECK", null, errorCode, errorMessage, throwable);
+                    
+                    if (isPspException) {
+                        return throwable; // Preserve original PspException
                     }
-                    return new SystemErrorException("Failed to process QR check request");
+                    log.error("Unexpected error during QR check: {}", throwable.getMessage(), throwable);
+                    return new SystemErrorException("Failed to process QR check request", throwable);
                 });
     }
     
@@ -87,12 +95,19 @@ public class MerchantServiceImpl implements MerchantService {
                         return operatorService.makePayment(request);
                     }
                 })
-                .onErrorMap(Exception.class, e -> {
-                    log.error("Error during payment: {}", e.getMessage(), e);
-                    if (e instanceof PspException) {
-                        return e;
+                .onErrorMap(throwable -> {
+                    // Log error with structured data - no stack trace for business errors
+                    boolean isPspException = throwable instanceof PspException;
+                    String errorMessage = throwable.getMessage();
+                    String errorCode = isPspException ? 
+                        ((PspException) throwable).getCode().toString() : "UNKNOWN_ERROR";
+                    LoggingUtil.logError("MAKE_PAYMENT", null, errorCode, errorMessage, throwable);
+                    
+                    if (isPspException) {
+                        return throwable; // Preserve original PspException
                     }
-                    return new SystemErrorException("Failed to process payment request");
+                    log.error("Unexpected error during payment: {}", throwable.getMessage(), throwable);
+                    return new SystemErrorException("Failed to process payment request", throwable);
                 });
     }
     

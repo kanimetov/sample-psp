@@ -6,12 +6,19 @@ All strings UTF‑8; numbers are integers unless specified otherwise. Amounts in
 
 ## DTO Consolidation
 
-The response DTOs have been consolidated to eliminate code duplication and improve maintainability:
+The DTOs have been consolidated and renamed to eliminate code duplication and improve maintainability:
 
+### Response DTOs:
 - **IncomingTransactionResponseDto**: Consolidates `CreateResponseDto`, `ExecuteResponseDto`, and `StatusDto` for incoming operations
 - **OutgoingTransactionResponseDto**: Consolidates `CreateResponseDto`, `ExecuteResponseDto`, and `StatusDto` for outgoing operations  
 - **IncomingCheckResponseDto**: Renamed from `CheckResponseDto` for incoming check operations
 - **OutgoingCheckResponseDto**: Renamed from `CheckResponseDto` for outgoing check operations
+
+### Request DTOs:
+- **IncomingCheckRequestDto**: Renamed from `CheckRequestDto` for incoming check operations
+- **IncomingCreateRequestDto**: Renamed from `CreateRequestDto` for incoming create operations
+- **OutgoingCheckRequestDto**: Renamed from `CheckRequestDto` for outgoing check operations
+- **OutgoingCreateRequestDto**: Renamed from `CreateRequestDto` for outgoing create operations
 
 This consolidation maintains full backward compatibility while providing clearer naming conventions that indicate the direction of data flow.
 
@@ -24,15 +31,15 @@ kg.demirbank.psp.dto/
 │   └── UpdateDto.java         - Bidirectional DTO for update operations
 ├── incoming/
 │   ├── request/
-│   │   ├── CheckRequestDto.java   - Request for check operation
-│   │   └── CreateRequestDto.java  - Request for create operation
+│   │   ├── IncomingCheckRequestDto.java   - Request for check operation
+│   │   └── IncomingCreateRequestDto.java  - Request for create operation
 │   └── response/
 │       ├── IncomingCheckResponseDto.java      - Response for check operation
 │       └── IncomingTransactionResponseDto.java - Response for create/execute/status operations
 └── outgoing/
     ├── request/
-    │   ├── CheckRequestDto.java   - Request for check operation
-    │   └── CreateRequestDto.java  - Request for create operation
+    │   ├── OutgoingCheckRequestDto.java   - Request for check operation
+    │   └── OutgoingCreateRequestDto.java  - Request for create operation
     └── response/
         ├── OutgoingCheckResponseDto.java      - Response for check operation
         └── OutgoingTransactionResponseDto.java - Response for create/execute/status operations
@@ -158,8 +165,8 @@ kg.demirbank.psp.dto/
 
 | Operation | Endpoint | Request DTO | Response DTO |
 |----------|----------|-------------|--------------|
-| Check | POST /in/qr/{v}/tx/check | CheckRequestDto | IncomingCheckResponseDto |
-| Create | POST /in/qr/{v}/tx/create | CreateRequestDto | IncomingTransactionResponseDto |
+| Check | POST /in/qr/{v}/tx/check | IncomingCheckRequestDto | IncomingCheckResponseDto |
+| Create | POST /in/qr/{v}/tx/create | IncomingCreateRequestDto | IncomingTransactionResponseDto |
 | Execute | POST /in/qr/{v}/tx/execute/{id} | (empty) | IncomingTransactionResponseDto |
 | Update | POST /in/qr/{v}/tx/update/{id} | UpdateDto | ACK (200 OK) |
 
@@ -167,8 +174,8 @@ kg.demirbank.psp.dto/
 
 | Operation | Endpoint | Request DTO | Response DTO |
 |----------|----------|-------------|--------------|
-| Check | POST /psp/api/v1/payment/qr/{version}/tx/check | CheckRequestDto | OutgoingCheckResponseDto |
-| Create | POST /psp/api/v1/payment/qr/{version}/tx/create | CreateRequestDto | OutgoingTransactionResponseDto |
+| Check | POST /psp/api/v1/payment/qr/{version}/tx/check | OutgoingCheckRequestDto | OutgoingCheckResponseDto |
+| Create | POST /psp/api/v1/payment/qr/{version}/tx/create | OutgoingCreateRequestDto | OutgoingTransactionResponseDto |
 | Execute | POST /psp/api/v1/payment/qr/{version}/tx/execute/{id} | (empty) | OutgoingTransactionResponseDto |
 
 ### Architecture Note

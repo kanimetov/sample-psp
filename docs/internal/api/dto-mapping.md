@@ -13,15 +13,15 @@ kg.demirbank.psp.dto/
 │   └── UpdateDto.java         - Bidirectional DTO for update operations
 ├── incoming/
 │   ├── request/
-│   │   ├── CheckRequestDto.java   - Request for check operation
-│   │   └── CreateRequestDto.java  - Request for create operation
+│   │   ├── IncomingCheckRequestDto.java   - Request for check operation
+│   │   └── IncomingCreateRequestDto.java  - Request for create operation
 │   └── response/
 │       ├── IncomingCheckResponseDto.java      - Response for check operation
 │       └── IncomingTransactionResponseDto.java - Response for create/execute/status operations
 └── outgoing/
     ├── request/
-    │   ├── CheckRequestDto.java   - Request for check operation
-    │   └── CreateRequestDto.java  - Request for create operation
+    │   ├── OutgoingCheckRequestDto.java   - Request for check operation
+    │   └── OutgoingCreateRequestDto.java  - Request for create operation
     └── response/
         ├── OutgoingCheckResponseDto.java      - Response for check operation
         └── OutgoingTransactionResponseDto.java - Response for create/execute/status operations
@@ -29,12 +29,19 @@ kg.demirbank.psp.dto/
 
 ## DTO Consolidation
 
-The response DTOs have been consolidated to eliminate code duplication:
+The DTOs have been consolidated and renamed to eliminate code duplication:
 
+### Response DTOs:
 - **IncomingTransactionResponseDto**: Consolidates `CreateResponseDto`, `ExecuteResponseDto`, and `StatusDto` for incoming operations
 - **OutgoingTransactionResponseDto**: Consolidates `CreateResponseDto`, `ExecuteResponseDto`, and `StatusDto` for outgoing operations  
 - **IncomingCheckResponseDto**: Renamed from `CheckResponseDto` for incoming check operations
 - **OutgoingCheckResponseDto**: Renamed from `CheckResponseDto` for outgoing check operations
+
+### Request DTOs:
+- **IncomingCheckRequestDto**: Renamed from `CheckRequestDto` for incoming check operations
+- **IncomingCreateRequestDto**: Renamed from `CreateRequestDto` for incoming create operations
+- **OutgoingCheckRequestDto**: Renamed from `CheckRequestDto` for outgoing check operations
+- **OutgoingCreateRequestDto**: Renamed from `CreateRequestDto` for outgoing create operations
 
 ---
 
@@ -60,7 +67,7 @@ POST /psp/api/v1/payment/qr/{version}/tx/check
 **Path Parameters:**
 - `version: string` - QR protocol version (usually "1")
 
-**Request Body:** `CheckRequestDto`
+**Request Body:** `OutgoingCheckRequestDto`
 ```json
 {
   "qrType": "staticQr",
@@ -93,7 +100,7 @@ POST /psp/api/v1/payment/qr/{version}/tx/create
 
 **Headers:** (same as in check)
 
-**Request Body:** `CreateRequestDto`
+**Request Body:** `OutgoingCreateRequestDto`
 ```json
 {
   "transactionId": "tx-12345678",
@@ -177,7 +184,7 @@ POST /in/qr/{version}/tx/check
 **Headers:**
 - `H-HASH: string` (required) - JWS v2 signature of request body
 
-**Request Body:** `CheckRequestDto` (same as outgoing)
+**Request Body:** `OutgoingCheckRequestDto` (same as outgoing)
 
 **Response 200:** `OutgoingCheckResponseDto`
 
@@ -192,7 +199,7 @@ POST /in/qr/{version}/tx/create
 **Headers:**
 - `H-HASH: string` (required)
 
-**Request Body:** `CreateRequestDto`
+**Request Body:** `OutgoingCreateRequestDto`
 
 **Response 200:** `OutgoingTransactionResponseDto`
 

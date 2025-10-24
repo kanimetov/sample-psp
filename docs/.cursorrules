@@ -1,0 +1,86 @@
+# Documentation Rules for @docs/ Directory
+
+## Language Requirement
+**CRITICAL: ALL documentation in this directory MUST be written in English**
+
+### Scope
+This rule applies to ALL files in the `docs/` directory and its subdirectories:
+- `docs/internal/` - Internal technical documentation
+- `docs/external/` - External API documentation
+- All `.md` files
+- All `.txt` files
+- All `.rst` files
+- All other documentation formats
+
+### Requirements
+
+#### 1. Language Standards
+- **Primary Language:** English only
+- **Writing Style:** Professional, clear, and concise
+- **Audience:** International developers and stakeholders
+- **Tone:** Technical but accessible
+
+#### 2. Content Guidelines
+- Use proper English grammar and spelling
+- Write in active voice when possible
+- Use consistent terminology throughout
+- Include clear explanations and context
+- Provide practical examples
+
+#### 3. Structure Requirements
+- Use standard markdown formatting
+- Include proper headings hierarchy
+- Use consistent file naming (kebab-case)
+- Include table of contents for long documents
+- Add cross-references between related documents
+
+#### 4. Code Examples
+- All code comments must be in English
+- Variable names should be in English
+- API examples should use English field names
+- Include explanatory text for complex examples
+
+#### 5. Technical Terms
+- Use industry-standard English terminology
+- Define acronyms on first use
+- Maintain consistent naming conventions
+- Use proper technical vocabulary
+
+### Examples
+
+#### ✅ Correct (English)
+```markdown
+# API Reference
+
+## Authentication
+The API uses JWT tokens for authentication.
+
+### Request Example
+```json
+{
+  "username": "user@example.com",
+  "password": "securePassword"
+}
+```
+
+#### ❌ Incorrect (Non-English)
+```markdown
+# Справочник API
+
+## Аутентификация
+API использует JWT токены для аутентификации.
+```
+
+### Enforcement
+- All new documentation must be in English
+- Existing non-English documentation should be translated
+- Code reviews should check language compliance
+- Documentation updates must maintain English standard
+
+### Exceptions
+- None. All documentation must be in English.
+
+### Related Files
+- `.cursorrules` - Main project rules
+- `docs/internal/README.md` - Documentation structure
+- `docs/external/README.md` - External documentation guide

@@ -1,0 +1,81 @@
+# Internal Documentation Rules
+
+## Language Requirement
+**ALL internal documentation MUST be written in English**
+
+### Scope
+This rule applies to ALL files in `docs/internal/` directory:
+- Architecture documents
+- API specifications
+- Database schemas
+- Security documentation
+- Runtime configuration
+- Testing documentation
+- Compliance documentation
+
+### Specific Requirements
+
+#### 1. Technical Documentation
+- Use clear, professional English
+- Include proper technical terminology
+- Provide comprehensive explanations
+- Use consistent formatting
+
+#### 2. API Documentation
+- All endpoint descriptions in English
+- Request/response examples with English field names
+- Error codes and messages in English
+- Authentication and authorization in English
+
+#### 3. Database Documentation
+- Table and column descriptions in English
+- Migration scripts with English comments
+- Schema documentation in English
+- Data dictionary in English
+
+#### 4. Security Documentation
+- Security policies in English
+- Access control documentation in English
+- Encryption and key management in English
+- Audit trail documentation in English
+
+#### 5. Architecture Documentation
+- System design in English
+- Component descriptions in English
+- Data flow diagrams with English labels
+- Decision records (ADRs) in English
+
+### File Structure
+- Use kebab-case for file names
+- Include proper markdown formatting
+- Add cross-references between documents
+- Maintain consistent structure
+
+### Examples
+
+#### ✅ Correct
+```markdown
+# Database Schema
+
+## Operations Table
+The operations table stores all transaction data.
+
+### Columns
+- `id`: Primary key
+- `psp_transaction_id`: PSP transaction identifier
+- `transfer_direction`: Transaction direction (IN/OUT/OWN)
+```
+
+#### ❌ Incorrect
+```markdown
+# Схема базы данных
+
+## Таблица операций
+Таблица операций хранит все данные транзакций.
+```
+
+### Enforcement
+- All new internal documentation must be in English
+- Existing documentation should be translated
+- Code reviews must check language compliance
+- Documentation updates must maintain English standard

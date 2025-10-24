@@ -1,0 +1,68 @@
+# PSP Service Project Rules
+
+## Documentation Standards
+
+### Language Requirement
+- **ALL documentation MUST be written in English**
+- This includes:
+  - README files
+  - API documentation
+  - Technical specifications
+  - Architecture documents
+  - Code comments in documentation files
+  - User guides and tutorials
+  - Migration guides
+  - Configuration references
+
+### Documentation Structure
+- Use clear, professional English
+- Follow standard technical writing conventions
+- Use consistent terminology across all documents
+- Include proper grammar and spelling
+- Use markdown formatting for better readability
+
+### File Naming
+- Use kebab-case for file names (e.g., `structured-logging.md`)
+- Use descriptive names that clearly indicate content
+- Avoid abbreviations unless they are industry standard
+
+### Content Guidelines
+- Write for international audience
+- Use active voice when possible
+- Include code examples with English comments
+- Provide clear explanations and context
+- Use consistent formatting and structure
+
+## Code Standards
+
+### Java Code
+- Use English for all class names, method names, and variable names
+- Write comments in English
+- Use descriptive names that clearly indicate purpose
+- Follow Java naming conventions
+
+### API Documentation
+- All API endpoints must be documented in English
+- Request/response examples should use English field names
+- Error messages should be in English
+- API descriptions should be clear and concise
+
+### Database Schema
+- Table and column names should be in English
+- Comments in database schema should be in English
+- Migration scripts should include English comments
+
+## Enforcement
+
+This rule applies to:
+- All files in `docs/` directory and subdirectories
+- All documentation-related files
+- README files at any level
+- API documentation
+- Technical specifications
+- Architecture documents
+
+**Note:** This rule does not apply to:
+- Business logic comments that may reference local terminology
+- Configuration values that are environment-specific
+- Test data that may use local language examples

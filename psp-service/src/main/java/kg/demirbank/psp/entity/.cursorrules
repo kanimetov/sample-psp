@@ -1,0 +1,23 @@
+# Entity Rules
+
+## When Entity is changed:
+
+1. **Find all usages:**
+   ```bash
+   grep -r "YourEntityName" psp-service/src/
+   ```
+
+2. **Update method comments:**
+   - `@param` descriptions in services/controllers
+   - `@return` descriptions for response DTOs
+
+3. **Check compilation:**
+   ```bash
+   gradle compileJava
+   ```
+
+## Files to check:
+- Service interfaces (`*Service.java`)
+- Service implementations (`*ServiceImpl.java`)
+- Controllers (`*Controller.java`)
+- Repository interfaces (`*Repository.java`)

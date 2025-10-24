@@ -32,6 +32,14 @@
 2. **Update comments:** `@param` and `@return` in services/controllers
 3. **Check compilation:** `gradle compileJava`
 
+## Entity Modification Rules
+
+**When Entity is changed:**
+
+1. **Find usages:** `grep -r "EntityName" psp-service/src/`
+2. **Update comments:** `@param` and `@return` in services/controllers/repositories
+3. **Check compilation:** `gradle compileJava`
+
 ## Change Control
 
 **See `.cursorrules-changes`**

@@ -26,7 +26,7 @@ import java.util.UUID;
 
 /**
  * Implementation of operator service
- * Handles full client operations using operator client
+ * Handles full merchant operations using operator client
  */
 @Service
 @RequiredArgsConstructor

@@ -25,7 +25,7 @@ public interface MerchantService {
      * Make payment after checking QR details
      * Creates transaction and returns payment confirmation
      * 
-     * @param request Merchant make payment request with QR URI and amount
+     * @param request Merchant make payment request with session ID and amount
      * @return Payment response with receipt ID and transaction details
      */
     Mono<MerchantMakePaymentResponseDto> makePayment(MerchantMakePaymentRequestDto request);

@@ -26,7 +26,7 @@ import java.util.UUID;
 
 /**
  * Implementation of bank service
- * Handles full client operations using bank client
+ * Handles full merchant operations using bank client
  */
 @Service
 @RequiredArgsConstructor

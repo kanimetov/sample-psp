@@ -24,6 +24,14 @@
 - Do NOT describe git history or changes
 - Do NOT write "Added this" or "Modified that"
 
+## DTO Modification Rules
+
+**When DTO is changed:**
+
+1. **Find usages:** `grep -r "DtoName" psp-service/src/`
+2. **Update comments:** `@param` and `@return` in services/controllers
+3. **Check compilation:** `gradle compileJava`
+
 ## Change Control
 
 **See `.cursorrules-changes`**

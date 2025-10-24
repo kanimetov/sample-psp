@@ -6,11 +6,16 @@ import kg.demirbank.psp.dto.merchant.request.MerchantCheckRequestDto;
 import kg.demirbank.psp.dto.merchant.request.MerchantMakePaymentRequestDto;
 import kg.demirbank.psp.dto.merchant.response.MerchantCheckResponseDto;
 import kg.demirbank.psp.dto.merchant.response.MerchantMakePaymentResponseDto;
+import kg.demirbank.psp.dto.incoming.request.IncomingCheckRequestDto;
+import kg.demirbank.psp.dto.incoming.request.IncomingCreateRequestDto;
+import kg.demirbank.psp.dto.incoming.response.IncomingCheckResponseDto;
+import kg.demirbank.psp.dto.incoming.response.IncomingTransactionResponseDto;
 import kg.demirbank.psp.dto.common.ELQRData;
 import kg.demirbank.psp.entity.OperationEntity;
 import kg.demirbank.psp.enums.CustomerType;
 import kg.demirbank.psp.enums.OperationType;
 import kg.demirbank.psp.enums.Status;
+import kg.demirbank.psp.enums.TransactionType;
 import kg.demirbank.psp.exception.*;
 import kg.demirbank.psp.repository.OperationRepository;
 import kg.demirbank.psp.service.clients.BankClient;
@@ -22,6 +27,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 /**
@@ -174,6 +180,150 @@ public class BankServiceImpl implements BankService {
                 });
     }
     
+    @Override
+    public Mono<IncomingCheckResponseDto> checkIncomingTransaction(IncomingCheckRequestDto request) {
+        log.info("Starting incoming transaction check for merchant: {} with amount: {}", 
+                request.getMerchantCode(), request.getAmount());
+        
+        // For CHECK operations, we don't create OperationEntity yet
+        // OperationEntity will be created only during CREATE operation
+        
+        // Create bank check request using incoming request parameters
+        BankCheckRequestDto bankCheckRequest = new BankCheckRequestDto();
+        bankCheckRequest.setMerchantId(request.getMerchantId());
+        bankCheckRequest.setBeneficiaryAccountNumber(request.getBeneficiaryAccountNumber());
+        bankCheckRequest.setMerchantCode(request.getMerchantCode());
+        bankCheckRequest.setAmount(request.getAmount());
+        
+        return bankClient.checkAccount(bankCheckRequest)
+                .map(_ -> {
+                    // Create incoming check response
+                    IncomingCheckResponseDto response = new IncomingCheckResponseDto();
+                    response.setBeneficiaryName(request.getMerchantId() != null ? 
+                            request.getMerchantId() : "Unknown Beneficiary");
+                    response.setTransactionType(TransactionType.C2C); // Default transaction type
+                    
+                    log.info("Incoming transaction check completed successfully for merchant: {}", 
+                            request.getMerchantCode());
+                    return response;
+                })
+                .onErrorMap(Exception.class, e -> {
+                    log.error("Error during incoming transaction check: {}", e.getMessage(), e);
+                    return new SystemErrorException("Failed to process incoming transaction check request");
+                });
+    }
+    
+    @Override
+    public Mono<IncomingTransactionResponseDto> createIncomingTransaction(IncomingCreateRequestDto request) {
+        log.info("Starting incoming transaction creation for merchant: {} with amount: {}", 
+                request.getMerchantCode(), request.getAmount());
+        
+        return Mono.fromCallable(() -> {
+            // Create operation entity for tracking incoming transaction
+            // Use transactionId from request as pspTransactionId for incoming transactions
+            OperationEntity operation = createIncomingOperationEntity(OperationType.CREATE, request);
+            operation.setPspTransactionId(request.getTransactionId()); // Use transactionId from request
+            operation.setAmount(request.getAmount());
+            operation.setStatus(Status.IN_PROCESS);
+            
+            return operationRepository.save(operation);
+        })
+        .flatMap(savedOperation -> {
+            log.debug("Incoming operation saved with ID: {}", savedOperation.getId());
+            
+            // Create bank check request
+            BankCheckRequestDto bankCheckRequest = new BankCheckRequestDto();
+            bankCheckRequest.setMerchantId(request.getMerchantId());
+            bankCheckRequest.setBeneficiaryAccountNumber(request.getBeneficiaryAccountNumber());
+            bankCheckRequest.setMerchantCode(request.getMerchantCode());
+            bankCheckRequest.setAmount(request.getAmount());
+            
+            return bankClient.checkAccount(bankCheckRequest)
+                    .flatMap(bankCheckResponse -> {
+                        if (!Boolean.TRUE.equals(bankCheckResponse.getAccountValid())) {
+                            return Mono.error(new BadRequestException("Account check failed"));
+                        }
+                        
+                        // Create bank transaction request
+                        BankCreateRequestDto bankCreateRequest = new BankCreateRequestDto();
+                        bankCreateRequest.setAmount(request.getAmount());
+                        bankCreateRequest.setCustomerType(CustomerType.INDIVIDUAL);
+                        bankCreateRequest.setQrType(request.getQrType());
+                        bankCreateRequest.setMerchantProvider(request.getMerchantProvider());
+                        bankCreateRequest.setMerchantId(request.getMerchantId());
+                        bankCreateRequest.setServiceId(request.getServiceId());
+                        bankCreateRequest.setServiceName(request.getServiceName());
+                        bankCreateRequest.setBeneficiaryAccountNumber(request.getBeneficiaryAccountNumber());
+                        bankCreateRequest.setMerchantCode(request.getMerchantCode());
+                        bankCreateRequest.setCurrencyCode(request.getCurrencyCode());
+                        bankCreateRequest.setQrTransactionId(request.getQrTransactionId());
+                        bankCreateRequest.setQrComment(request.getQrComment());
+                        bankCreateRequest.setQrLinkHash(request.getQrLinkHash());
+                        
+                        return bankClient.createTransaction(bankCreateRequest)
+                                .map(bankTransactionResponse -> {
+                                    // Update operation with transaction details
+                                    savedOperation.setStatus(Status.SUCCESS);
+                                    savedOperation.setTransactionId(bankTransactionResponse.getTransactionId());
+                                    savedOperation.setReceiptId(bankTransactionResponse.getTransactionId());
+                                    savedOperation.setUpdatedAt(LocalDateTime.now());
+                                    
+                                    operationRepository.save(savedOperation);
+                                    
+                                    // Create incoming transaction response
+                                    IncomingTransactionResponseDto response = new IncomingTransactionResponseDto();
+                                    response.setTransactionId(bankTransactionResponse.getTransactionId());
+                                    response.setStatus(Status.SUCCESS);
+                                    response.setAmount(request.getAmount());
+                                    response.setBeneficiaryName(request.getMerchantId() != null ? 
+                                            request.getMerchantId() : "Unknown Beneficiary");
+                                    response.setCustomerType(CustomerType.INDIVIDUAL);
+                                    response.setReceiptId(request.getSenderReceiptId());
+                                    response.setCreatedDate(LocalDateTime.now().toString());
+                                    response.setExecutedDate(LocalDateTime.now().toString());
+                                    
+                                    log.info("Incoming transaction created successfully for merchant: {}", 
+                                            request.getMerchantCode());
+                                    return response;
+                                });
+                    });
+        })
+        .onErrorMap(Exception.class, e -> {
+            log.error("Error during incoming transaction creation: {}", e.getMessage(), e);
+            if (e instanceof PspException) {
+                return e;
+            }
+            return new SystemErrorException("Failed to process incoming transaction creation request");
+        });
+    }
+    
+    
+    /**
+     * Create operation entity for tracking incoming transactions (create request)
+     */
+    private OperationEntity createIncomingOperationEntity(OperationType type, IncomingCreateRequestDto request) {
+        OperationEntity operation = new OperationEntity();
+        // pspTransactionId will be set from request.getTransactionId() in the calling method
+        operation.setPaymentSessionId(UUID.randomUUID().toString());
+        operation.setOperationType(type);
+        operation.setTransferDirection("IN"); // Incoming to PSP
+        operation.setQrType(request.getQrType());
+        operation.setMerchantProvider(request.getMerchantProvider());
+        operation.setMerchantId(request.getMerchantId());
+        operation.setServiceId(request.getServiceId());
+        operation.setServiceName(request.getServiceName());
+        operation.setBeneficiaryAccountNumber(request.getBeneficiaryAccountNumber());
+        operation.setMerchantCode(request.getMerchantCode());
+        operation.setCurrencyCode(request.getCurrencyCode());
+        operation.setQrTransactionId(request.getQrTransactionId());
+        operation.setQrComment(request.getQrComment());
+        operation.setCustomerType(CustomerType.INDIVIDUAL);
+        operation.setAmount(request.getAmount());
+        operation.setQrLinkHash(request.getQrLinkHash());
+        operation.setStatus(Status.CREATED);
+        return operation;
+    }
+    
     /**
      * Create operation entity for tracking
      */
@@ -198,5 +348,46 @@ public class BankServiceImpl implements BankService {
         operation.setQrLinkHash(elqrData.getQrLinkHash());
         operation.setStatus(Status.CREATED);
         return operation;
+    }
+    
+    @Override
+    public Mono<IncomingTransactionResponseDto> executeIncomingTransaction(String transactionId) {
+        return Mono.fromCallable(() -> {
+            // Find the operation by operator's transaction ID
+            OperationEntity operation = operationRepository.findByTransactionId(transactionId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Transaction not found: " + transactionId));
+            
+            // Validate that this is an incoming transaction
+            if (!"IN".equals(operation.getTransferDirection())) {
+                throw new BadRequestException("Only incoming transactions can be executed");
+            }
+            
+            // Validate that transaction is in CREATED status
+            if (operation.getStatus() != Status.CREATED) {
+                throw new BadRequestException("Transaction must be in CREATED status to execute");
+            }
+            
+            // Update operation status to IN_PROCESS
+            operation.setStatus(Status.IN_PROCESS);
+            operation.setExecutedAt(LocalDateTime.now());
+            operation.setLastStatusUpdateAt(LocalDateTime.now());
+            operation.setUpdatedBy("BANK_SERVICE");
+            
+            // Save the updated operation
+            operationRepository.save(operation);
+            
+            // Create response
+            IncomingTransactionResponseDto response = new IncomingTransactionResponseDto();
+            response.setTransactionId(operation.getTransactionId());
+            response.setStatus(operation.getStatus());
+            response.setAmount(operation.getAmount());
+            response.setBeneficiaryName(operation.getBeneficiaryName());
+            response.setCustomerType(operation.getCustomerType());
+            response.setReceiptId(operation.getReceiptId());
+            response.setCreatedDate(operation.getCreatedAt().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) + "Z");
+            response.setExecutedDate(operation.getExecutedAt().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) + "Z");
+            
+            return response;
+        });
     }
 }

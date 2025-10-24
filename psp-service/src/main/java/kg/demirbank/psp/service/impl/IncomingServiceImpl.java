@@ -1,8 +1,12 @@
 package kg.demirbank.psp.service.impl;
 
-import kg.demirbank.psp.dto.*;
-import kg.demirbank.psp.enums.CustomerType;
-import kg.demirbank.psp.enums.Status;
+import kg.demirbank.psp.dto.incoming.request.CheckRequestDto;
+import kg.demirbank.psp.dto.incoming.request.CreateRequestDto;
+import kg.demirbank.psp.dto.common.UpdateDto;
+import kg.demirbank.psp.dto.incoming.response.CheckResponseDto;
+import kg.demirbank.psp.dto.incoming.response.CreateResponseDto;
+import kg.demirbank.psp.dto.incoming.response.StatusDto;
+import kg.demirbank.psp.enums.TransactionType;
 import kg.demirbank.psp.exception.*;
 import kg.demirbank.psp.util.LoggingUtil;
 import lombok.RequiredArgsConstructor;
@@ -49,7 +53,7 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
             
             // Simulate beneficiary lookup based on merchant data
             String beneficiaryName = lookupBeneficiaryName(request);
-            CustomerType transactionType = determineTransactionType(request);
+            TransactionType transactionType = determineTransactionType(request);
             
             CheckResponseDto response = new CheckResponseDto();
             response.setBeneficiaryName(beneficiaryName);
@@ -75,15 +79,15 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
     @Override
     public Mono<CreateResponseDto> createTransaction(CreateRequestDto request) {
         // Set transaction context for logging
-        LoggingUtil.setTransactionContext(request.getTransactionId(), request.getPspTransactionId(), 
-                request.getReceiptId(), request.getMerchantProvider(), 
+        LoggingUtil.setTransactionContext(request.getTransactionId().toString(), request.getSenderTransactionId(), 
+                request.getSenderReceiptId(), request.getMerchantProvider(), 
                 request.getMerchantCode(), request.getQrType());
-        LoggingUtil.setOperationContext("CREATE_TRANSACTION", Status.CREATED.name(), 
+        LoggingUtil.setOperationContext("CREATE_TRANSACTION", "10", 
                 request.getAmount(), request.getCurrencyCode(), null);
         
         // Create properties for structured logging
         Map<String, Object> properties = LoggingUtil.createTransactionProperties(
-                request.getTransactionId(), request.getPspTransactionId(), request.getReceiptId(),
+                request.getTransactionId().toString(), request.getSenderTransactionId(), request.getSenderReceiptId(),
                 request.getMerchantProvider(), request.getMerchantCode(), request.getQrType(), 
                 request.getAmount(), request.getCurrencyCode());
         
@@ -95,24 +99,23 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
             
             // Generate transaction ID if not provided
             String transactionId = request.getTransactionId() != null ? 
-                    request.getTransactionId() : generateTransactionId();
+                    request.getTransactionId().toString() : generateTransactionId();
             
             // Simulate transaction creation
             CreateResponseDto response = new CreateResponseDto();
             response.setTransactionId(transactionId);
-            response.setStatus(Status.CREATED);
-            response.setTransactionType(request.getTransactionType());
+            response.setStatus(10); // Status 10 for created
             response.setAmount(request.getAmount());
             response.setBeneficiaryName("Sample Beneficiary");
-            response.setCustomerType(1); // Default to Individual customer type
-            response.setReceiptId(request.getReceiptId());
+            response.setCustomerType("1"); // Default to Individual customer type
+            response.setReceiptId(request.getSenderReceiptId());
             response.setCreatedDate(LocalDateTime.now().format(ISO_DATE_TIME) + "Z");
-            response.setExecutedDate("");
+            response.setExecutedDate(null);
             
             // Log successful response
             Map<String, Object> responseProperties = new HashMap<>(properties);
             responseProperties.put("generatedTransactionId", transactionId);
-            responseProperties.put("status", Status.CREATED.name());
+            responseProperties.put("status", "10");
             responseProperties.put("beneficiaryName", "Sample Beneficiary");
             LoggingUtil.logOperationSuccess("CREATE_TRANSACTION", responseProperties);
             
@@ -131,7 +134,7 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
     public Mono<StatusDto> executeTransaction(String transactionId) {
         // Set transaction context for logging
         LoggingUtil.setTransactionContext(transactionId, null, null, null, null, null);
-        LoggingUtil.setOperationContext("EXECUTE_TRANSACTION", Status.SUCCESS.name(), 
+        LoggingUtil.setOperationContext("EXECUTE_TRANSACTION", "20", 
                 40000L, "417", null);
         
         // Create properties for structured logging
@@ -150,8 +153,7 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
             // Simulate transaction execution
             StatusDto response = new StatusDto();
             response.setTransactionId(transactionId);
-            response.setStatus(Status.SUCCESS);
-            response.setTransactionType(CustomerType.C2C);
+            response.setStatus(20); // Status 20 for success
             response.setAmount(40000L);
             response.setBeneficiaryName("c***e A***o");
             response.setCustomerType("1");
@@ -161,7 +163,7 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
             
             // Log successful response
             Map<String, Object> responseProperties = new HashMap<>(properties);
-            responseProperties.put("status", Status.SUCCESS.name());
+            responseProperties.put("status", "20");
             responseProperties.put("amount", 40000L);
             responseProperties.put("beneficiaryName", "c***e A***o");
             responseProperties.put("customerType", "1");
@@ -296,14 +298,14 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
             throw new IncorrectRequestDataException("Only KGS currency (417) is supported");
         }
         
-        // Validate PSP transaction ID format
-        if (request.getPspTransactionId() == null || request.getPspTransactionId().trim().isEmpty()) {
-            throw new IncorrectRequestDataException("PSP transaction ID is required");
+        // Validate sender transaction ID format
+        if (request.getSenderTransactionId() == null || request.getSenderTransactionId().trim().isEmpty()) {
+            throw new IncorrectRequestDataException("Sender transaction ID is required");
         }
         
-        // Validate receipt ID format
-        if (request.getReceiptId() == null || request.getReceiptId().trim().isEmpty()) {
-            throw new IncorrectRequestDataException("Receipt ID is required");
+        // Validate sender receipt ID format
+        if (request.getSenderReceiptId() == null || request.getSenderReceiptId().trim().isEmpty()) {
+            throw new IncorrectRequestDataException("Sender receipt ID is required");
         }
     }
     
@@ -332,10 +334,10 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
     /**
      * Determine transaction type based on request data
      */
-    private CustomerType determineTransactionType(CheckRequestDto request) {
+    private TransactionType determineTransactionType(CheckRequestDto request) {
         // Simulate transaction type determination
         // In real implementation, this would be based on business rules
-        return CustomerType.C2C;
+        return TransactionType.C2C;
     }
     
     /**

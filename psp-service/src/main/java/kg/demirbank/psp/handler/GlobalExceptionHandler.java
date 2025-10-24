@@ -1,6 +1,6 @@
 package kg.demirbank.psp.handler;
 
-import kg.demirbank.psp.dto.ErrorResponseDto;
+import kg.demirbank.psp.dto.common.ErrorResponseDto;
 import kg.demirbank.psp.exception.*;
 import kg.demirbank.psp.util.LoggingUtil;
 import lombok.extern.slf4j.Slf4j;

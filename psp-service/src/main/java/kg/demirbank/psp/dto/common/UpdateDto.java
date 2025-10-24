@@ -1,10 +1,14 @@
-package kg.demirbank.psp.dto;
+package kg.demirbank.psp.dto.common;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
 import kg.demirbank.psp.enums.Status;
 import lombok.Data;
 
+/**
+ * Common update request DTO
+ * Used for status updates in both incoming and outgoing requests
+ */
 @Data
 public class UpdateDto {
 
@@ -23,4 +27,3 @@ public class UpdateDto {
     @JsonProperty("updateDate")
     private String updateDate;
 }
-

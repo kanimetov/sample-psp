@@ -1,24 +1,19 @@
-package kg.demirbank.psp.dto;
+package kg.demirbank.psp.dto.incoming.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
-import kg.demirbank.psp.enums.CustomerType;
+import kg.demirbank.psp.dto.common.KeyValueDto;
 import lombok.Data;
 
 import java.util.List;
 
+/**
+ * Incoming check request DTO (Operator → PSP)
+ * Used when PSP acts as beneficiary receiving check requests from Operator
+ */
 @Data
-public class CreateRequestDto {
-
-    /**
-     * Transaction ID from the Operator's system
-     */
-    @NotNull
-    @Size(max = 32)
-    @JsonProperty("transactionId")
-    private String transactionId;
-    
+public class CheckRequestDto {
     /**
      * Payment link type, Field ID=01 from QR
      */
@@ -28,7 +23,7 @@ public class CreateRequestDto {
     private String qrType;
 
     /**
-     * Unique identificator of merchant provider, Field ID=32, SubID=00 from QR
+     * Unique identificator of merchant provider (QR Acquirer), Field ID=32, SubID=00 from QR
      */
     @NotBlank
     @Size(max = 32)
@@ -43,7 +38,7 @@ public class CreateRequestDto {
     private String merchantId;
 
     /**
-     * Service code in the Payment system, Field ID=32, SubID=01 from QR
+     * Service code in the Payment system of QR Acquirer, Field ID=32, SubID=01 from QR
      */
     @Size(max = 32)
     @JsonProperty("serviceId")
@@ -67,8 +62,7 @@ public class CreateRequestDto {
      * Service provider code (MCC), Field ID=52 from QR
      */
     @NotNull
-    @Min(0)
-    @Max(9999)
+    @Min(0) @Max(9999)
     @JsonProperty("merchantCode")
     private Integer merchantCode;
 
@@ -81,7 +75,7 @@ public class CreateRequestDto {
     private String currencyCode = "417";
 
     /**
-     * Transaction ID from QR, Field ID=32, SubID=11 from QR
+     * Transaction ID in the QR Acquirer system, Field ID=32, SubID=11 from QR
      */
     @Size(max = 32)
     @JsonProperty("qrTransactionId")
@@ -94,29 +88,8 @@ public class CreateRequestDto {
     @JsonProperty("qrComment")
     private String qrComment;
 
-    @NotBlank
-    @Pattern(regexp = "1|2")
-    @JsonProperty("customerType")
-    private String customerType;
-
     /**
-     * Transaction id from the Sender's system
-     */
-    @NotBlank
-    @Size(max = 50)
-    @JsonProperty("pspTransactionId")
-    private String pspTransactionId;
-
-    /**
-     * Sender's receipt number
-     */
-    @NotBlank
-    @Size(max = 20)
-    @JsonProperty("receiptId")
-    private String receiptId;
-
-    /**
-     * Payment amount (in tyiyns)
+     * Payment amount (in tyiyns), could be from QR or from Payment App/ Sender Bank
      */
     @NotNull
     @Digits(integer = 13, fraction = 0)
@@ -132,16 +105,8 @@ public class CreateRequestDto {
     @JsonProperty("qrLinkHash")
     private String qrLinkHash;
 
-    /**
-     * Transaction type (specified in the table)
-     */
-    @NotNull
-    @JsonProperty("transactionType")
-    private CustomerType transactionType;
-
     @Size(max = 5)
     @Valid
     @JsonProperty("extra")
     private List<KeyValueDto> extra;
 }
-

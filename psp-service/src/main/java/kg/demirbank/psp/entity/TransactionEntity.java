@@ -1,7 +1,7 @@
 package kg.demirbank.psp.entity;
 
 import jakarta.persistence.*;
-import kg.demirbank.psp.enums.CustomerType;
+import kg.demirbank.psp.enums.TransactionType;
 import kg.demirbank.psp.enums.Status;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -70,7 +70,7 @@ public class TransactionEntity {
 
     @Enumerated(EnumType.ORDINAL)
     @Column(name = "transaction_type", nullable = false)
-    private CustomerType transactionType;
+    private TransactionType transactionType;
 
     @Enumerated(EnumType.ORDINAL)
     @Column(name = "status", nullable = false)
@@ -260,11 +260,11 @@ public class TransactionEntity {
         this.qrLinkHash = qrLinkHash;
     }
 
-    public CustomerType getTransactionType() {
+    public TransactionType getTransactionType() {
         return transactionType;
     }
 
-    public void setTransactionType(CustomerType transactionType) {
+    public void setTransactionType(TransactionType transactionType) {
         this.transactionType = transactionType;
     }
 

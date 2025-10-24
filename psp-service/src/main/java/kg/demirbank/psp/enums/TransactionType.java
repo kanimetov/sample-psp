@@ -9,9 +9,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * Customer type enum representing different transaction types in the payment system.
+ * Transaction type enum representing different transaction types in the payment system.
  */
-public enum CustomerType {
+public enum TransactionType {
     
     /**
      * C2C - Transfer by QR code/payment link.
@@ -50,11 +50,11 @@ public enum CustomerType {
 
     private final int code;
 
-    private static final Map<Integer, CustomerType> CODE_MAP = 
+    private static final Map<Integer, TransactionType> CODE_MAP = 
             Arrays.stream(values())
-                    .collect(Collectors.toMap(CustomerType::getCode, Function.identity()));
+                    .collect(Collectors.toMap(TransactionType::getCode, Function.identity()));
 
-    CustomerType(int code) {
+    TransactionType(int code) {
         this.code = code;
     }
 
@@ -64,19 +64,18 @@ public enum CustomerType {
     }
 
     /**
-     * Find CustomerType by code.
+     * Find TransactionType by code.
      * 
      * @param code the numeric code
-     * @return the corresponding CustomerType
+     * @return the corresponding TransactionType
      * @throws IllegalArgumentException if code is not found
      */
     @JsonCreator
-    public static CustomerType fromCode(int code) {
-        CustomerType type = CODE_MAP.get(code);
+    public static TransactionType fromCode(int code) {
+        TransactionType type = CODE_MAP.get(code);
         if (type == null) {
-            throw new IllegalArgumentException("Unknown customer type code: " + code);
+            throw new IllegalArgumentException("Unknown transaction type code: " + code);
         }
         return type;
     }
 }
-

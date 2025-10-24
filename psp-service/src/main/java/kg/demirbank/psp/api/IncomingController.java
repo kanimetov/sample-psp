@@ -1,6 +1,11 @@
 package kg.demirbank.psp.api;
 
-import kg.demirbank.psp.dto.*;
+import kg.demirbank.psp.dto.incoming.request.CheckRequestDto;
+import kg.demirbank.psp.dto.incoming.request.CreateRequestDto;
+import kg.demirbank.psp.dto.common.UpdateDto;
+import kg.demirbank.psp.dto.incoming.response.CheckResponseDto;
+import kg.demirbank.psp.dto.incoming.response.CreateResponseDto;
+import kg.demirbank.psp.dto.incoming.response.StatusDto;
 import kg.demirbank.psp.exception.BadRequestException;
 import kg.demirbank.psp.exception.SignatureVerificationException;
 import kg.demirbank.psp.security.SignatureService;
@@ -142,8 +147,8 @@ public class IncomingController {
         // Add request properties to logging context
         Map<String, Object> requestProperties = new HashMap<>(properties);
         requestProperties.put("transactionId", body.getTransactionId());
-        requestProperties.put("pspTransactionId", body.getPspTransactionId());
-        requestProperties.put("receiptId", body.getReceiptId());
+        requestProperties.put("senderTransactionId", body.getSenderTransactionId());
+        requestProperties.put("senderReceiptId", body.getSenderReceiptId());
         requestProperties.put("merchantProvider", body.getMerchantProvider());
         requestProperties.put("merchantCode", body.getMerchantCode());
         requestProperties.put("qrType", body.getQrType());

@@ -1,4 +1,4 @@
-package kg.demirbank.psp.dto;
+package kg.demirbank.psp.dto.common;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,7 +8,8 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 /**
- * Standard error response DTO for PSP Service
+ * Common error response DTO for PSP Service
+ * Used for all error responses in both incoming and outgoing directions
  */
 @Data
 @Builder
@@ -42,4 +43,3 @@ public class ErrorResponseDto {
      */
     private String path;
 }
-

@@ -1,39 +1,39 @@
-# DTO спецификация
+# DTO Specification
 
-> **Важно:** Полное описание всех эндпоинтов и DTOs см. в [dto-mapping.md](dto-mapping.md)
+> **Important:** For complete description of all endpoints and DTOs see [dto-mapping.md](dto-mapping.md)
 
-Все строки UTF‑8; числа — целые, если не оговорено. Суммы в тыйын (minor units).
+All strings UTF‑8; numbers are integers unless specified otherwise. Amounts in tyiyn (minor units).
 
-## Структура пакета DTO
+## DTO Package Structure
 
 ```java
 kg.demirbank.psp.dto/
-├── KeyValueDto.java       - Вспомогательный DTO для extra полей
-├── CheckRequestDto.java   - Request для check операции
-├── CreateRequestDto.java  - Request для create операции
-├── CheckResponseDto.java  - Response для check операции
-├── CreateResponseDto.java - Response для create операции
-├── StatusDto.java         - Универсальный DTO для execute/get responses
-└── UpdateDto.java         - Bidirectional DTO для update операций
+├── KeyValueDto.java       - Helper DTO for extra fields
+├── CheckRequestDto.java   - Request for check operation
+├── CreateRequestDto.java  - Request for create operation
+├── CheckResponseDto.java  - Response for check operation
+├── CreateResponseDto.java - Response for create operation
+├── StatusDto.java         - Universal DTO for execute/get responses
+└── UpdateDto.java         - Bidirectional DTO for update operations
 ```
 
-## Common headers (исходящие к Оператору)
+## Common headers (outgoing to Operator)
 
 - H-PSP-TOKEN: string (required)
 - H-PSP-ID: string (required)
 - H-SIGNING-VERSION: "2" (required)
-- H-HASH: string (JWS v2 подпись payload) (required)
+- H-HASH: string (JWS v2 signature payload) (required)
 
-## Краткое описание DTOs
+## Brief DTO Description
 
 ### CheckRequestDto
 
-**Используется в:**
-- `POST /ipc/operator/api/v1/payment/qr/{version}/tx/check` (исходящий)
-- `POST /in/qr/{version}/tx/check` (входящий от оператора)
-- `POST /api/qr/tx/check` (внешний API для клиентов)
+**Used in:**
+- `POST /ipc/operator/api/v1/payment/qr/{version}/tx/check` (outgoing)
+- `POST /in/qr/{version}/tx/check` (incoming from operator)
+- `POST /api/qr/tx/check` (external API for clients)
 
-**Поля:**
+**Fields:**
 - qrType: string, enum ["staticQr","dynamicQr"] (required, @Pattern)
 - merchantProvider: string, max 32 (required, @NotBlank)
 - merchantId: string, max 32 (optional, @Size)
@@ -51,140 +51,140 @@ kg.demirbank.psp.dto/
 
 ### CreateRequestDto
 
-**Используется в:**
-- `POST /ipc/operator/api/v1/payment/qr/{version}/tx/create` (исходящий)
-- `POST /in/qr/{version}/tx/create` (входящий от оператора)
-- `POST /api/qr/tx/create` (внешний API)
+**Used in:**
+- `POST /ipc/operator/api/v1/payment/qr/{version}/tx/create` (outgoing)
+- `POST /in/qr/{version}/tx/create` (incoming from operator)
+- `POST /api/qr/tx/create` (external API)
 
-**Поля:** Все поля из CheckRequestDto плюс:
-- transactionId: string, max 32 (required, @NotNull @Size) - ID транзакции (operator's transaction ID)
-- pspTransactionId: string, max 50 (required, @NotBlank @Size) - ID транзакции в PSP
-- receiptId: string, max 20 (required, @NotBlank @Size) - ID чека
-- transactionType: CustomerType enum (required, @NotNull) - Тип транзакции
+**Fields:** All fields from CheckRequestDto plus:
+- transactionId: string, max 32 (required, @NotNull @Size) - Transaction ID (operator's transaction ID)
+- pspTransactionId: string, max 50 (required, @NotBlank @Size) - Transaction ID in PSP
+- receiptId: string, max 20 (required, @NotBlank @Size) - Receipt ID
+- transactionType: CustomerType enum (required, @NotNull) - Transaction type
 
 ### CheckResponseDto
 
-**Возвращается из:**
-- Check операций (все направления)
+**Returned from:**
+- Check operations (all directions)
 
-**Поля:**
-- beneficiaryName: string (masked, например "c***e A***o")
-- transactionType: CustomerType - Тип транзакции (enum, nullable)
+**Fields:**
+- beneficiaryName: string (masked, e.g. "c***e A***o")
+- transactionType: CustomerType - Transaction type (enum, nullable)
 
 ### CreateResponseDto
 
-**Возвращается из:**
-- Create операций (все направления)
+**Returned from:**
+- Create operations (all directions)
 
-**Поля:**
-- transactionId: string (UUID) - ID транзакции от оператора
-- status: Status enum - Статус транзакции (nullable)
-- transactionType: CustomerType - Тип транзакции (enum)
-- amount: Long - Сумма транзакции в тыйынах
-- beneficiaryName: string - Имя получателя (masked)
-- customerType: Integer - Тип клиента (1=Individual, 2=Corporate)
-- receiptId: string - ID чека
-- createdDate: string (ISO8601) - Дата создания
-- executedDate: string (ISO8601) - Дата выполнения (default "")
+**Fields:**
+- transactionId: string (UUID) - Transaction ID from operator
+- status: Status enum - Transaction status (nullable)
+- transactionType: CustomerType - Transaction type (enum)
+- amount: Long - Transaction amount in tyiyn
+- beneficiaryName: string - Beneficiary name (masked)
+- customerType: Integer - Customer type (1=Individual, 2=Corporate)
+- receiptId: string - Receipt ID
+- createdDate: string (ISO8601) - Creation date
+- executedDate: string (ISO8601) - Execution date (default "")
 
 ### StatusDto
 
-**Используется в:**
-- Execute responses (все направления)
-- Get responses (все направления)
+**Used in:**
+- Execute responses (all directions)
+- Get responses (all directions)
 
-**Поля:**
+**Fields:**
 - transactionId: string (UUID)
-- status: Status - enum статус транзакции (nullable)
-- transactionType: CustomerType - enum тип транзакции (nullable)
-- amount: Long - сумма в тыйынах
+- status: Status - transaction status enum (nullable)
+- transactionType: CustomerType - transaction type enum (nullable)
+- amount: Long - amount in tyiyn
 - beneficiaryName: string (nullable)
-- customerType: string (nullable) - "1" или "2"
+- customerType: string (nullable) - "1" or "2"
 - receiptId: string (nullable)
 - createdDate: string (ISO8601)
 - executedDate: string (ISO8601, nullable)
 
 ### UpdateDto
 
-**Используется в:**
-- `POST /in/qr/{version}/tx/update/{transactionId}` (входящий от оператора)
+**Used in:**
+- `POST /in/qr/{version}/tx/update/{transactionId}` (incoming from operator)
 
-**Поля:**
-- status: Status enum (required, @NotNull) - Новый статус транзакции
-- updateDate: string, max 30 (optional, @Size) - Дата обновления
+**Fields:**
+- status: Status enum (required, @NotNull) - New transaction status
+- updateDate: string, max 30 (optional, @Size) - Update date
 
 ### KeyValueDto
 
-**Вспомогательный тип для extra полей**
+**Helper type for extra fields**
 
-**Поля:**
+**Fields:**
 - key: string, max 64 (required, @NotBlank @Size)
 - value: string, max 256 (required, @NotBlank @Size)
 
-## Маппинг эндпоинтов
+## Endpoint Mapping
 
-### Входящие от Оператора (Operator → PSP) - РЕАЛИЗОВАНО
+### Incoming from Operator (Operator → PSP) - IMPLEMENTED
 
-| Операция | Endpoint | Request DTO | Response DTO |
+| Operation | Endpoint | Request DTO | Response DTO |
 |----------|----------|-------------|--------------|
 | Check | POST /in/qr/{v}/tx/check | CheckRequestDto | CheckResponseDto |
 | Create | POST /in/qr/{v}/tx/create | CreateRequestDto | CreateResponseDto |
 | Execute | POST /in/qr/{v}/tx/execute/{id} | (empty) | StatusDto |
 | Update | POST /in/qr/{v}/tx/update/{id} | UpdateDto | ACK (200 OK) |
 
-### Исходящие к Оператору (PSP → Operator) - ПЛАНИРУЕТСЯ
+### Outgoing to Operator (PSP → Operator) - PLANNED
 
-| Операция | Endpoint | Request DTO | Response DTO |
+| Operation | Endpoint | Request DTO | Response DTO |
 |----------|----------|-------------|--------------|
-| Check | POST /ipc/operator/.../tx/check | CheckRequestDto | CheckResponseDto |
-| Create | POST /ipc/operator/.../tx/create | CreateRequestDto | CreateResponseDto |
-| Execute | POST /ipc/operator/.../tx/execute/{id} | (empty) | StatusDto |
+| Check | POST /psp/api/v1/payment/qr/{version}/tx/check | CheckRequestDto | CheckResponseDto |
+| Create | POST /psp/api/v1/payment/qr/{version}/tx/create | CreateRequestDto | CreateResponseDto |
+| Execute | POST /psp/api/v1/payment/qr/{version}/tx/execute/{id} | (empty) | StatusDto |
 
-### Внешние (Client → PSP) - ПЛАНИРУЕТСЯ
+### External (Client → PSP) - PLANNED
 
-| Операция | Endpoint | Request DTO | Response DTO |
+| Operation | Endpoint | Request DTO | Response DTO |
 |----------|----------|-------------|--------------|
 | Check | POST /api/qr/tx/check | CheckRequestDto | CheckResponseDto |
 | Create | POST /api/qr/tx/create | CreateRequestDto | CreateResponseDto |
 | Execute | POST /api/qr/tx/execute/{id} | (empty) | StatusDto |
 | Get | GET /api/qr/tx/{id} | (none) | StatusDto |
 
-## Идемпотентность
+## Idempotency
 
-Все операции, изменяющие состояние, должны быть идемпотентными:
+All state-changing operations must be idempotent:
 
-- **check:** Идемпотентность по `(qrLinkHash, amount, customerType)`
-- **create:** Идемпотентность по `pspTransactionId`
-- **execute:** Идемпотентность по `transactionId`
-- **update:** Идемпотентность по `(transactionId, status)`
+- **check:** Idempotency by `(qrLinkHash, amount, customerType)`
+- **create:** Idempotency by `pspTransactionId`
+- **execute:** Idempotency by `transactionId`
+- **update:** Idempotency by `(transactionId, status)`
 
-Реализуется через Redis с TTL ключами.
+Implemented via Redis with TTL keys.
 
-## Коды статусов (Status enum)
+## Status Codes (Status enum)
 
-| Код | Название | Финальный | Описание |
+| Code | Name | Final | Description |
 |-----|----------|-----------|----------|
-| 10 | CREATED | Нет | Транзакция создана |
-| 20 | IN_PROCESS | Нет | Транзакция в процессе |
-| 30 | ERROR | Да | Транзакция завершена с ошибкой |
-| 40 | CANCELED | Да | Транзакция отменена |
-| 50 | SUCCESS | Да | Транзакция успешно завершена |
+| 10 | CREATED | No | Transaction created |
+| 20 | IN_PROCESS | No | Transaction in process |
+| 30 | ERROR | Yes | Transaction completed with error |
+| 40 | CANCELED | Yes | Transaction canceled |
+| 50 | SUCCESS | Yes | Transaction successfully completed |
 
-## Типы транзакций (CustomerType enum)
+## Transaction Types (CustomerType enum)
 
-| Код | Название | Описание |
+| Code | Name | Description |
 |-----|----------|----------|
-| 10 | C2C | Перевод по QR-коду/платежной ссылке |
-| 20 | C2B | Покупка по QR-коду/платежной ссылке |
-| 30 | C2G | Государственный платеж (физ. лицо) по QR-коду/платежной ссылке |
-| 40 | B2C | Денежный перевод/вывод/возврат по QR-коду/платежной ссылке |
-| 50 | B2B | Платеж/перевод по QR-коду/платежной ссылке |
-| 60 | BANK_RESERVE | Электронное сообщение о постановке резерва на банк |
-| 70 | B2G | Государственный платеж (юр. лицо) по QR-коду/платежной ссылке |
+| 10 | C2C | Transfer via QR code/payment link |
+| 20 | C2B | Purchase via QR code/payment link |
+| 30 | C2G | Government payment (individual) via QR code/payment link |
+| 40 | B2C | Money transfer/withdrawal/refund via QR code/payment link |
+| 50 | B2B | Payment/transfer via QR code/payment link |
+| 60 | BANK_RESERVE | Electronic message about bank reserve placement |
+| 70 | B2G | Government payment (legal entity) via QR code/payment link |
 
-## См. также
+## See Also
 
-- **[dto-mapping.md](dto-mapping.md)** - Полное детальное описание всех эндпоинтов с примерами JSON
-- [contracts.md](contracts.md) - API контракты
-- [../security/crypto.md](../security/crypto.md) - JWS/JWE спецификации
-- [../data/schema.md](../data/schema.md) - Схема БД
+- **[dto-mapping.md](dto-mapping.md)** - Complete detailed description of all endpoints with JSON examples
+- [API Endpoints Reference](endpoints-reference.md) - Complete API endpoints
+- [../security/crypto.md](../security/crypto.md) - JWS/JWE specifications
+- [../data/schema.md](../data/schema.md) - Database schema

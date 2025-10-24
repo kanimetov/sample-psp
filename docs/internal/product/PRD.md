@@ -1,106 +1,113 @@
-## PRD: PSP (Sender/Beneficiary) по DKIBQR
+## PRD: PSP (Sender/Beneficiary) according to DKIBQR
 
-### 1. Контекст и цели
-- Реализовать PSP, поддерживающий исходящие переводы (Sender) и приём платежей (Beneficiary) по DKIBQR.
-- Нагрузочные цели: 5k TPS пик, p95 ≤ 150 мс, доступность 99.95%.
-- Инфраструктура: ВМ; Oracle DB; Redis (обязателен); RabbitMQ; H‑SIGNING‑VERSION=2 (только), JWS/JWE (RSA‑2048), mTLS.
+### 1. Context and Goals
+- Implement PSP supporting outgoing transfers (Sender) and payment acceptance (Beneficiary) according to DKIBQR.
+- Performance goals: 5k TPS peak, p95 ≤ 150 ms, availability 99.95%.
+- Infrastructure: VMs; Oracle DB; Redis (mandatory); RabbitMQ; H‑SIGNING‑VERSION=2 (only), JWS/JWE (RSA‑2048), mTLS.
 
-### 2. Область (Scope)
-- Включено:
-  - Sender API: tx/check, tx/create, tx/execute/{transactionId}, tx/get/{transactionId} (fallback без version).
-  - Beneficiary API (/in/...): приём check/create/execute/get и обязательный приём UPDATE.
+### 2. Scope
+- Included:
+  - Sender API: tx/check, tx/create, tx/execute/{transactionId}, tx/get/{transactionId} (fallback without version).
+  - Beneficiary API (/in/...): accepting check/create/execute/get and mandatory UPDATE acceptance.
   - UPDATE:
-    - Входящий UPDATE от Оператора — всегда принимаем.
-    - Исходящий UPDATE к Оператору — отправляем, если execute не вернул финал.
-    - GET статус — только при timeout.
-- Исключено: биллинг/межбанковские расчёты, фронтенд.
+    - Incoming UPDATE from Operator — always accept.
+    - Outgoing UPDATE to Operator — send if execute didn't return final status.
+    - GET status — only on timeout.
+- Excluded: billing/interbank settlements, frontend.
 
-### 3. Акторы
-- Клиентские каналы банка (мобильный/интернет‑банк) — Sender.
-- Interaction Operator — контрагент.
-- Операторы поддержки (мониторинг).
+### 3. Actors
+- Bank client channels (mobile/internet banking) — Sender.
+- Interaction Operator — counterparty.
+- Support operators (monitoring).
 
-### 4. Процессы (высокоуровнево)
-- Sender: Scan QR → Check → Create → Execute → (получаем UPDATE или GET при timeout).
-- Beneficiary: Приём Check/Create/Execute → Исполнение → (если нет финала) исходящий UPDATE к Оператору.
+### 4. Processes (high-level)
+- Sender: Scan QR → Check → Create → Execute → (receive UPDATE or GET on timeout).
+- Beneficiary: Accept Check/Create/Execute → Execution → (if no final status) outgoing UPDATE to Operator.
 
-### 5. Эндпоинты
-- Внешние (PSP → клиенты)
+### 5. Endpoints
+- External (PSP → clients)
   - POST /api/qr/tx/check
   - POST /api/qr/tx/create
   - POST /api/qr/tx/execute/{transactionId}
   - GET  /api/qr/tx/{transactionId}
-- Исходящие (PSP → Operator)
-  - POST /operator-api/api/v1/payment/qr/{version}/tx/check
-  - POST /operator-api/api/v1/payment/qr/{version}/tx/create
-  - POST /operator-api/api/v1/payment/qr/{version}/tx/execute/{transactionId}
-  - GET  /operator-api/api/v1/payment/qr/{version}/tx/get/{transactionId}
-  - POST /operator-api/api/v1/payment/qr/{version}/tx/update/{transactionId}
-- Входящие (Operator → PSP, Beneficiary)
+- Outgoing (PSP → Operator)
+  - POST /psp/api/v1/payment/qr/{version}/tx/check
+  - POST /psp/api/v1/payment/qr/{version}/tx/create
+  - POST /psp/api/v1/payment/qr/{version}/tx/execute/{transactionId}
+  - GET  /psp/api/v1/payment/qr/{version}/tx/get/{transactionId}
+  - POST /psp/api/v1/payment/qr/{version}/tx/update/{transactionId}
+- Incoming (Operator → PSP, Beneficiary)
   - POST /in/qr/{version}/tx/check
   - POST /in/qr/{version}/tx/create
   - POST /in/qr/{version}/tx/execute/{transactionId}
   - GET  /in/qr/{version}/tx/get/{transactionId}
   - POST /qr/{version}/tx/update/{transactionId}
 
-Примечания по заголовкам/безопасности:
-- Поддерживается только H‑SIGNING‑VERSION=2. H‑HASH — JWS подпись по правилам v2.
-- POST‑тела: JWE (RSA‑OAEP‑256/A256GCM) при необходимости протоколом.
-- GET: как правило без JWE; подпись по v2.
+Notes on headers/security:
+- Only H‑SIGNING‑VERSION=2 is supported. H‑HASH — JWS signature according to v2 rules.
+- POST bodies: JWE (RSA‑OAEP‑256/A256GCM) when required by protocol.
+- GET: usually without JWE; signature according to v2.
 
-### 6. Контракты данных (кратко)
+### 6. Data Contracts (brief)
 - tx/check (request): qrType, merchantProvider, merchantCode, currencyCode=417, qrTransactionId, amount (tyiyns), qrLinkHash (4), customerType (1|2), extra[≤3].
 - tx/check (response): beneficiaryName, transactionType, extra[].
-- tx/create/execute: использовать pspTransactionId, receiptId и поля по спецификации.
+- tx/create/execute: use pspTransactionId, receiptId and fields according to specification.
 - get/{transactionId} (response): { transactionId, status, transactionType, amount, commission, senderTransactionId, senderReceiptId, createdDate, executedDate }.
-- update (payload): { transactionId, status, amount, commission?, pspTransactionId?, receiptId?, createdDate?, executedDate? } — финальный состав уточняется у Оператора.
+- update (payload): { transactionId, status, amount, commission?, pspTransactionId?, receiptId?, createdDate?, executedDate? } — final composition to be clarified with Operator.
 
-### 7. Нефункциональные требования (NFR)
-- 5k TPS суммарно; горизонтальное масштабирование (6–10 инстансов).
-- p95 ≤ 150 мс на горячем пути.
-- 99.95% доступность; устойчивость к сбоям оператора (timeouts/retry/circuit breaker/bulkhead).
+### 7. Non-Functional Requirements (NFR)
+> **📋 Reference:** For complete performance targets and infrastructure configuration, see [Configuration Reference](../runtime/configuration-reference.md)
 
-### 8. Redis (обязателен)
-- Идемпотентность: SET NX + TTL
-  - idem:check:{pspId}:{merchantProvider}:{qrTxId}:{amount} TTL 120s
-  - idem:create|execute|update:{pspTransactionId|transactionId}:{status} TTL 24h
-- Rate‑limit: rl:{pspId}:{minute}, rl:tx:{transactionId}
-- Кэш статуса: status:{transactionId} TTL 60s
-- Кэш ключей: jwks:operator:{kid} TTL 1h; token:psp — по политике
-- Блокировки: lock:update:{transactionId} TTL 30s
+**Quick Summary:**
+- 5k TPS total; horizontal scaling (6–10 instances)
+- p95 ≤ 150 ms on hot path
+- 99.95% availability; resilience to operator failures
+
+### 8. Redis (mandatory)
+> **📋 Reference:** For complete Redis key patterns and TTL values, see [Redis Schema Reference](../data/redis-schema.md)
+
+**Quick Summary:**
+- Idempotency keys with TTL (120s-24h)
+- Rate limiting with token bucket
+- Status and key caching
+- Distributed locking
 
 ### 9. RabbitMQ
-- Exchange: qr.tx.update; Queues: qr.tx.update.dispatch, qr.tx.update.dlq
-- Ретраи: экспоненциальный backoff (15s→60s→5m→15m→1h), лимит попыток, DLQ
-- Outbox: фиксация события в БД и публикация в MQ (exactly‑once на уровне домена)
+> **📋 Reference:** For complete RabbitMQ configuration, see [RabbitMQ Configuration](../messaging/rabbitmq.md)
 
-### 10. Данные (Oracle)
-- qr_tx (pk, psp_transaction_id unique, operator_tx_id idx, status, суммы, атрибуты QR, created_at partition)
+**Quick Summary:**
+- Exchange: qr.tx.update
+- Queues: dispatch + DLQ
+- Exponential backoff retries
+- Outbox: event persistence in DB and MQ publication (exactly‑once at domain level)
+
+### 10. Data (Oracle)
+- qr_tx (pk, psp_transaction_id unique, operator_tx_id idx, status, amounts, QR attributes, created_at partition)
 - qr_tx_audit (append‑only, REQ/RESP, stage)
 - integrations_keys (JWKS)
 - outbox_events
 
-### 11. Безопасность
-- mTLS к оператору; pinning публичного ключа.
-- JWS/JWE (RSA‑2048) v2; приватные/публичные ключи загружаются в директорию сервера (вне репозитория), права доступа 600/700; документировать путь/ротацию.
-- Логи с маскированием PII; строгая канонизация JSON при подписи v2.
+### 11. Security
+- mTLS to operator; public key pinning.
+- JWS/JWE (RSA‑2048) v2; private/public keys loaded to server directory (outside repository), access rights 600/700; document path/rotation.
+- Logs with PII masking; strict JSON canonicalization for v2 signature.
 
-### 12. Наблюдаемость
-- OpenTelemetry (traces/metrics/logs). Метрики: TPS, p95/p99, error rate, CB state, retry count, Redis/DB latency.
-- Логи JSON с корреляцией traceId/pspTransactionId. Алерты по DLQ/таймаутам/доступности.
+### 12. Observability
+- OpenTelemetry (traces/metrics/logs). Metrics: TPS, p95/p99, error rate, CB state, retry count, Redis/DB latency.
+- JSON logs with traceId/pspTransactionId correlation. Alerts on DLQ/timeouts/availability.
 
-### 13. Операции и деплой
-- ВМ + NGINX/HAProxy; blue/green/canary; health/readiness.
-- Бэкапы: БД и ключи; DR: RPO ≤ 5 мин, RTO ≤ 30 мин.
-- Управление секретами/ключами: файлы на сервере + SOP ротации.
+### 13. Operations and Deployment
+- VMs + NGINX/HAProxy; blue/green/canary; health/readiness.
+- Backups: DB and keys; DR: RPO ≤ 5 min, RTO ≤ 30 min.
+- Secret/key management: files on server + rotation SOP.
 
-### 14. Критерии приёмки
-- Корректность check/create/execute/update/get; маппинг кодов ошибок.
-- Идемпотентность и отсутствие дублей; устойчивые ретраи UPDATE.
-- Нагрузочные цели достигнуты; JWS/JWE v2 проверены.
+### 14. Acceptance Criteria
+- Correctness of check/create/execute/update/get; error code mapping.
+- Idempotency and no duplicates; resilient UPDATE retries.
+- Performance goals achieved; JWS/JWE v2 verified.
 
-### 15. Риски/вопросы
-- Возможные изменения DKIBQR; ограничения оператора (SLA/rate‑limit).
-- Уточнить финальный состав полей в UPDATE payload.
+### 15. Risks/Questions
+- Possible DKIBQR changes; operator limitations (SLA/rate‑limit).
+- Clarify final field composition in UPDATE payload.
 
 

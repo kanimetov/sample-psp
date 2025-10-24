@@ -1,9 +1,9 @@
-## План тестирования
+## Test Plan
 
-- Unit: валидации DTO, маппинг ошибок
-- Crypto: JWS/JWE v2 подпись/верификация, шифрование/дешифрование
-- Contract: WireMock для операторских API (check/create/execute/get/update)
-- Integration: Redis idempotency, RabbitMQ ретраи
-- Load: k6 сценарии до 2× пика
+- Unit: DTO validation, error mapping
+- Crypto: JWS/JWE v2 signature/verification, encryption/decryption
+- Contract: WireMock for operator APIs (check/create/execute/get/update)
+- Integration: Redis idempotency, RabbitMQ retries
+- Load: k6 scenarios up to 2× peak
 
 

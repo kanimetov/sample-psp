@@ -80,31 +80,15 @@ Generic network exception for other network-related errors.
 
 ## Timeout Configuration
 
-Timeouts are configured in `application.yml`:
+> **📋 Reference:** For complete timeout configuration values, see [Configuration Reference](../runtime/configuration-reference.md#timeout-configuration)
 
-```yaml
-operator:
-  timeout:
-    connection: 5000      # Connection timeout in milliseconds (5 seconds)
-    read: 30000          # Read timeout in milliseconds (30 seconds)
-    write: 30000         # Write timeout in milliseconds (30 seconds)
-    response: 60000      # Response timeout in milliseconds (60 seconds)
-```
+**Quick Summary:**
+- Connection: 5000ms (dev/test), 3000ms (prod)
+- Read: 30000ms (dev/test), 20000ms (prod)  
+- Write: 30000ms (dev/test), 20000ms (prod)
+- Response: 60000ms (dev/test), 45000ms (prod)
 
-### Timeout Types Explained
-
-1. **Connection Timeout (5s):** Maximum time to establish a TCP connection
-2. **Read Timeout (30s):** Maximum time waiting for data after connection is established
-3. **Write Timeout (30s):** Maximum time to send data after connection is established
-4. **Response Timeout (60s):** Maximum time for the entire request-response cycle
-
-### Recommended Timeout Values
-
-| Environment | Connection | Read  | Write | Response |
-|-------------|-----------|-------|-------|----------|
-| Development | 5000ms    | 30000ms | 30000ms | 60000ms  |
-| Testing     | 5000ms    | 30000ms | 30000ms | 60000ms  |
-| Production  | 3000ms    | 20000ms | 20000ms | 45000ms  |
+For complete timeout configuration details, see [Configuration Reference](../runtime/configuration-reference.md).
 
 ## Implementation Details
 

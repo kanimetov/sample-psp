@@ -1,7 +1,6 @@
-## Политика версионирования API
+## API Versioning Policy
 
-- Внешний GET статус: без параметра version (стабильный контракт).
-- Все исходящие к Оператору сохраняют {version} в пути согласно протоколу.
-- Минорные изменения — назад совместимы; breaking changes — новая версия пути/параметров.
+- All outgoing requests to Operator preserve {version} in path according to protocol.
+- Minor changes — backward compatible; breaking changes — new version path/parameters.
 
 

@@ -1,6 +1,6 @@
 ## Compliance
 
-- Требования регулятора/платёжной системы (при наличии) — TBD
-- Политики хранения и маскирования данных
+- Regulator/payment system requirements (if any) — TBD
+- Data storage and masking policies
 
 

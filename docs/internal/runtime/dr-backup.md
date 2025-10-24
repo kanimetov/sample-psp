@@ -1,6 +1,6 @@
 ## DR & Backup
 
-- DR: RPO ≤ 5 мин, RTO ≤ 30 мин; горячий standby Redis/Oracle
-- Бэкапы: полные + журналы; проверка восстановления по расписанию
+- DR: RPO ≤ 5 min, RTO ≤ 30 min; hot standby Redis/Oracle
+- Backups: full + logs; scheduled recovery verification
 
 

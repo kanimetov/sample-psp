@@ -1,6 +1,6 @@
-## Contract tests (Operator)
+## Contract Tests (Operator)
 
-- WireMock: check/create/execute/get/update — ответы по спецификации
-- Верификация заголовков: H‑PSP‑TOKEN/H‑PSP‑ID/H‑HASH (v2), H‑SIGNING‑VERSION=2
+- WireMock: check/create/execute/get/update — responses according to specification
+- Header verification: H‑PSP‑TOKEN/H‑PSP‑ID/H‑HASH (v2), H‑SIGNING‑VERSION=2
 
 

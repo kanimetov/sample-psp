@@ -1,7 +1,7 @@
-# ADR-0002: Redis обязателен
+# ADR-0002: Redis Mandatory
 
-Решение: Redis включён как обязательный компонент (идемпотентность, кэш, лимиты, блокировки).
+Decision: Redis included as mandatory component (idempotency, cache, limits, locks).
 
-Мотивы: p95 ≤ 150 мс при 5k TPS, разгрузка БД, устойчивость.
+Motives: p95 ≤ 150 ms at 5k TPS, database offloading, resilience.
 
 

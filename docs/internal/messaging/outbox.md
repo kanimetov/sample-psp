@@ -1,7 +1,7 @@
-## Outbox паттерн
+## Outbox Pattern
 
-- События UPDATE пишутся в outbox_events в одной транзакции с бизнес‑изменениями.
-- Паблишер читает outbox, публикует в RabbitMQ и помечает доставку.
-- Семантика: как минимум один раз; идемпотентный консьюмер гарантирует эквивалентно один раз.
+- UPDATE events are written to outbox_events in the same transaction as business changes.
+- Publisher reads outbox, publishes to RabbitMQ and marks delivery.
+- Semantics: at least once; idempotent consumer guarantees effectively once.
 
 

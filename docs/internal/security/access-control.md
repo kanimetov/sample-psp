@@ -1,7 +1,7 @@
-## Доступ и аутентификация
+## Access and Authentication
 
-- mTLS для исходящих к оператору
-- H‑PSP‑TOKEN/H‑PSP‑ID — обязательные заголовки
-- H‑HASH (JWS v2) — обязательная подпись
+- mTLS for outgoing requests to operator
+- H‑PSP‑TOKEN/H‑PSP‑ID — mandatory headers
+- H‑HASH (JWS v2) — mandatory signature
 
 

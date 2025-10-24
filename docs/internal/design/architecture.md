@@ -1,43 +1,42 @@
-## Архитектура
+## Architecture
 
-### Текущая реализация (MVP)
+### Current Implementation (MVP)
 
-- **PSP Service** (Spring Boot, stateless, 6–10 инстансов)
-  - **IncomingController** - Beneficiary фасад (/in/qr/{version}/tx/*)
-  - **SignatureService** - JWS v2 верификация подписей
-  - **IncomingService** - Бизнес-логика обработки входящих запросов
-  - **OperatorClient** - Клиент для взаимодействия с оператором (планируется)
-  - **Oracle** - Основное хранилище (transactions, check_requests, extra_data)
-  - **Redis** - Кэширование и идемпотентность (планируется)
-  - **RabbitMQ** - Асинхронная обработка (планируется)
+- **PSP Service** (Spring Boot, stateless, 6–10 instances)
+  - **IncomingController** - Beneficiary facade (/in/qr/{version}/tx/*)
+  - **SignatureService** - JWS v2 signature verification
+  - **IncomingService** - Business logic for processing incoming requests
+  - **OperatorClient** - Client for operator interaction (planned)
+  - **Oracle** - Main storage (transactions, check_requests, extra_data)
+  - **Redis** - Caching and idempotency (planned)
+  - **RabbitMQ** - Asynchronous processing (planned)
 
-### Реализованные компоненты
+### Implemented Components
 
-- ✅ **Входящие API** - обработка запросов от оператора
-- ✅ **Верификация подписей** - JWS v2 с детальным логированием
-- ✅ **Валидация DTO** - комплексная проверка входящих данных
-- ✅ **Структурированное логирование** - детальное отслеживание операций
-- ✅ **Обработка ошибок** - централизованный GlobalExceptionHandler
-- ✅ **База данных** - полная схема с индексами и ограничениями
+- ✅ **Incoming APIs** - processing requests from operator
+- ✅ **Signature verification** - JWS v2 with detailed logging
+- ✅ **DTO validation** - comprehensive validation of incoming data
+- ✅ **Structured logging** - detailed operation tracking
+- ✅ **Error handling** - centralized GlobalExceptionHandler
+- ✅ **Database** - complete schema with indexes and constraints
 
-### Планируемые компоненты
+### Planned Components
 
-- 🔄 **Внешние API** - фасад для клиентов (/api/qr/tx/*)
-- 🔄 **OperatorClient** - исходящие запросы к оператору
-- 🔄 **Redis** - кэширование и идемпотентность
-- 🔄 **RabbitMQ** - асинхронная обработка и DLQ
-- 🔄 **Outbox pattern** - надежная доставка событий
+- 🔄 **External APIs** - facade for clients (/api/qr/tx/*)
+- 🔄 **Redis** - caching and idempotency
+- 🔄 **RabbitMQ** - asynchronous processing and DLQ
+- 🔄 **Outbox pattern** - reliable event delivery
 
-### Горячий путь (текущий)
+### Hot Path (Current)
 
-**Входящие запросы**: `/in/qr/{version}/tx/*` → верификация подписи → валидация DTO → бизнес-логика → ответ
+**Incoming requests**: `/in/qr/{version}/tx/*` → signature verification → DTO validation → business logic → response
 
-**Планируемый**: API → валидация → идемпотентность → JWS/JWE → оператор → маппинг → ответ
+**Planned**: API → validation → idempotency → JWS/JWE → operator → mapping → response
 
-### Fallback стратегии
+### Fallback Strategies
 
-- UPDATE через MQ при отсутствии финала
-- GET статус при timeout
-- Retry механизмы с экспоненциальной задержкой
+- UPDATE via MQ when final status is missing
+- GET status on timeout
+- Retry mechanisms with exponential backoff
 
 

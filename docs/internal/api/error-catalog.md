@@ -1,23 +1,23 @@
-## Каталог ошибок
+## Error Catalog
 
-- 400 Bad Request — валидация/формат
-- 404 Not Found — ресурс не существует
-- 422 Unprocessable Entity — данные корректны синтаксически, но невалидны
-- 502 Bad Gateway — общая сетевая ошибка (SSL/Socket/Unknown host)
-- 503 Service Unavailable — ошибка подключения (connection refused/reset/no route)
-- 504 Gateway Timeout — таймаут запроса (connect/read/write/response)
-- 452 Recipient data incorrect — по спецификации оператора
-- 453 Access denied — по спецификации оператора
-- 454 Incorrect data — по спецификации оператора
-- 455 Min amount not valid — по спецификации оператора
-- 456 Max amount not valid — по спецификации оператора
-- 500 System error — внутренняя ошибка
-- 523 Supplier not available — недоступность поставщика
-- 524 External server not available — внешняя недоступность
+- 400 Bad Request — validation/format
+- 404 Not Found — resource does not exist
+- 422 Unprocessable Entity — data is syntactically correct but invalid
+- 502 Bad Gateway — general network error (SSL/Socket/Unknown host)
+- 503 Service Unavailable — connection error (connection refused/reset/no route)
+- 504 Gateway Timeout — request timeout (connect/read/write/response)
+- 452 Recipient data incorrect — according to operator specification
+- 453 Access denied — according to operator specification
+- 454 Incorrect data — according to operator specification
+- 455 Min amount not valid — according to operator specification
+- 456 Max amount not valid — according to operator specification
+- 500 System error — internal error
+- 523 Supplier not available — supplier unavailability
+- 524 External server not available — external unavailability
 
-### Примечание по маппингу ошибок
+### Error Mapping Notes
 
-- HTTP‑ошибки, возвращённые оператором, маппятся напрямую по коду статуса (400/404/422/452–456/500/523/524).
-- Транспортные ошибки (таймауты, разрывы соединения, SSL, DNS и т. п.) маппятся в 504/503/502 соответственно.
+- HTTP errors returned by the operator are mapped directly by status code (400/404/422/452–456/500/523/524).
+- Transport errors (timeouts, connection breaks, SSL, DNS, etc.) are mapped to 504/503/502 respectively.
 
 

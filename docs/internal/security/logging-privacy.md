@@ -1,6 +1,6 @@
-## Логирование и приватность
+## Logging and Privacy
 
-- Логи в формате JSON, маскирование PII (beneficiaryAccountNumber и пр.)
-- Ретеншн логов согласно политике; доступ по ролям
+- Logs in JSON format, PII masking (beneficiaryAccountNumber etc.)
+- Log retention according to policy; role-based access
 
 

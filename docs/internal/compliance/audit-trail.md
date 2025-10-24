@@ -1,6 +1,6 @@
-## Audit trail
+## Audit Trail
 
-- qr_tx_audit: хранить REQ/RESP (маскировано), стадия, время
-- Доступ ограничен; неизменяемость записей
+- qr_tx_audit: store REQ/RESP (masked), stage, time
+- Access restricted; record immutability
 
 

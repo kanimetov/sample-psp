@@ -1,7 +1,7 @@
 ## Retention & Archival
 
-- Транзакционные записи: 5 лет (политика уточняется)
-- Аудит-payload: 90 дней в online, далее — архив
-- Ключи/JWKS метаданные: до ротации + 30 дней
+- Transaction records: 5 years (policy to be clarified)
+- Audit payload: 90 days online, then — archive
+- Keys/JWKS metadata: until rotation + 30 days
 
 

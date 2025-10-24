@@ -1,7 +1,7 @@
-## Операции и деплой
+## Operations and Deployment
 
-- ВМ + NGINX/HAProxy; systemd/containers; health/readiness
-- Blue/green или canary релизы
-- Конфигурации через файлы/ENV; пути к ключам на файловой системе
+- VMs + NGINX/HAProxy; systemd/containers; health/readiness
+- Blue/green or canary releases
+- Configurations via files/ENV; key paths on file system
 
 

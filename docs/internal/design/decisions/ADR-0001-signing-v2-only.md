@@ -1,7 +1,7 @@
-# ADR-0001: Только H‑SIGNING‑VERSION=2
+# ADR-0001: H‑SIGNING‑VERSION=2 Only
 
-Решение: поддерживаем только v2 подписи/шифрования. v1 — не поддерживается.
+Decision: support only v2 signatures/encryption. v1 — not supported.
 
-Мотивы: безопасность, упрощение реализации, соответствие протоколу оператора.
+Motives: security, implementation simplification, operator protocol compliance.
 
 

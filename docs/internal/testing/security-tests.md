@@ -1,7 +1,7 @@
-## Security tests
+## Security Tests
 
-- Подпись JWS v2: позитивные/негативные кейсы, подмена подписи
-- JWE: корректность шифрования/дешифрования, неверный ключ
-- mTLS: проверка цепочки, pinning
+- JWS v2 signature: positive/negative cases, signature substitution
+- JWE: encryption/decryption correctness, wrong key
+- mTLS: chain verification, pinning
 
 

@@ -1,9 +1,9 @@
-## Глоссарий
+## Glossary
 
-- PSP: Платёжный сервис‑провайдер (Sender/Beneficiary)
-- IO/Operator: Внешний оператор взаимодействия
-- H‑SIGNING‑VERSION=2: версия подписи JWS/JWE по DKIBQR
-- JWS/JWE: подпись/шифрование (RSA‑2048)
-- TTL: срок жизни ключа/кэша
+- PSP: Payment Service Provider (Sender/Beneficiary)
+- IO/Operator: External interaction operator
+- H‑SIGNING‑VERSION=2: JWS/JWE signature version according to DKIBQR
+- JWS/JWE: signature/encryption (RSA‑2048)
+- TTL: key/cache lifetime
 
 

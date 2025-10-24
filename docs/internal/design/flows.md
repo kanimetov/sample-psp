@@ -1,32 +1,32 @@
-## Потоки
+## Flows
 
-### Текущая реализация (Beneficiary)
+### Current Implementation (Beneficiary)
 
-**Входящие запросы от оператора:**
-1. **Check**: `POST /in/qr/{version}/tx/check` → верификация подписи → валидация → бизнес-логика → `CheckResponseDto`
-2. **Create**: `POST /in/qr/{version}/tx/create` → верификация подписи → валидация → создание транзакции → `CreateResponseDto`
-3. **Execute**: `POST /in/qr/{version}/tx/execute/{id}` → верификация подписи → выполнение транзакции → `StatusDto`
-4. **Update**: `POST /in/qr/{version}/tx/update/{id}` → верификация подписи → обновление статуса → ACK (200 OK)
+**Incoming requests from operator:**
+1. **Check**: `POST /in/qr/{version}/tx/check` → signature verification → validation → business logic → `CheckResponseDto`
+2. **Create**: `POST /in/qr/{version}/tx/create` → signature verification → validation → transaction creation → `CreateResponseDto`
+3. **Execute**: `POST /in/qr/{version}/tx/execute/{id}` → signature verification → transaction execution → `StatusDto`
+4. **Update**: `POST /in/qr/{version}/tx/update/{id}` → signature verification → status update → ACK (200 OK)
 
-### Планируемые потоки
+### Planned Flows
 
-### Sender (планируется)
-Scan QR → POST check → POST create → POST execute → (inbound UPDATE) → done; иначе GET статус.
+### Sender (planned)
+Scan QR → POST check → POST makePayment → (inbound UPDATE) → done; otherwise GET status.
 
-### Beneficiary (расширение)
-Inbound POST check/create/execute → обработка → исходящий POST update при отсутствии финала.
+### Beneficiary (extension)
+Inbound POST check/create/execute → processing → outgoing POST update when final status is missing.
 
-### Обработка исключений
+### Exception Handling
 
-**Текущая реализация:**
-1. **Верификация подписи** → `SignatureVerificationException` при ошибке
-2. **Валидация DTO** → `ValidationException` при некорректных данных
-3. **Бизнес-логика** → специфичные исключения (`BadRequestException`, `ResourceNotFoundException`, etc.)
-4. **Все исключения** → `GlobalExceptionHandler` → стандартизированный `ErrorResponseDto`
+**Current implementation:**
+1. **Signature verification** → `SignatureVerificationException` on error
+2. **DTO validation** → `ValidationException` on incorrect data
+3. **Business logic** → specific exceptions (`BadRequestException`, `ResourceNotFoundException`, etc.)
+4. **All exceptions** → `GlobalExceptionHandler` → standardized `ErrorResponseDto`
 
-**Планируемая обработка сетевых ошибок:**
-1. HTTP ошибки (400-524) → маппинг по статус-коду → соответствующие PspException
-2. Транспортные ошибки → детекция типа → NetworkTimeoutException (504) / NetworkConnectionException (503) / NetworkException (502)
-3. Клиент получает HTTP статус + JSON с code/message/details/timestamp/path
+**Planned network error handling:**
+1. HTTP errors (400-524) → mapping by status code → corresponding PspException
+2. Transport errors → type detection → NetworkTimeoutException (504) / NetworkConnectionException (503) / NetworkException (502)
+3. Client receives HTTP status + JSON with code/message/details/timestamp/path
 
 

@@ -17,11 +17,11 @@ import java.util.List;
 public class ClientCheckResponseDto implements ELQRData {
     
     /**
-     * Check session ID linking to the saved CHECK operation
+     * Payment session ID linking to the saved CHECK operation
      * Used to link subsequent makePayment calls
      */
-    @JsonProperty("checkSessionId")
-    private String checkSessionId;
+    @JsonProperty("paymentSessionId")
+    private String paymentSessionId;
     
     /**
      * Beneficiary name from operator/bank check response

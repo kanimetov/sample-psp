@@ -36,6 +36,13 @@ public class OperationEntity {
     private String pspTransactionId;
 
     /**
+     * Payment session ID for linking check and payment operations
+     * Generated during CHECK operation and used in MAKE_PAYMENT operation
+     */
+    @Column(name = "payment_session_id", unique = true, length = 50)
+    private String paymentSessionId;
+
+    /**
      * Operation type: CHECK, CREATE, EXECUTE, UPDATE
      */
     @Enumerated(EnumType.ORDINAL)
@@ -237,6 +244,14 @@ public class OperationEntity {
 
     public void setPspTransactionId(String pspTransactionId) {
         this.pspTransactionId = pspTransactionId;
+    }
+
+    public String getPaymentSessionId() {
+        return paymentSessionId;
+    }
+
+    public void setPaymentSessionId(String paymentSessionId) {
+        this.paymentSessionId = paymentSessionId;
     }
 
     public OperationType getOperationType() {

@@ -26,6 +26,11 @@ public interface OperationRepository extends JpaRepository<OperationEntity, Long
     Optional<OperationEntity> findByPspTransactionId(String pspTransactionId);
 
     /**
+     * Find operation by payment session ID
+     */
+    Optional<OperationEntity> findByPaymentSessionId(String paymentSessionId);
+
+    /**
      * Find operation by operator's transaction ID
      */
     Optional<OperationEntity> findByTransactionId(String transactionId);
@@ -100,6 +105,11 @@ public interface OperationRepository extends JpaRepository<OperationEntity, Long
      * Check if operation exists by PSP transaction ID
      */
     boolean existsByPspTransactionId(String pspTransactionId);
+
+    /**
+     * Check if operation exists by payment session ID
+     */
+    boolean existsByPaymentSessionId(String paymentSessionId);
 
     /**
      * Check if operation exists by operator transaction ID

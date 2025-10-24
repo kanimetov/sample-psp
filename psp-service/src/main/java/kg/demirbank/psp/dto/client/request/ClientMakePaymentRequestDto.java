@@ -40,9 +40,10 @@ public class ClientMakePaymentRequestDto {
     private CustomerType customerType;
     
     /**
-     * Optional check session ID linking to previous CHECK operation
-     * If provided, will link this payment to the previous check
+     * Required payment session ID linking to previous CHECK operation
+     * Links this payment to the previous check operation
      */
-    @JsonProperty("checkSessionId")
-    private String checkSessionId;
+    @NotBlank(message = "Payment session ID is required")
+    @JsonProperty("paymentSessionId")
+    private String paymentSessionId;
 }

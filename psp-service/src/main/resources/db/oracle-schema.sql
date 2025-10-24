@@ -6,6 +6,7 @@
 CREATE TABLE operations (
     id NUMBER(19) NOT NULL,
     psp_transaction_id VARCHAR2(50) NOT NULL,
+    payment_session_id VARCHAR2(50),
     operation_type NUMBER(1) NOT NULL,
     transfer_direction VARCHAR2(3) NOT NULL,
     transaction_id VARCHAR2(32),
@@ -40,6 +41,7 @@ CREATE TABLE operations (
     updated_by VARCHAR2(50),
     CONSTRAINT pk_operations PRIMARY KEY (id),
     CONSTRAINT uk_operations_psp_transaction_id UNIQUE (psp_transaction_id),
+    CONSTRAINT uk_operations_payment_session_id UNIQUE (payment_session_id),
     CONSTRAINT uk_operations_transaction_id UNIQUE (transaction_id),
     CONSTRAINT uk_operations_receipt_id UNIQUE (receipt_id),
     CONSTRAINT chk_operations_operation_type CHECK (operation_type IN (10, 20, 30, 40)),
@@ -81,6 +83,7 @@ CREATE SEQUENCE extra_data_seq
 -- Create indexes for better performance
 -- Unique constraints automatically create unique indexes for:
 -- - psp_transaction_id (uk_operations_psp_transaction_id)
+-- - payment_session_id (uk_operations_payment_session_id)
 -- - transaction_id (uk_operations_transaction_id) 
 -- - receipt_id (uk_operations_receipt_id)
 
@@ -94,6 +97,7 @@ CREATE INDEX idx_operations_merchant_code ON operations(merchant_code);
 CREATE INDEX idx_operations_qr_link_hash ON operations(qr_link_hash);
 CREATE INDEX idx_operations_customer_type ON operations(customer_type);
 CREATE INDEX idx_operations_psp_transaction_id ON operations(psp_transaction_id);
+CREATE INDEX idx_operations_payment_session_id ON operations(payment_session_id);
 
 -- Performance indexes for extra_data table
 CREATE INDEX idx_extra_data_operation_id ON extra_data(operation_id);

@@ -55,6 +55,9 @@ operator:
 # Merchant Provider Configuration
 merchant:
   provider: "demirbank"  # Provider identifier for direction determination
+  # Supported providers:
+  # - "demirbank" - Uses internal bank client for transactions
+  # - Any other value - Uses external operator client for transactions
 
 # QR Decoder Configuration
 qr:

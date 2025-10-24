@@ -5,18 +5,14 @@ import kg.demirbank.psp.dto.incoming.request.IncomingCreateRequestDto;
 import kg.demirbank.psp.dto.common.UpdateDto;
 import kg.demirbank.psp.dto.incoming.response.IncomingCheckResponseDto;
 import kg.demirbank.psp.dto.incoming.response.IncomingTransactionResponseDto;
-import kg.demirbank.psp.enums.CustomerType;
-import kg.demirbank.psp.enums.Status;
-import kg.demirbank.psp.enums.TransactionType;
 import kg.demirbank.psp.exception.*;
+import kg.demirbank.psp.service.BankService;
 import kg.demirbank.psp.util.LoggingUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 /**
@@ -28,81 +24,51 @@ import java.util.UUID;
 @Slf4j
 public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingService {
     
-    private static final DateTimeFormatter ISO_DATE_TIME = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+    private final BankService bankService;
     
     @Override
     public Mono<IncomingCheckResponseDto> checkTransaction(IncomingCheckRequestDto request) {
-        String pspTransactionId = UUID.randomUUID().toString();
         
         // Set transaction context for logging
-        LoggingUtil.setTransactionContext(pspTransactionId, null, null, "CHECK", 
+        LoggingUtil.setTransactionContext(null, null, null, "CHECK", 
                 "IN", request.getMerchantCode(), 
                 request.getAmount(), null);
         
-        LoggingUtil.logOperationStart("CHECK", pspTransactionId, 
+        LoggingUtil.logOperationStart("CHECK", null, 
                 "IN", request.getMerchantCode());
         
-        return Mono.fromCallable(() -> {
-            // Business logic validation
-            validateCheckRequest(request);
-            
-            // Simulate beneficiary lookup based on merchant data
-            String beneficiaryName = lookupBeneficiaryName(request);
-            TransactionType transactionType = determineTransactionType(request);
-            
-            IncomingCheckResponseDto response = new IncomingCheckResponseDto();
-            response.setBeneficiaryName(beneficiaryName);
-            response.setTransactionType(transactionType);
-            
-            // Log successful response
-            LoggingUtil.logOperationSuccess("CHECK", pspTransactionId, null, "SUCCESS");
-            
-            return response;
-        })
+        return bankService.checkIncomingTransaction(request)
+                .doOnSuccess(_ -> {
+                    // Log successful response
+                    LoggingUtil.logOperationSuccess("CHECK", null, null, "SUCCESS");
+                })
         .doOnError(error -> {
             // Log error with structured data - no stack trace for business errors
             String errorCode = getErrorCode(error);
             String errorMessage = error.getMessage();
-            LoggingUtil.logError("CHECK", pspTransactionId, errorCode, errorMessage, error);
+            LoggingUtil.logError("CHECK", null, errorCode, errorMessage, error);
         });
     }
     
     @Override
     public Mono<IncomingTransactionResponseDto> createTransaction(IncomingCreateRequestDto request) {
-        String pspTransactionId = UUID.randomUUID().toString();
+        // Use transactionId from request as pspTransactionId for incoming transactions
+        String pspTransactionId = request.getTransactionId();
         
         // Set transaction context for logging
-        LoggingUtil.setTransactionContext(pspTransactionId, request.getTransactionId().toString(), 
+        LoggingUtil.setTransactionContext(pspTransactionId, request.getTransactionId(), 
                 request.getSenderReceiptId(), "CREATE", "IN", 
                 request.getMerchantCode(), request.getAmount(), "CREATED");
         
         LoggingUtil.logOperationStart("CREATE", pspTransactionId, 
                 "IN", request.getMerchantCode());
         
-        return Mono.fromCallable(() -> {
-            // Business logic validation
-            validateCreateRequest(request);
-            
-            // Generate transaction ID if not provided
-            String transactionId = request.getTransactionId() != null ? 
-                    request.getTransactionId().toString() : generateTransactionId();
-            
-            // Simulate transaction creation
-            IncomingTransactionResponseDto response = new IncomingTransactionResponseDto();
-            response.setTransactionId(transactionId);
-            response.setStatus(Status.CREATED); // Status 10 for created
-            response.setAmount(request.getAmount());
-            response.setBeneficiaryName("Sample Beneficiary");
-            response.setCustomerType(CustomerType.INDIVIDUAL); // Default to Individual customer type
-            response.setReceiptId(request.getSenderReceiptId());
-            response.setCreatedDate(LocalDateTime.now().format(ISO_DATE_TIME) + "Z");
-            response.setExecutedDate(null);
-            
-            // Log successful response
-            LoggingUtil.logOperationSuccess("CREATE", pspTransactionId, transactionId, "CREATED");
-            
-            return response;
-        })
+        return bankService.createIncomingTransaction(request)
+                .doOnSuccess(response -> {
+                    // Log successful response
+                    LoggingUtil.logOperationSuccess("CREATE", pspTransactionId, 
+                            response.getTransactionId(), "CREATED");
+                })
         .doOnError(error -> {
             // Log error with structured data - no stack trace for business errors
             String errorCode = getErrorCode(error);
@@ -121,28 +87,11 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
         
         LoggingUtil.logOperationStart("EXECUTE", pspTransactionId, "IN", null);
         
-        return Mono.fromCallable(() -> {
-            // Validate transaction ID
-            if (transactionId == null || transactionId.trim().isEmpty()) {
-                throw new BadRequestException("Transaction ID is required");
-            }
-            
-            // Simulate transaction execution
-            IncomingTransactionResponseDto response = new IncomingTransactionResponseDto();
-            response.setTransactionId(transactionId);
-            response.setStatus(Status.IN_PROCESS); // Status 20 for success
-            response.setAmount(40000L);
-            response.setBeneficiaryName("c***e A***o");
-            response.setCustomerType(CustomerType.INDIVIDUAL);
-            response.setReceiptId("7218199");
-            response.setCreatedDate("2022-11-01T12:00:00Z");
-            response.setExecutedDate(LocalDateTime.now().format(ISO_DATE_TIME) + "Z");
-            
-            // Log successful response
-            LoggingUtil.logOperationSuccess("EXECUTE", pspTransactionId, transactionId, "IN_PROCESS");
-            
-            return response;
-        })
+        return bankService.executeIncomingTransaction(transactionId)
+                .doOnSuccess(response -> {
+                    // Log successful response
+                    LoggingUtil.logOperationSuccess("EXECUTE", pspTransactionId, transactionId, response.getStatus().name());
+                })
         .doOnError(error -> {
             // Log error with structured data - no stack trace for business errors
             String errorCode = getErrorCode(error);
@@ -162,20 +111,12 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
         LoggingUtil.logOperationStart("UPDATE", pspTransactionId, "IN", null);
         
         return Mono.fromCallable(() -> {
-            // Validate transaction ID
-            if (transactionId == null || transactionId.trim().isEmpty()) {
-                throw new BadRequestException("Transaction ID is required");
-            }
-            
-            // Validate update request
-            validateUpdateRequest(updateRequest);
-            
             // Simulate transaction update
             LoggingUtil.logAuditTrail("UPDATE", pspTransactionId, "Transaction updated");
             return null; // Return null for Void
         })
         .then()
-        .doOnSuccess(__ -> LoggingUtil.logOperationSuccess("UPDATE", pspTransactionId, transactionId, updateRequest.getStatus().name()))
+        .doOnSuccess(_ -> LoggingUtil.logOperationSuccess("UPDATE", pspTransactionId, transactionId, updateRequest.getStatus().name()))
         .doOnError(error -> {
             // Log error with structured data - no stack trace for business errors
             String errorCode = getErrorCode(error);
@@ -184,99 +125,8 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
         });
     }
     
-    /**
-     * Validate check request business rules
-     */
-    private void validateCheckRequest(IncomingCheckRequestDto request) {
-        // Validate amount limits
-        if (request.getAmount() < 100) {
-            throw new MinAmountNotValidException("Minimum amount is 100");
-        }
-        if (request.getAmount() > 1000000) {
-            throw new MaxAmountNotValidException("Maximum amount is 1000000");
-        }
-        
-        // Validate merchant code
-        if (request.getMerchantCode() < 0 || request.getMerchantCode() > 9999) {
-            throw new IncorrectRequestDataException("Merchant code must be between 0 and 9999");
-        }
-        
-        // Validate currency code
-        if (!"417".equals(request.getCurrencyCode())) {
-            throw new IncorrectRequestDataException("Only KGS currency (417) is supported");
-        }
-    }
     
-    /**
-     * Validate create request business rules
-     */
-    private void validateCreateRequest(IncomingCreateRequestDto request) {
-        // Validate amount limits
-        if (request.getAmount() < 100) {
-            throw new MinAmountNotValidException("Minimum amount is 100");
-        }
-        if (request.getAmount() > 1000000) {
-            throw new MaxAmountNotValidException("Maximum amount is 1000000");
-        }
-        
-        // Validate merchant code
-        if (request.getMerchantCode() < 0 || request.getMerchantCode() > 9999) {
-            throw new IncorrectRequestDataException("Merchant code must be between 0 and 9999");
-        }
-        
-        // Validate currency code
-        if (!"417".equals(request.getCurrencyCode())) {
-            throw new IncorrectRequestDataException("Only KGS currency (417) is supported");
-        }
-        
-        // Validate sender transaction ID format
-        if (request.getSenderTransactionId() == null || request.getSenderTransactionId().trim().isEmpty()) {
-            throw new IncorrectRequestDataException("Sender transaction ID is required");
-        }
-        
-        // Validate sender receipt ID format
-        if (request.getSenderReceiptId() == null || request.getSenderReceiptId().trim().isEmpty()) {
-            throw new IncorrectRequestDataException("Sender receipt ID is required");
-        }
-    }
     
-    /**
-     * Validate update request business rules
-     */
-    private void validateUpdateRequest(UpdateDto request) {
-        if (request.getStatus() == null) {
-            throw new IncorrectRequestDataException("Status is required");
-        }
-        
-        if (request.getUpdateDate() == null || request.getUpdateDate().trim().isEmpty()) {
-            throw new IncorrectRequestDataException("Update date is required");
-        }
-    }
-    
-    /**
-     * Lookup beneficiary name based on merchant data
-     */
-    private String lookupBeneficiaryName(IncomingCheckRequestDto request) {
-        // Simulate beneficiary lookup logic
-        // In real implementation, this would query merchant database
-        return "c***e A***o";
-    }
-    
-    /**
-     * Determine transaction type based on request data
-     */
-    private TransactionType determineTransactionType(IncomingCheckRequestDto request) {
-        // Simulate transaction type determination
-        // In real implementation, this would be based on business rules
-        return TransactionType.C2C;
-    }
-    
-    /**
-     * Generate unique transaction ID
-     */
-    private String generateTransactionId() {
-        return UUID.randomUUID().toString();
-    }
     
     /**
      * Get error code from exception for structured logging

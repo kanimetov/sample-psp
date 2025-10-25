@@ -59,7 +59,7 @@ Notes on headers/security:
 > **📋 Reference:** For complete performance targets and infrastructure configuration, see [Configuration Reference](../runtime/configuration-reference.md)
 
 **Quick Summary:**
-- 5k TPS total; horizontal scaling (6–10 instances)
+- 5k TPS total; horizontal scaling (2 instances)
 - p95 ≤ 150 ms on hot path
 - 99.95% availability; resilience to operator failures
 

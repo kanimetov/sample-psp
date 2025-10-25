@@ -2,7 +2,7 @@
 
 ### Current Implementation (MVP)
 
-- **PSP Service** (Spring Boot, stateless, 6–10 instances)
+- **PSP Service** (Spring Boot, stateless, 2 instances)
   - **IncomingController** - Beneficiary facade (/in/qr/{version}/tx/*)
   - **MerchantController** - Merchant facade (/out/qr/{version}/*)
   - **SignatureService** - JWS v2 signature verification

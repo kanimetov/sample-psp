@@ -1,97 +1,97 @@
 # PSP Service
 
-Payment Service Provider для QR-платежей по протоколу DKIBQR.
+Payment Service Provider for QR payments using DKIBQR protocol.
 
-## Быстрый старт
+## Quick Start
 
 ```bash
 cd psp-service
 ./gradlew bootRun
 ```
 
-Сервис запустится на `http://localhost:8080`
+Service will start on `http://localhost:8080`
 
-## Текущий статус
+## Current Status
 
-**MVP реализован** - полная архитектура PSP сервиса с поддержкой QR-платежей и входящих транзакций.
+**MVP implemented** - complete PSP service architecture with QR payment and incoming transaction support.
 
-### ✅ Реализовано
+### ✅ Implemented
 - **API Layer**: 
-  - IncomingController для входящих запросов от оператора
-  - MerchantController для внешних QR-платежей
-- **Service Layer**: Полная архитектура сервисов
-  - MerchantService - маршрутизация QR-платежей
-  - BankService - обработка банковских транзакций
-  - OperatorService - обработка операторских транзакций
-  - IncomingService - фасад для входящих операций
-- **Client Layer**: Внешние клиенты
-  - BankClient - интеграция с банковскими системами
-  - OperatorClient - интеграция с операторскими API
-  - QrDecoderClient - декодирование QR-кодов
-- **Security**: JWS v2 верификация подписей, управление ключами
-- **Data Layer**: Entity модели и Oracle схема
-- **Error Handling**: Централизованная обработка исключений
-- **Logging**: Структурированное логирование всех операций
+  - IncomingController for incoming requests from operators
+  - MerchantController for external QR payments
+- **Service Layer**: Complete service architecture
+  - MerchantService - QR payment routing
+  - BankService - bank transaction processing
+  - OperatorService - operator transaction processing
+  - IncomingService - facade for incoming operations
+- **Client Layer**: External clients
+  - BankClient - integration with banking systems
+  - OperatorClient - integration with operator APIs
+  - QrDecoderClient - QR code decoding
+- **Security**: JWS v2 signature verification, key management
+- **Data Layer**: Entity models and Oracle schema
+- **Error Handling**: Centralized exception handling
+- **Logging**: Structured logging for all operations
 
-### 🔄 В разработке
-- Интеграция с Redis для кэширования
-- Интеграция с RabbitMQ для асинхронной обработки
-- Расширение OperatorService для входящих транзакций
+### 🔄 In Development
+- Redis integration for caching
+- RabbitMQ integration for asynchronous processing
+- OperatorService extension for incoming transactions
 
 ## API Endpoints
 
-### Входящие от Оператора (активные)
-- `POST /in/qr/{version}/tx/check` - Проверка транзакции
-- `POST /in/qr/{version}/tx/create` - Создание транзакции  
-- `POST /in/qr/{version}/tx/execute/{transactionId}` - Выполнение транзакции
-- `POST /in/qr/{version}/tx/update/{transactionId}` - Обновление статуса
+### Incoming from Operator (active)
+- `POST /in/qr/{version}/tx/check` - Transaction check
+- `POST /in/qr/{version}/tx/create` - Transaction creation  
+- `POST /in/qr/{version}/tx/execute/{transactionId}` - Transaction execution
+- `POST /in/qr/{version}/tx/update/{transactionId}` - Status update
 
-### Внешние API для QR-платежей (активные)
-- `POST /out/qr/{version}/check` - Проверка QR-кода
-- `POST /out/qr/{version}/make-payment` - Создание платежа
+### External APIs for QR Payments (active)
+- `POST /out/qr/{version}/check` - QR code check
+- `POST /out/qr/{version}/make-payment` - Payment creation
 
-### Архитектура маршрутизации
-- **BankService**: Обрабатывает транзакции для `merchantProvider = "demirbank"`
-- **OperatorService**: Обрабатывает транзакции для всех других провайдеров
-- **IncomingService**: Всегда делегирует операции в BankService
+### Routing Architecture
+- **BankService**: Processes transactions for `merchantProvider = "demirbank"`
+- **OperatorService**: Processes transactions for all other providers
+- **IncomingService**: Always delegates operations to BankService
 
-## Технологии
+## Technologies
 
 - **Java 21** + **Spring Boot 3.4.1**
 - **Gradle** + **Lombok**
 - **Jakarta Bean Validation** + **Jackson**
-- **Oracle DB** + **Redis** (настроено) + **RabbitMQ** (планируется)
+- **Oracle DB** + **Redis** (configured) + **RabbitMQ** (planned)
 - **Reactive Programming** (WebFlux + Reactor)
-- **JWS v2** для верификации подписей
+- **JWS v2** for signature verification
 
-## Документация
+## Documentation
 
-📚 **Полная документация**: [`../docs/internal/`](../docs/internal/)
+📚 **Complete documentation**: [`../docs/internal/`](../docs/internal/)
 
-### Основные разделы:
-- **[design/service-architecture.md](../docs/internal/design/service-architecture.md)** - Архитектура сервисов
-- **[api/](../docs/internal/api/)** - API контракты и DTOs
-- **[product/PRD.md](../docs/internal/product/PRD.md)** - Продуктовые требования
-- **[design/](../docs/internal/design/)** - Архитектура и потоки
-- **[security/](../docs/internal/security/)** - Криптография и безопасность
-- **[data/](../docs/internal/data/)** - Схема БД и миграции
+### Main sections:
+- **[design/service-architecture.md](../docs/internal/design/service-architecture.md)** - Service architecture
+- **[api/](../docs/internal/api/)** - API contracts and DTOs
+- **[product/PRD.md](../docs/internal/product/PRD.md)** - Product requirements
+- **[design/](../docs/internal/design/)** - Architecture and flows
+- **[security/](../docs/internal/security/)** - Cryptography and security
+- **[data/](../docs/internal/data/)** - Database schema and migrations
 
-### Настройка:
-- **[SIGNATURE_SETUP.md](SIGNATURE_SETUP.md)** - Настройка RSA подписей
-- **[ORACLE_SETUP.md](ORACLE_SETUP.md)** - Настройка Oracle DB
+### Setup:
+- **[SIGNATURE_SETUP.md](SIGNATURE_SETUP.md)** - RSA signature setup
+- **[ORACLE_SETUP.md](ORACLE_SETUP.md)** - Oracle DB setup
 
-## Примеры запросов
+## Request Examples
 
-### QR-платеж (внешний API)
+### QR Payment (external API)
 ```bash
-# Проверка QR-кода
+# QR code check
 curl -X POST http://localhost:8080/out/qr/v1/check \
   -H "Content-Type: application/json" \
   -d '{
     "qrUri": "https://example.com/qr?data=encoded_qr_data"
   }'
 
-# Создание платежа
+# Payment creation
 curl -X POST http://localhost:8080/out/qr/v1/make-payment \
   -H "Content-Type: application/json" \
   -d '{
@@ -100,9 +100,9 @@ curl -X POST http://localhost:8080/out/qr/v1/make-payment \
   }'
 ```
 
-### Входящая транзакция (от оператора)
+### Incoming Transaction (from operator)
 ```bash
-# Check транзакции (требует JWS v2 подпись)
+# Transaction check (requires JWS v2 signature)
 curl -X POST http://localhost:8080/in/qr/v1/tx/check \
   -H "Content-Type: application/json" \
   -H "H-HASH: <jws-signature>" \
@@ -117,40 +117,40 @@ curl -X POST http://localhost:8080/in/qr/v1/tx/check \
   }'
 ```
 
-## Разработка
+## Development
 
-### Требования
+### Requirements
 - Java 21+
-- Gradle 8.x (wrapper включен)
+- Gradle 8.x (wrapper included)
 
-### Сборка
+### Build
 ```bash
 ./gradlew build
 ```
 
-### Конфигурация
-Настройки в `src/main/resources/application.yml`:
+### Configuration
+Settings in `src/main/resources/application.yml`:
 - Server port
 - Database connections  
 - Redis configuration
 - RabbitMQ queues
 - Logging levels
 
-### Логирование
-Структурированное логирование настроено в `logback-spring.xml`:
+### Logging
+Structured logging configured in `logback-spring.xml`:
 
-**Директория логов**: `logs/`
-- `psp-service.log` - основные логи приложения
-- `psp-service-error.log` - только ошибки (ERROR level)
-- `psp-service-audit.log` - аудит операций (90 дней хранения)
-- `psp-service-performance.log` - метрики производительности (7 дней хранения)
+**Log directory**: `logs/`
+- `psp-service.log` - main application logs
+- `psp-service-error.log` - errors only (ERROR level)
+- `psp-service-audit.log` - operation audit (90 days retention)
+- `psp-service-performance.log` - performance metrics (7 days retention)
 
-**Ротация логов**:
-- Максимальный размер файла: 100MB
-- История: 30 дней для основных логов
-- Общий размер: до 1GB
+**Log rotation**:
+- Maximum file size: 100MB
+- History: 30 days for main logs
+- Total size: up to 1GB
 
-**Уровни логирования**:
+**Logging levels**:
 - `kg.demirbank.psp`: DEBUG (dev), INFO (prod)
 - `org.hibernate.SQL`: DEBUG (dev), WARN (prod)
 - `org.springframework`: INFO (dev), WARN (prod)

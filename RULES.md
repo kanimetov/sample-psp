@@ -9,7 +9,8 @@
 ### 2. Changes: Permission Required
 - Ask before changing anything
 - Wait for approval
-- Ask before committing
+- **NEVER commit changes without explicit permission**
+- Do not push to remote without explicit authorization
 
 ## Files
 - `.cursorrules` - Main rules

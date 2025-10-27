@@ -82,10 +82,14 @@ Notes on headers/security:
 - Outbox: event persistence in DB and MQ publication (exactly‑once at domain level)
 
 ### 10. Data (Oracle)
-- qr_tx (pk, psp_transaction_id unique, operator_tx_id idx, status, amounts, QR attributes, created_at partition)
-- qr_tx_audit (append‑only, REQ/RESP, stage)
-- integrations_keys (JWKS)
-- outbox_events
+- operations (unified table for all operations: check, create, execute, update)
+  - PK: id
+  - Unique: psp_transaction_id, payment_session_id, transaction_id, receipt_id
+  - Fields: operation_type (CHECK/CREATE/EXECUTE/UPDATE), transfer_direction (IN/OUT/OWN), QR attributes, status, timestamps, retry logic
+  - Indexes: operation_type, transfer_direction, status, created_at, executed_at, merchant_code, qr_link_hash, customer_type
+- extra_data (key-value pairs for additional operation metadata)
+  - FK: operation_id → operations.id
+- outbox_events (for asynchronous event publishing via RabbitMQ)
 
 ### 11. Security
 - mTLS to operator; public key pinning.

@@ -4,23 +4,21 @@
 
 All strings UTF‑8; numbers are integers unless specified otherwise. Amounts in tyiyn (minor units).
 
-## DTO Consolidation
+## DTO Organization
 
-The DTOs have been consolidated and renamed to eliminate code duplication and improve maintainability:
+DTOs are organized by communication direction to clearly indicate data flow and eliminate duplication:
 
 ### Response DTOs:
-- **IncomingTransactionResponseDto**: Consolidates `CreateResponseDto`, `ExecuteResponseDto`, and `StatusDto` for incoming operations
-- **OutgoingTransactionResponseDto**: Consolidates `CreateResponseDto`, `ExecuteResponseDto`, and `StatusDto` for outgoing operations  
-- **IncomingCheckResponseDto**: Renamed from `CheckResponseDto` for incoming check operations
-- **OutgoingCheckResponseDto**: Renamed from `CheckResponseDto` for outgoing check operations
+- **IncomingTransactionResponseDto**: Used for incoming create, execute, and status operations
+- **OutgoingTransactionResponseDto**: Used for outgoing create, execute, and status operations  
+- **IncomingCheckResponseDto**: Used for incoming check operations
+- **OutgoingCheckResponseDto**: Used for outgoing check operations
 
 ### Request DTOs:
-- **IncomingCheckRequestDto**: Renamed from `CheckRequestDto` for incoming check operations
-- **IncomingCreateRequestDto**: Renamed from `CreateRequestDto` for incoming create operations
-- **OutgoingCheckRequestDto**: Renamed from `CheckRequestDto` for outgoing check operations
-- **OutgoingCreateRequestDto**: Renamed from `CreateRequestDto` for outgoing create operations
-
-This consolidation maintains full backward compatibility while providing clearer naming conventions that indicate the direction of data flow.
+- **IncomingCheckRequestDto**: Used for incoming check operations
+- **IncomingCreateRequestDto**: Used for incoming create operations
+- **OutgoingCheckRequestDto**: Used for outgoing check operations
+- **OutgoingCreateRequestDto**: Used for outgoing create operations
 
 ## DTO Package Structure
 
@@ -161,7 +159,7 @@ kg.demirbank.psp.dto/
 
 ## Endpoint Mapping
 
-### Incoming from Operator (Operator → PSP) - IMPLEMENTED
+### Incoming from Operator (Operator → PSP)
 
 | Operation | Endpoint | Request DTO | Response DTO |
 |----------|----------|-------------|--------------|
@@ -170,7 +168,7 @@ kg.demirbank.psp.dto/
 | Execute | POST /in/qr/{v}/tx/execute/{id} | (empty) | IncomingTransactionResponseDto |
 | Update | POST /in/qr/{v}/tx/update/{id} | UpdateDto | ACK (200 OK) |
 
-### Outgoing to Operator (PSP → Operator) - IMPLEMENTED
+### Outgoing to Operator (PSP → Operator)
 
 | Operation | Endpoint | Request DTO | Response DTO |
 |----------|----------|-------------|--------------|

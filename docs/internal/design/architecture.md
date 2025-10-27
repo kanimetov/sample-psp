@@ -12,7 +12,7 @@
     - **BankClient** - Internal bank operations
     - **OperatorClient** - External operator interaction
     - **QrDecoderClient** - QR code parsing and validation
-  - **Oracle** - Main storage (transactions, check_requests, extra_data)
+  - **Oracle** - Main storage (operations, extra_data)
   - **Redis** - Caching and idempotency (planned)
   - **RabbitMQ** - Asynchronous processing (planned)
 

@@ -27,21 +27,21 @@ kg.demirbank.psp.dto/
         └── OutgoingTransactionResponseDto.java - Response for create/execute/status operations
 ```
 
-## DTO Consolidation
+## DTO Organization
 
-The DTOs have been consolidated and renamed to eliminate code duplication:
+DTOs are organized by communication direction to clearly indicate data flow:
 
 ### Response DTOs:
-- **IncomingTransactionResponseDto**: Consolidates `CreateResponseDto`, `ExecuteResponseDto`, and `StatusDto` for incoming operations
-- **OutgoingTransactionResponseDto**: Consolidates `CreateResponseDto`, `ExecuteResponseDto`, and `StatusDto` for outgoing operations  
-- **IncomingCheckResponseDto**: Renamed from `CheckResponseDto` for incoming check operations
-- **OutgoingCheckResponseDto**: Renamed from `CheckResponseDto` for outgoing check operations
+- **IncomingTransactionResponseDto**: Used for incoming create, execute, and status operations
+- **OutgoingTransactionResponseDto**: Used for outgoing create, execute, and status operations  
+- **IncomingCheckResponseDto**: Used for incoming check operations
+- **OutgoingCheckResponseDto**: Used for outgoing check operations
 
 ### Request DTOs:
-- **IncomingCheckRequestDto**: Renamed from `CheckRequestDto` for incoming check operations
-- **IncomingCreateRequestDto**: Renamed from `CreateRequestDto` for incoming create operations
-- **OutgoingCheckRequestDto**: Renamed from `CheckRequestDto` for outgoing check operations
-- **OutgoingCreateRequestDto**: Renamed from `CreateRequestDto` for outgoing create operations
+- **IncomingCheckRequestDto**: Used for incoming check operations
+- **IncomingCreateRequestDto**: Used for incoming create operations
+- **OutgoingCheckRequestDto**: Used for outgoing check operations
+- **OutgoingCreateRequestDto**: Used for outgoing create operations
 
 ---
 

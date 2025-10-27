@@ -14,48 +14,48 @@ This document provides the definitive list of all API endpoints in the PSP syste
 
 ## Endpoint Categories
 
-### 1. Incoming (Operator → PSP) - ✅ IMPLEMENTED
+### 1. Incoming (Operator → PSP)
 
 **Implementation:** `IncomingController.java`  
 **Base URL:** `/in/qr/{version}/tx`
 
-| Operation | Method | Endpoint | Status | Description |
-|-----------|--------|----------|--------|-------------|
-| Check | POST | `/in/qr/{version}/tx/check` | ✅ | QR code verification |
-| Create | POST | `/in/qr/{version}/tx/create` | ✅ | Transaction creation |
-| Execute | POST | `/in/qr/{version}/tx/execute/{transactionId}` | ✅ | Transaction execution |
-| Update | POST | `/in/qr/{version}/tx/update/{transactionId}` | ✅ | Status update |
+| Operation | Method | Endpoint | Description |
+|-----------|--------|----------|-------------|
+| Check | POST | `/in/qr/{version}/tx/check` | QR code verification |
+| Create | POST | `/in/qr/{version}/tx/create` | Transaction creation |
+| Execute | POST | `/in/qr/{version}/tx/execute/{transactionId}` | Transaction execution |
+| Update | POST | `/in/qr/{version}/tx/update/{transactionId}` | Status update |
 
 **Security:** All endpoints require `H-HASH` (JWS v2 signature)
 
 ---
 
-### 2. Merchant (Merchant → PSP) - ✅ IMPLEMENTED
+### 2. Merchant (Merchant → PSP)
 
 **Implementation:** `MerchantController.java`  
-**Base URL:** `/out/qr/{version}`
+**Base URL:** `/merchant/qr/{version}`
 
-| Operation | Method | Endpoint | Status | Description |
-|-----------|--------|----------|--------|-------------|
-| Check | POST | `/out/qr/{version}/check` | ✅ | QR code verification for merchants |
-| Make Payment | POST | `/out/qr/{version}/makePayment` | ✅ | Payment processing for merchants |
+| Operation | Method | Endpoint | Description |
+|-----------|--------|----------|-------------|
+| Check | POST | `/merchant/qr/{version}/check` | QR code verification for merchants |
+| Make Payment | POST | `/merchant/qr/{version}/makePayment` | Payment processing for merchants |
 
 **Security:** No signature verification required (public merchant API)
 
 ---
 
-### 3. Outgoing (PSP → Operator) - 🔄 PLANNED
+### 3. Outgoing (PSP → Operator)
 
 **Implementation:** `OperatorClient.java`  
 **Base URL:** `/psp/api/v1/payment/qr/{version}/tx`
 
-| Operation | Method | Endpoint | Status | Description |
-|-----------|--------|----------|--------|-------------|
-| Check | POST | `/psp/api/v1/payment/qr/{version}/tx/check` | 🔄 | QR code verification |
-| Create | POST | `/psp/api/v1/payment/qr/{version}/tx/create` | 🔄 | Transaction creation |
-| Execute | POST | `/psp/api/v1/payment/qr/{version}/tx/execute/{transactionId}` | 🔄 | Transaction execution |
-| Get | GET | `/psp/api/v1/payment/qr/{version}/tx/get/{transactionId}` | 🔄 | Status retrieval |
-| Update | POST | `/psp/api/v1/payment/qr/{version}/tx/update/{transactionId}` | 🔄 | Status update |
+| Operation | Method | Endpoint | Description |
+|-----------|--------|----------|-------------|
+| Check | POST | `/psp/api/v1/payment/qr/{version}/tx/check` | QR code verification |
+| Create | POST | `/psp/api/v1/payment/qr/{version}/tx/create` | Transaction creation |
+| Execute | POST | `/psp/api/v1/payment/qr/{version}/tx/execute/{transactionId}` | Transaction execution |
+| Get | GET | `/psp/api/v1/payment/qr/{version}/tx/get/{transactionId}` | Status retrieval |
+| Update | POST | `/psp/api/v1/payment/qr/{version}/tx/update/{transactionId}` | Status update |
 
 **Security:** All endpoints require:
 - `H-PSP-TOKEN` (PSP authentication token)
@@ -117,11 +117,6 @@ Accept: application/json
 | Check | `ClientCheckRequestDto` | `ClientCheckResponseDto` |
 | Make Payment | `ClientMakePaymentRequestDto` | `ClientMakePaymentResponseDto` |
 
-## Implementation Status
-
-- ✅ **IMPLEMENTED:** Incoming APIs (Operator → PSP) - `IncomingController.java`
-- ✅ **IMPLEMENTED:** Merchant APIs (Merchant → PSP) - `MerchantController.java`
-- 🔄 **PLANNED:** Outgoing APIs (PSP → Operator) - `OperatorClient.java`
 
 ## Related Documentation
 

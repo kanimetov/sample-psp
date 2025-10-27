@@ -28,7 +28,6 @@
 - **data/** — database and caching
   - redis-schema.md — **MASTER** Redis reference
   - schema.md — Oracle database schema
-  - migrations.md — database migration strategy
 - **reliability/** — resilience patterns
   - idempotency.md — idempotency implementation
   - ratelimiting.md — rate limiting strategy
@@ -40,7 +39,6 @@
   - configuration-reference.md — **MASTER** config reference
   - observability.md — monitoring and logging
   - structured-logging.md — **MASTER** logging reference
-  - logging-migration.md — logging system migration guide
   - operations.md — deployment procedures
 - **testing/** — testing strategy
   - test-plan.md — comprehensive testing approach

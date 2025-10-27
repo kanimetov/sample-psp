@@ -1,37 +1,16 @@
 -- Oracle DDL (baseline) - PSP Service Schema
+-- This schema uses a unified operations table design
 
--- Table for storing check request operations
-CREATE TABLE check_requests (
+-- Unified table for storing all PSP operations (check/create/execute/update)
+-- This single table design allows easy querying of all operation data with proper direction tracking
+CREATE TABLE operations (
     id NUMBER(19) NOT NULL,
-    qr_type VARCHAR2(32) NOT NULL,
-    merchant_provider VARCHAR2(32) NOT NULL,
-    merchant_id VARCHAR2(32),
-    service_id VARCHAR2(32),
-    service_name VARCHAR2(32),
-    beneficiary_account_number VARCHAR2(32),
-    merchant_code NUMBER(10) NOT NULL,
-    currency_code VARCHAR2(3) NOT NULL,
-    qr_transaction_id VARCHAR2(32),
-    qr_comment VARCHAR2(32),
-    customer_type VARCHAR2(1) NOT NULL,
-    amount NUMBER(19) NOT NULL,
-    qr_link_hash VARCHAR2(4) NOT NULL,
-    request_hash VARCHAR2(255),
-    api_version VARCHAR2(10),
-    created_at TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP,
-    processed_at TIMESTAMP,
-    response_status VARCHAR2(20),
-    error_message VARCHAR2(500),
-    CONSTRAINT pk_check_requests PRIMARY KEY (id)
-);
-
--- Table for storing transaction operations (create/execute/update)
-CREATE TABLE transactions (
-    id NUMBER(19) NOT NULL,
-    transaction_id VARCHAR2(32) NOT NULL,
     psp_transaction_id VARCHAR2(50) NOT NULL,
-    receipt_id VARCHAR2(20) NOT NULL,
+    payment_session_id VARCHAR2(50),
+    operation_type NUMBER(1) NOT NULL,
+    transfer_direction VARCHAR2(3) NOT NULL,
+    transaction_id VARCHAR2(32),
+    receipt_id VARCHAR2(20),
     qr_type VARCHAR2(32) NOT NULL,
     merchant_provider VARCHAR2(32) NOT NULL,
     merchant_id VARCHAR2(32),
@@ -41,12 +20,12 @@ CREATE TABLE transactions (
     merchant_code NUMBER(10) NOT NULL,
     currency_code VARCHAR2(3) NOT NULL,
     qr_transaction_id VARCHAR2(32),
-    qr_comment VARCHAR2(32),
+    qr_comment VARCHAR2(99),
     customer_type VARCHAR2(1) NOT NULL,
     amount NUMBER(19) NOT NULL,
     qr_link_hash VARCHAR2(4) NOT NULL,
-    transaction_type NUMBER(10) NOT NULL,
-    status NUMBER(10) NOT NULL,
+    transaction_type NUMBER(1),
+    status NUMBER(1),
     beneficiary_name VARCHAR2(100),
     request_hash VARCHAR2(255),
     api_version VARCHAR2(10),
@@ -60,13 +39,16 @@ CREATE TABLE transactions (
     is_final NUMBER(1) NOT NULL DEFAULT 0,
     created_by VARCHAR2(50),
     updated_by VARCHAR2(50),
-    ip_address VARCHAR2(45),
-    user_agent VARCHAR2(500),
-    CONSTRAINT pk_transactions PRIMARY KEY (id),
-    CONSTRAINT uk_transactions_transaction_id UNIQUE (transaction_id),
-    CONSTRAINT uk_transactions_psp_transaction_id UNIQUE (psp_transaction_id),
-    CONSTRAINT uk_transactions_receipt_id UNIQUE (receipt_id),
-    CONSTRAINT uk_transactions_qr_transaction_id UNIQUE (qr_transaction_id)
+    CONSTRAINT pk_operations PRIMARY KEY (id),
+    CONSTRAINT uk_operations_psp_transaction_id UNIQUE (psp_transaction_id),
+    CONSTRAINT uk_operations_payment_session_id UNIQUE (payment_session_id),
+    CONSTRAINT uk_operations_transaction_id UNIQUE (transaction_id),
+    CONSTRAINT uk_operations_receipt_id UNIQUE (receipt_id),
+    CONSTRAINT chk_operations_operation_type CHECK (operation_type IN (10, 20, 30, 40)),
+    CONSTRAINT chk_operations_transfer_direction CHECK (transfer_direction IN ('IN', 'OUT', 'OWN')),
+    CONSTRAINT chk_operations_customer_type CHECK (customer_type IN ('1', '2')),
+    CONSTRAINT chk_operations_qr_type CHECK (qr_type IN ('staticQr', 'dynamicQr')),
+    CONSTRAINT chk_operations_currency_code CHECK (currency_code = '417')
 );
 
 -- Table for storing extra key-value data
@@ -75,39 +57,47 @@ CREATE TABLE extra_data (
     key_name VARCHAR2(64) NOT NULL,
     value_data VARCHAR2(256) NOT NULL,
     order_index NUMBER(10),
-    check_request_id NUMBER(19),
-    transaction_id NUMBER(19),
+    operation_id NUMBER(19) NOT NULL,
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP,
     is_active NUMBER(1) NOT NULL DEFAULT 1,
     data_type VARCHAR2(20),
     description VARCHAR2(200),
     CONSTRAINT pk_extra_data PRIMARY KEY (id),
-    CONSTRAINT fk_extra_data_check_request FOREIGN KEY (check_request_id) REFERENCES check_requests(id),
-    CONSTRAINT fk_extra_data_transaction FOREIGN KEY (transaction_id) REFERENCES transactions(id)
+    CONSTRAINT fk_extra_data_operation FOREIGN KEY (operation_id) REFERENCES operations(id)
 );
 
--- Create indexes for better performance
-CREATE INDEX idx_check_requests_created_at ON check_requests(created_at);
-CREATE INDEX idx_check_requests_qr_link_hash ON check_requests(qr_link_hash);
-CREATE INDEX idx_check_requests_merchant_code ON check_requests(merchant_code);
-CREATE INDEX idx_check_requests_qr_transaction_id ON check_requests(qr_transaction_id);
+-- Create sequences
+CREATE SEQUENCE operations_seq
+    START WITH 1
+    INCREMENT BY 1
+    NOCACHE
+    NOCYCLE;
 
--- Additional indexes for transactions table
-CREATE INDEX idx_transactions_status ON transactions(status);
-CREATE INDEX idx_transactions_created_at ON transactions(created_at);
-CREATE INDEX idx_transactions_executed_at ON transactions(executed_at);
-CREATE INDEX idx_transactions_merchant_code ON transactions(merchant_code);
-CREATE INDEX idx_transactions_qr_link_hash ON transactions(qr_link_hash);
+CREATE SEQUENCE extra_data_seq
+    START WITH 1
+    INCREMENT BY 1
+    NOCACHE
+    NOCYCLE;
 
--- Indexes for extra_data table
-CREATE INDEX idx_extra_data_check_request_id ON extra_data(check_request_id);
-CREATE INDEX idx_extra_data_transaction_id ON extra_data(transaction_id);
+-- Performance indexes for operations table
+CREATE INDEX idx_operations_operation_type ON operations(operation_type);
+CREATE INDEX idx_operations_transfer_direction ON operations(transfer_direction);
+CREATE INDEX idx_operations_status ON operations(status);
+CREATE INDEX idx_operations_created_at ON operations(created_at);
+CREATE INDEX idx_operations_executed_at ON operations(executed_at);
+CREATE INDEX idx_operations_merchant_code ON operations(merchant_code);
+CREATE INDEX idx_operations_qr_link_hash ON operations(qr_link_hash);
+CREATE INDEX idx_operations_customer_type ON operations(customer_type);
+CREATE INDEX idx_operations_psp_transaction_id ON operations(psp_transaction_id);
+CREATE INDEX idx_operations_payment_session_id ON operations(payment_session_id);
+
+-- Performance indexes for extra_data table
+CREATE INDEX idx_extra_data_operation_id ON extra_data(operation_id);
 CREATE INDEX idx_extra_data_key_name ON extra_data(key_name);
 
 -- Grant permissions to application user (replace 'psp_user' with actual username)
--- GRANT SELECT, INSERT, UPDATE, DELETE ON check_requests TO psp_user;
--- GRANT SELECT, INSERT, UPDATE, DELETE ON transactions TO psp_user;
+-- GRANT SELECT, INSERT, UPDATE, DELETE ON operations TO psp_user;
 -- GRANT SELECT, INSERT, UPDATE, DELETE ON extra_data TO psp_user;
 
 

@@ -72,7 +72,7 @@ graph TD
   - Process QR-based transactions for external operator merchants
   - Handle operator-specific business logic
   - Integration with external operator APIs
-  - **Limitation**: Only supports QR-based transactions, not incoming transactions
+  - Supports QR-based transactions only
 
 ### IncomingService
 - **Primary Role**: Facade for incoming transaction operations
@@ -120,11 +120,11 @@ private boolean isBankProvider(String merchantProvider) {
 ```
 
 - **Bank Service**: Used when `merchantProvider` equals configured value ("demirbank")
-  - Handles both QR-based transactions AND incoming transactions
+  - Handles both QR-based transactions and incoming transactions
   - Full transaction lifecycle support
 - **Operator Service**: Used for all other merchant providers
-  - **Limitation**: Only handles QR-based transactions
-  - **Limitation**: Does NOT handle incoming transactions
+  - Handles QR-based transactions only
+  - Does not handle incoming transactions
 - **Incoming Service**: Always delegates to BankService regardless of provider
 
 ## Error Handling
@@ -135,22 +135,13 @@ All services implement consistent error handling:
 - **ResourceNotFoundException**: For missing resources
 - **ValidationException**: For input validation errors
 
-## Future Enhancements
+## Architecture Patterns
 
-### Planned Improvements
-- **Redis Integration**: Caching and idempotency (partially configured)
-- **RabbitMQ Integration**: Asynchronous processing
-- **Circuit Breakers**: Resilience patterns for external calls
-- **Metrics**: Service-level monitoring and observability
-- **OperatorService Incoming Support**: Extend OperatorService to handle incoming transactions
-- **Service Discovery**: Dynamic service provider selection
-
-### Service Evolution
-- **Client Abstraction**: Common interface for all external clients
-- **Load Balancing**: Multiple instances of external services
-- **Retry Logic**: Configurable retry strategies
-- **Transaction State Machine**: Enhanced transaction lifecycle management
-- **Audit Trail**: Comprehensive transaction logging and tracking
+### Current Patterns
+- **Service Layer**: Clear separation between controllers, services, and clients
+- **Error Handling**: Centralized exception management with PspException hierarchy
+- **DTO Organization**: Direction-based DTOs for clear data flow
+- **Repository Pattern**: Entity-based data access with OperationRepository
 
 ## Related Documentation
 

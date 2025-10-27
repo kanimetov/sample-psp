@@ -13,9 +13,8 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Unified entity for storing all PSP operations (check, create, execute, update).
- * This table consolidates check requests and transactions into a single table
- * with proper direction tracking and field nullability based on operation type.
+ * Entity for storing all PSP operations (check, create, execute, update).
+ * Supports three transfer directions (IN, OUT, OWN) and proper field nullability based on operation type.
  */
 @Entity
 @Table(name = "operations")

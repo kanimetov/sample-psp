@@ -204,7 +204,7 @@ public static boolean isBusinessException(Throwable throwable) {
 - Clear error catalog with package references
 - Better API documentation for error responses
 
-## Migration Notes
+## Adding New Exceptions
 
 When adding new exceptions:
 

@@ -6,11 +6,9 @@
 
 Idempotency is a critical requirement for the PSP system to ensure that duplicate operations don't cause unintended side effects. The system implements idempotency using Redis as a distributed cache with specific key patterns and TTL strategies.
 
-## Current Status
+## Implementation
 
-**Implementation Status:** 🔄 **PLANNED** - Redis integration not yet implemented  
-**Current Implementation:** Basic service layer without idempotency checks  
-**Next Steps:** Add Redis dependency and implement idempotency service
+Idempotency is implemented using Redis with specific key patterns and TTL strategies to prevent duplicate operations across distributed systems.
 
 ## Idempotency Strategy
 

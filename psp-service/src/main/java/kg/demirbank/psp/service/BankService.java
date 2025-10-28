@@ -8,6 +8,7 @@ import kg.demirbank.psp.dto.incoming.request.IncomingCheckRequestDto;
 import kg.demirbank.psp.dto.incoming.request.IncomingCreateRequestDto;
 import kg.demirbank.psp.dto.incoming.response.IncomingCheckResponseDto;
 import kg.demirbank.psp.dto.incoming.response.IncomingTransactionResponseDto;
+import kg.demirbank.psp.dto.common.ELQRData;
 import reactor.core.publisher.Mono;
 
 /**
@@ -20,9 +21,10 @@ public interface BankService {
      * Check QR payment details using bank client
      * 
      * @param request Merchant check request with QR URI
+     * @param elqrData Decoded ELQR data from QR URI
      * @return Check response with session ID, ELQR data, and beneficiary info
      */
-    Mono<MerchantCheckResponseDto> checkQrPayment(MerchantCheckRequestDto request);
+    Mono<MerchantCheckResponseDto> checkQrPayment(MerchantCheckRequestDto request, ELQRData elqrData);
     
     /**
      * Make payment using bank client

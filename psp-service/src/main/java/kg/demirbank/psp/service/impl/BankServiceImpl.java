@@ -24,7 +24,6 @@ import kg.demirbank.psp.repository.OperationRepository;
 import kg.demirbank.psp.service.clients.BankClient;
 import kg.demirbank.psp.service.BankService;
 import kg.demirbank.psp.service.WebhookService;
-import kg.demirbank.psp.service.clients.QrDecoderClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -44,63 +43,59 @@ import java.util.UUID;
 public class BankServiceImpl implements BankService {
     
     private final BankClient bankClient;
-    private final QrDecoderClient qrDecoderClient;
     private final OperationRepository operationRepository;
     private final WebhookService webhookService;
     
     @Override
-    public Mono<MerchantCheckResponseDto> checkQrPayment(MerchantCheckRequestDto request) {
+    public Mono<MerchantCheckResponseDto> checkQrPayment(MerchantCheckRequestDto request, ELQRData elqrData) {
         log.info("Starting bank QR payment check for URI: {}", request.getQrUri());
         
-        return qrDecoderClient.decodeQrUri(request.getQrUri())
-                .flatMap(elqrData -> {
-                    log.debug("QR decoded successfully, ELQR data: {}", elqrData);
+        log.debug("QR decoded successfully, ELQR data: {}", elqrData);
+        
+        // First check if client exists through BankClient
+        BankCheckRequestDto bankCheckRequest = new BankCheckRequestDto();
+        bankCheckRequest.setMerchantId(elqrData.getMerchantId());
+        bankCheckRequest.setBeneficiaryAccountNumber(elqrData.getBeneficiaryAccountNumber());
+        bankCheckRequest.setMerchantCode(elqrData.getMerchantCode());
+        bankCheckRequest.setAmount(0L); // For CHECK operation amount = 0
+        
+        return bankClient.checkAccount(bankCheckRequest)
+                .flatMap(bankCheckResponse -> {
+                    // Validate account exists
+                    if (!Boolean.TRUE.equals(bankCheckResponse.getAccountValid())) {
+                        return Mono.error(new BadRequestException("Account check failed"));
+                    }
                     
-                    // First check if client exists through BankClient
-                    BankCheckRequestDto bankCheckRequest = new BankCheckRequestDto();
-                    bankCheckRequest.setMerchantId(elqrData.getMerchantId());
-                    bankCheckRequest.setBeneficiaryAccountNumber(elqrData.getBeneficiaryAccountNumber());
-                    bankCheckRequest.setMerchantCode(elqrData.getMerchantCode());
-                    bankCheckRequest.setAmount(0L); // For CHECK operation amount = 0
+                    // Only after successful validation create and save operation
+                    OperationEntity operation = createOperationEntity(
+                            OperationType.CHECK, 
+                            request.getQrUri(), 
+                            elqrData
+                    );
                     
-                    return bankClient.checkAccount(bankCheckRequest)
-                            .flatMap(bankCheckResponse -> {
-                                // Validate account exists
-                                if (!Boolean.TRUE.equals(bankCheckResponse.getAccountValid())) {
-                                    return Mono.error(new BadRequestException("Account check failed"));
-                                }
+                    return Mono.fromCallable(() -> operationRepository.save(operation))
+                            .map(savedOperation -> {
+                                log.debug("Operation saved with ID: {}", savedOperation.getId());
                                 
-                                // Only after successful validation create and save operation
-                                OperationEntity operation = createOperationEntity(
-                                        OperationType.CHECK, 
-                                        request.getQrUri(), 
-                                        elqrData
-                                );
+                                // Create response
+                                MerchantCheckResponseDto response = new MerchantCheckResponseDto();
+                                response.setPaymentSessionId(savedOperation.getPaymentSessionId());
+                                response.setBeneficiaryName(elqrData.getMerchantId());
+                                response.setQrType(elqrData.getQrType());
+                                response.setMerchantProvider(elqrData.getMerchantProvider());
+                                response.setMerchantId(elqrData.getMerchantId());
+                                response.setServiceId(elqrData.getServiceId());
+                                response.setServiceName(elqrData.getServiceName());
+                                response.setBeneficiaryAccountNumber(elqrData.getBeneficiaryAccountNumber());
+                                response.setMerchantCode(elqrData.getMerchantCode());
+                                response.setCurrencyCode(elqrData.getCurrencyCode());
+                                response.setQrTransactionId(elqrData.getQrTransactionId());
+                                response.setQrComment(elqrData.getQrComment());
+                                response.setQrLinkHash(elqrData.getQrLinkHash());
+                                response.setExtra(elqrData.getExtra());
                                 
-                                return Mono.fromCallable(() -> operationRepository.save(operation))
-                                        .map(savedOperation -> {
-                                            log.debug("Operation saved with ID: {}", savedOperation.getId());
-                                            
-                                            // Create response
-                                            MerchantCheckResponseDto response = new MerchantCheckResponseDto();
-                                            response.setPaymentSessionId(savedOperation.getPaymentSessionId());
-                                            response.setBeneficiaryName(elqrData.getMerchantId());
-                                            response.setQrType(elqrData.getQrType());
-                                            response.setMerchantProvider(elqrData.getMerchantProvider());
-                                            response.setMerchantId(elqrData.getMerchantId());
-                                            response.setServiceId(elqrData.getServiceId());
-                                            response.setServiceName(elqrData.getServiceName());
-                                            response.setBeneficiaryAccountNumber(elqrData.getBeneficiaryAccountNumber());
-                                            response.setMerchantCode(elqrData.getMerchantCode());
-                                            response.setCurrencyCode(elqrData.getCurrencyCode());
-                                            response.setQrTransactionId(elqrData.getQrTransactionId());
-                                            response.setQrComment(elqrData.getQrComment());
-                                            response.setQrLinkHash(elqrData.getQrLinkHash());
-                                            response.setExtra(elqrData.getExtra());
-                                            
-                                            log.info("Bank QR check completed successfully for session: {}", response.getPaymentSessionId());
-                                            return response;
-                                        });
+                                log.info("Bank QR check completed successfully for session: {}", response.getPaymentSessionId());
+                                return response;
                             });
                 })
                 .onErrorMap(throwable -> {

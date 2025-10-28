@@ -17,7 +17,6 @@ import kg.demirbank.psp.exception.network.SystemErrorException;
 import kg.demirbank.psp.repository.OperationRepository;
 import kg.demirbank.psp.service.clients.OperatorClient;
 import kg.demirbank.psp.service.OperatorService;
-import kg.demirbank.psp.service.clients.QrDecoderClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -36,48 +35,42 @@ import java.util.UUID;
 public class OperatorServiceImpl implements OperatorService {
     
     private final OperatorClient operatorClient;
-    private final QrDecoderClient qrDecoderClient;
     private final OperationRepository operationRepository;
     
     @Override
-    public Mono<MerchantCheckResponseDto> checkQrPayment(MerchantCheckRequestDto request) {
+    public Mono<MerchantCheckResponseDto> checkQrPayment(MerchantCheckRequestDto request, ELQRData elqrData) {
         log.info("Starting operator QR payment check for URI: {}", request.getQrUri());
         
-        return qrDecoderClient.decodeQrUri(request.getQrUri())
-                .flatMap(elqrData -> {
-                    log.debug("QR decoded successfully, ELQR data: {}", elqrData);
+        // Create operation entity for tracking
+        OperationEntity operation = createOperationEntity(
+                OperationType.CHECK, 
+                request.getQrUri(), 
+                elqrData
+        );
+        
+        return Mono.fromCallable(() -> operationRepository.save(operation))
+                .flatMap(savedOperation -> {
+                    log.debug("Operation saved with ID: {}", savedOperation.getId());
                     
-                    // Create operation entity for tracking
-                    OperationEntity operation = createOperationEntity(
-                            OperationType.CHECK, 
-                            request.getQrUri(), 
-                            elqrData
-                    );
+                    // Create response
+                    MerchantCheckResponseDto response = new MerchantCheckResponseDto();
+                    response.setPaymentSessionId(savedOperation.getPaymentSessionId());
+                    response.setBeneficiaryName(elqrData.getMerchantId());
+                    response.setQrType(elqrData.getQrType());
+                    response.setMerchantProvider(elqrData.getMerchantProvider());
+                    response.setMerchantId(elqrData.getMerchantId());
+                    response.setServiceId(elqrData.getServiceId());
+                    response.setServiceName(elqrData.getServiceName());
+                    response.setBeneficiaryAccountNumber(elqrData.getBeneficiaryAccountNumber());
+                    response.setMerchantCode(elqrData.getMerchantCode());
+                    response.setCurrencyCode(elqrData.getCurrencyCode());
+                    response.setQrTransactionId(elqrData.getQrTransactionId());
+                    response.setQrComment(elqrData.getQrComment());
+                    response.setQrLinkHash(elqrData.getQrLinkHash());
+                    response.setExtra(elqrData.getExtra());
                     
-                    return Mono.fromCallable(() -> operationRepository.save(operation))
-                            .flatMap(savedOperation -> {
-                                log.debug("Operation saved with ID: {}", savedOperation.getId());
-                                
-                                // Create response
-                                MerchantCheckResponseDto response = new MerchantCheckResponseDto();
-                                response.setPaymentSessionId(savedOperation.getPaymentSessionId());
-                                response.setBeneficiaryName(elqrData.getMerchantId());
-                                response.setQrType(elqrData.getQrType());
-                                response.setMerchantProvider(elqrData.getMerchantProvider());
-                                response.setMerchantId(elqrData.getMerchantId());
-                                response.setServiceId(elqrData.getServiceId());
-                                response.setServiceName(elqrData.getServiceName());
-                                response.setBeneficiaryAccountNumber(elqrData.getBeneficiaryAccountNumber());
-                                response.setMerchantCode(elqrData.getMerchantCode());
-                                response.setCurrencyCode(elqrData.getCurrencyCode());
-                                response.setQrTransactionId(elqrData.getQrTransactionId());
-                                response.setQrComment(elqrData.getQrComment());
-                                response.setQrLinkHash(elqrData.getQrLinkHash());
-                                response.setExtra(elqrData.getExtra());
-                                
-                                log.info("Operator QR check completed successfully for session: {}", response.getPaymentSessionId());
-                                return Mono.just(response);
-                            });
+                    log.info("Operator QR check completed successfully for session: {}", response.getPaymentSessionId());
+                    return Mono.just(response);
                 })
                 .onErrorMap(throwable -> {
                     if (throwable instanceof PspException) {

@@ -4,7 +4,9 @@ import kg.demirbank.psp.dto.merchant.request.MerchantCheckRequestDto;
 import kg.demirbank.psp.dto.merchant.request.MerchantMakePaymentRequestDto;
 import kg.demirbank.psp.dto.merchant.response.MerchantCheckResponseDto;
 import kg.demirbank.psp.dto.merchant.response.MerchantMakePaymentResponseDto;
+import kg.demirbank.psp.dto.common.ELQRData;
 import kg.demirbank.psp.service.MerchantService;
+import kg.demirbank.psp.service.clients.QrDecoderClient;
 import kg.demirbank.psp.util.LoggingUtil;
 import kg.demirbank.psp.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +27,7 @@ import reactor.core.publisher.Mono;
 public class MerchantController {
     
     private final MerchantService merchantService;
+    private final QrDecoderClient qrDecoderClient;
     private final ValidationUtil validationUtil;
     
     /**
@@ -46,8 +49,14 @@ public class MerchantController {
         // Validate DTO
         validationUtil.validateDto(request);
         
-        // Process the request using business service
-        return merchantService.checkQrPayment(request)
+        // Decode QR URI first
+        return qrDecoderClient.decodeQrUri(request.getQrUri())
+                .flatMap(elqrData -> {
+                    log.debug("QR decoded successfully, ELQR data: {}", elqrData);
+                    
+                    // Process the request using business service with decoded data
+                    return merchantService.checkQrPayment(request, elqrData);
+                })
                 .map(ResponseEntity::ok)
                 .onErrorResume(e -> Mono.error(e)); // Let GlobalExceptionHandler handle it
     }

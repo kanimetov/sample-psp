@@ -4,6 +4,7 @@ import kg.demirbank.psp.dto.merchant.request.MerchantCheckRequestDto;
 import kg.demirbank.psp.dto.merchant.request.MerchantMakePaymentRequestDto;
 import kg.demirbank.psp.dto.merchant.response.MerchantCheckResponseDto;
 import kg.demirbank.psp.dto.merchant.response.MerchantMakePaymentResponseDto;
+import kg.demirbank.psp.dto.common.ELQRData;
 import kg.demirbank.psp.exception.PspException;
 import kg.demirbank.psp.exception.business.ResourceNotFoundException;
 import kg.demirbank.psp.exception.network.SystemErrorException;
@@ -11,7 +12,6 @@ import kg.demirbank.psp.repository.OperationRepository;
 import kg.demirbank.psp.service.BankService;
 import kg.demirbank.psp.service.MerchantService;
 import kg.demirbank.psp.service.OperatorService;
-import kg.demirbank.psp.service.clients.QrDecoderClient;
 import kg.demirbank.psp.util.LoggingUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +30,6 @@ import reactor.core.publisher.Mono;
 public class MerchantServiceImpl implements MerchantService {
     
     
-    private final QrDecoderClient qrDecoderClient;
     private final BankService bankService;
     private final OperatorService operatorService;
     private final OperationRepository operationRepository;
@@ -39,39 +38,20 @@ public class MerchantServiceImpl implements MerchantService {
     private String configuredMerchantProvider;
     
     @Override
-    public Mono<MerchantCheckResponseDto> checkQrPayment(MerchantCheckRequestDto request) {
+    public Mono<MerchantCheckResponseDto> checkQrPayment(MerchantCheckRequestDto request, ELQRData elqrData) {
         log.info("Starting QR payment check for URI: {}", request.getQrUri());
         
-        return qrDecoderClient.decodeQrUri(request.getQrUri())
-                .flatMap(elqrData -> {
-                    log.debug("QR decoded successfully, ELQR data: {}", elqrData);
-                    
-                    // Determine which service to use based on merchant provider
-                    String merchantProvider = elqrData.getMerchantProvider();
-                    log.info("Routing QR check to service based on merchant provider: {}", merchantProvider);
-                    
-                    if (isBankProvider(merchantProvider)) {
-                        log.debug("Using bank service for QR check");
-                        return bankService.checkQrPayment(request);
-                    } else {
-                        log.debug("Using operator service for QR check");
-                        return operatorService.checkQrPayment(request);
-                    }
-                })
-                .onErrorMap(throwable -> {
-                    // Log error with structured data - no stack trace for business errors
-                    boolean isPspException = throwable instanceof PspException;
-                    String errorMessage = throwable.getMessage();
-                    String errorCode = isPspException ? 
-                        ((PspException) throwable).getCode().toString() : "UNKNOWN_ERROR";
-                    LoggingUtil.logError("QR_CHECK", null, errorCode, errorMessage, throwable);
-                    
-                    if (isPspException) {
-                        return throwable; // Preserve original PspException
-                    }
-                    log.error("Unexpected error during QR check: {}", throwable.getMessage(), throwable);
-                    return new SystemErrorException("Failed to process QR check request", throwable);
-                });
+        // Determine which service to use based on merchant provider
+        String merchantProvider = elqrData.getMerchantProvider();
+        log.info("Routing QR check to service based on merchant provider: {}", merchantProvider);
+        
+        if (isBankProvider(merchantProvider)) {
+            log.debug("Using bank service for QR check");
+            return bankService.checkQrPayment(request, elqrData);
+        } else {
+            log.debug("Using operator service for QR check");
+            return operatorService.checkQrPayment(request, elqrData);
+        }
     }
     
     @Override

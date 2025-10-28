@@ -4,6 +4,7 @@ import kg.demirbank.psp.dto.merchant.request.MerchantCheckRequestDto;
 import kg.demirbank.psp.dto.merchant.request.MerchantMakePaymentRequestDto;
 import kg.demirbank.psp.dto.merchant.response.MerchantCheckResponseDto;
 import kg.demirbank.psp.dto.merchant.response.MerchantMakePaymentResponseDto;
+import kg.demirbank.psp.dto.common.ELQRData;
 import reactor.core.publisher.Mono;
 
 /**
@@ -14,12 +15,13 @@ public interface MerchantService {
     
     /**
      * Check QR payment details
-     * Decodes QR, validates data, and returns beneficiary information
+     * Validates data and returns beneficiary information
      * 
      * @param request Merchant check request with QR URI
+     * @param elqrData Decoded ELQR data from QR URI
      * @return Check response with session ID, ELQR data, and beneficiary info
      */
-    Mono<MerchantCheckResponseDto> checkQrPayment(MerchantCheckRequestDto request);
+    Mono<MerchantCheckResponseDto> checkQrPayment(MerchantCheckRequestDto request, ELQRData elqrData);
     
     /**
      * Make payment after checking QR details

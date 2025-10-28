@@ -29,10 +29,10 @@ External service clients are organized in a dedicated `clients/` folder for bett
 
 ```mermaid
 graph TD
-    A[MerchantController] --> B[MerchantService]
+    A[MerchantController] --> E[QrDecoderClient]
+    E --> B[MerchantService]
     C[IncomingController] --> D[IncomingService]
     
-    B --> E[QrDecoderClient]
     B --> F[BankService]
     B --> G[OperatorService]
     
@@ -49,12 +49,13 @@ graph TD
 ## Service Responsibilities
 
 ### MerchantService
-- **Primary Role**: Entry point for QR-based merchant operations
+- **Primary Role**: Business logic coordinator for merchant operations
 - **Responsibilities**:
-  - QR code validation and routing
+  - Route to appropriate service based on merchant provider
   - Determine service provider (bank vs operator)
   - Coordinate between BankService and OperatorService
   - Handle merchant-specific business logic for QR transactions
+- **Note**: QR decoding is handled by MerchantController, not this service
 
 ### BankService
 - **Primary Role**: Internal bank transaction processing + Incoming transaction management
@@ -87,7 +88,8 @@ graph TD
 - **OperatorClient**: Real implementation for external operator APIs
   - Supports check, create, execute, and update operations
 - **QrDecoderClient**: QR code parsing and ELQR data extraction
-  - Used by both BankService and OperatorService
+  - Used by MerchantController to decode QR once per request
+  - Eliminates duplicate QR decoding in services
 
 ## Transaction Flow Types
 

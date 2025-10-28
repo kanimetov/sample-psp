@@ -17,6 +17,15 @@ CREATE SEQUENCE EXTRA_DATA_SEQ
     NOCYCLE
     CACHE 20;
 
+-- Sequence for merchant_webhooks table
+CREATE SEQUENCE MERCHANT_WEBHOOKS_SEQ
+    START WITH 1
+    INCREMENT BY 1
+    NOMAXVALUE
+    NOCYCLE
+    CACHE 20;
+
 -- Grant permissions to application user (replace 'psp_user' with actual username)
 -- GRANT SELECT ON OPERATIONS_SEQ TO psp_user;
 -- GRANT SELECT ON EXTRA_DATA_SEQ TO psp_user;
+-- GRANT SELECT ON MERCHANT_WEBHOOKS_SEQ TO psp_user;

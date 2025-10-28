@@ -67,6 +67,24 @@ CREATE TABLE extra_data (
     CONSTRAINT fk_extra_data_operation FOREIGN KEY (operation_id) REFERENCES operations(id)
 );
 
+-- Table for storing merchant webhook configurations
+CREATE TABLE merchant_webhooks (
+    id NUMBER(19) NOT NULL,
+    merchant_name VARCHAR2(100) NOT NULL,
+    app_id VARCHAR2(32) NOT NULL,
+    api_key_name VARCHAR2(100) NOT NULL,
+    api_key_value VARCHAR2(255) NOT NULL,
+    target_url VARCHAR2(500) NOT NULL,
+    is_active NUMBER(1) NOT NULL DEFAULT 1,
+    created_at TIMESTAMP NOT NULL,
+    created_by VARCHAR2(50),
+    updated_at TIMESTAMP,
+    updated_by VARCHAR2(50),
+    CONSTRAINT pk_merchant_webhooks PRIMARY KEY (id),
+    CONSTRAINT uk_merchant_webhooks_app_id UNIQUE (app_id),
+    CONSTRAINT chk_merchant_webhooks_active CHECK (is_active IN (0, 1))
+);
+
 -- Create sequences
 CREATE SEQUENCE operations_seq
     START WITH 1
@@ -102,6 +120,10 @@ CREATE INDEX idx_operations_payment_session_id ON operations(payment_session_id)
 -- Performance indexes for extra_data table
 CREATE INDEX idx_extra_data_operation_id ON extra_data(operation_id);
 CREATE INDEX idx_extra_data_key_name ON extra_data(key_name);
+
+-- Performance indexes for merchant_webhooks table
+CREATE INDEX idx_merchant_webhooks_app_id ON merchant_webhooks(app_id);
+CREATE INDEX idx_merchant_webhooks_active ON merchant_webhooks(is_active);
 
 -- Grant permissions to application user (replace 'psp_user' with actual username)
 -- GRANT SELECT, INSERT, UPDATE, DELETE ON operations TO psp_user;

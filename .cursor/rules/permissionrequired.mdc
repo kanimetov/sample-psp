@@ -1,0 +1,7 @@
+---
+alwaysApply: true
+---
+- Ask before changing anything
+- Wait for approval
+- **NEVER commit changes without explicit permission**
+- Do not push to remote without explicit authorization

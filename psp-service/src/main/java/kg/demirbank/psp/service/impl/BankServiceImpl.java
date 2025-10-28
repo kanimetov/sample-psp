@@ -23,6 +23,7 @@ import kg.demirbank.psp.exception.network.SystemErrorException;
 import kg.demirbank.psp.repository.OperationRepository;
 import kg.demirbank.psp.service.clients.BankClient;
 import kg.demirbank.psp.service.BankService;
+import kg.demirbank.psp.service.WebhookService;
 import kg.demirbank.psp.service.clients.QrDecoderClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,6 +46,7 @@ public class BankServiceImpl implements BankService {
     private final BankClient bankClient;
     private final QrDecoderClient qrDecoderClient;
     private final OperationRepository operationRepository;
+    private final WebhookService webhookService;
     
     @Override
     public Mono<MerchantCheckResponseDto> checkQrPayment(MerchantCheckRequestDto request) {
@@ -217,7 +219,7 @@ public class BankServiceImpl implements BankService {
         bankCheckRequest.setAmount(request.getAmount());
         
         return bankClient.checkAccount(bankCheckRequest)
-                .map(_ -> {
+                .map(bankCheckResponse -> {
                     // Create incoming check response
                     IncomingCheckResponseDto response = new IncomingCheckResponseDto();
                     response.setBeneficiaryName(request.getMerchantId() != null ? 
@@ -248,9 +250,19 @@ public class BankServiceImpl implements BankService {
             OperationEntity operation = createIncomingOperationEntity(OperationType.CREATE, request);
             operation.setPspTransactionId(request.getTransactionId()); // Use transactionId from request
             operation.setAmount(request.getAmount());
-            operation.setStatus(Status.IN_PROCESS);
+            operation.setStatus(Status.CREATED);
             
-            return operationRepository.save(operation);
+            OperationEntity savedOperation = operationRepository.save(operation);
+            
+            // Send webhook for PENDING status (CREATED) after successful save
+            try {
+                webhookService.sendWebhookAsync(savedOperation);
+            } catch (Exception e) {
+                log.error("Failed to send webhook for CREATED status", e);
+                // Don't throw - webhook failure shouldn't affect transaction
+            }
+            
+            return savedOperation;
         })
         .flatMap(savedOperation -> {
             log.debug("Incoming operation saved with ID: {}", savedOperation.getId());
@@ -262,11 +274,23 @@ public class BankServiceImpl implements BankService {
             bankCheckRequest.setMerchantCode(request.getMerchantCode());
             bankCheckRequest.setAmount(request.getAmount());
             
-            return bankClient.checkAccount(bankCheckRequest)
-                    .flatMap(bankCheckResponse -> {
-                        if (!Boolean.TRUE.equals(bankCheckResponse.getAccountValid())) {
-                            return Mono.error(new BadRequestException("Account check failed"));
-                        }
+                        return bankClient.checkAccount(bankCheckRequest)
+                                .flatMap(bankCheckResponse -> {
+                                    if (!Boolean.TRUE.equals(bankCheckResponse.getAccountValid())) {
+                                        // Update operation status to ERROR
+                                        savedOperation.setStatus(Status.ERROR);
+                                        savedOperation.setUpdatedAt(LocalDateTime.now());
+                                        OperationEntity errorOperation = operationRepository.save(savedOperation);
+                                        
+                                        // Send webhook for ERROR status
+                                        try {
+                                            webhookService.sendWebhookAsync(errorOperation);
+                                        } catch (Exception e) {
+                                            log.error("Failed to send webhook for ERROR status", e);
+                                        }
+                                        
+                                        return Mono.error(new BadRequestException("Account check failed"));
+                                    }
                         
                         // Create bank transaction request
                         BankCreateRequestDto bankCreateRequest = new BankCreateRequestDto();
@@ -292,7 +316,15 @@ public class BankServiceImpl implements BankService {
                                     savedOperation.setReceiptId(bankTransactionResponse.getTransactionId());
                                     savedOperation.setUpdatedAt(LocalDateTime.now());
                                     
-                                    operationRepository.save(savedOperation);
+                                    OperationEntity finalOperation = operationRepository.save(savedOperation);
+                                    
+                                    // Send webhook for final SUCCESS status
+                                    try {
+                                        webhookService.sendWebhookAsync(finalOperation);
+                                    } catch (Exception e) {
+                                        log.error("Failed to send webhook for SUCCESS status", e);
+                                        // Don't throw - webhook failure shouldn't affect transaction
+                                    }
                                     
                                     // Create incoming transaction response
                                     IncomingTransactionResponseDto response = new IncomingTransactionResponseDto();

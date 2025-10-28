@@ -32,7 +32,7 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
                 request.getMerchantCode(), request.getAmount());
         
         return bankService.checkIncomingTransaction(request)
-                .doOnSuccess(_ -> {
+                .doOnSuccess(response -> {
                     log.info("Incoming transaction check completed successfully for merchant: {}", 
                             request.getMerchantCode());
                 })
@@ -58,7 +58,7 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
                 request.getTransactionId(), request.getAmount());
         
         return bankService.createIncomingTransaction(request)
-                .doOnSuccess(_ -> {
+                .doOnSuccess(response -> {
                     log.info("Incoming transaction created successfully for transaction: {}", 
                             request.getTransactionId());
                 })
@@ -83,7 +83,7 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
         log.info("Starting incoming transaction execution for transaction: {}", transactionId);
         
         return bankService.executeIncomingTransaction(transactionId)
-                .doOnSuccess(_ -> {
+                .doOnSuccess(response -> {
                     log.info("Incoming transaction executed successfully for transaction: {}", transactionId);
                 })
                 .onErrorMap(throwable -> {
@@ -109,7 +109,7 @@ public class IncomingServiceImpl implements kg.demirbank.psp.service.IncomingSer
                 transactionId, updateRequest.getStatus());
         
         return bankService.updateIncomingTransaction(transactionId, updateRequest)
-        .doOnSuccess(_ -> log.info("Incoming transaction updated successfully for transaction: {} with status: {}", 
+        .doOnSuccess(result -> log.info("Incoming transaction updated successfully for transaction: {} with status: {}", 
                 transactionId, updateRequest.getStatus()))
         .onErrorMap(throwable -> {
             // Log error with structured data - no stack trace for business errors

@@ -74,5 +74,19 @@ public enum Status {
         }
         return status;
     }
+
+    /**
+     * Check if status is eligible for webhook notification.
+     * Returns true for CREATED (PENDING), ERROR, CANCELED, and SUCCESS statuses.
+     * 
+     * @param status the status to check
+     * @return true if status should trigger webhook notification
+     */
+    public static boolean isWebhookEligible(Status status) {
+        if (status == null) {
+            return false;
+        }
+        return status == CREATED || status.isFinal();
+    }
 }
 

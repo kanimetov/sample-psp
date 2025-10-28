@@ -69,6 +69,18 @@ bank:
   service:
     base-url: ""  # For future bank service integration
 
+# Webhook Configuration
+webhook:
+  rabbitmq:
+    exchange: webhook.merchant.notify
+    queue: webhook.merchant.notify.queue
+    dlq: webhook.merchant.notify.dlq
+    routing-key: merchant.webhook
+  http:
+    timeout-ms: 5000
+    max-retries: 3
+  enabled: true
+
 security:
   signature:
     operator-public-key-path: /path/to/operator-public-key.pem

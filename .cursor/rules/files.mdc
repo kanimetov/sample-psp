@@ -1,0 +1,5 @@
+---
+alwaysApply: true
+---
+- `.cursorrules` - Main rules
+- `.cursorrules-changes` - Change control

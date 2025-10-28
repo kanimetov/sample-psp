@@ -71,6 +71,22 @@ Stores additional key-value metadata associated with operations.
 - `data_type` (VARCHAR2(20)) - Data type (STRING, NUMBER, BOOLEAN, JSON, etc.)
 - `description` (VARCHAR2(200)) - Field description
 
+#### merchant_webhooks
+Stores merchant webhook configurations for payment status notifications.
+
+**Fields:**
+- `id` (NUMBER) - Primary key
+- `merchant_name` (VARCHAR2(100), NOT NULL) - Merchant name for identification
+- `app_id` (VARCHAR2(32), NOT NULL, UNIQUE) - Application ID used for matching with serviceName (case-insensitive)
+- `api_key_name` (VARCHAR2(100), NOT NULL) - API key name for HTTP header authentication
+- `api_key_value` (VARCHAR2(255), NOT NULL) - API key value for HTTP header authentication
+- `target_url` (VARCHAR2(500), NOT NULL) - Target URL for webhook delivery
+- `is_active` (NUMBER(1), NOT NULL, DEFAULT 1) - Whether webhook configuration is active
+- `created_at` (TIMESTAMP, NOT NULL) - Creation timestamp
+- `created_by` (VARCHAR2(50)) - Creator identifier
+- `updated_at` (TIMESTAMP) - Last update timestamp
+- `updated_by` (VARCHAR2(50)) - Last updater identifier
+
 ### Indexes
 
 **operations table:**
@@ -89,10 +105,15 @@ Stores additional key-value metadata associated with operations.
 - `idx_extra_data_operation_id` - Join with operations
 - `idx_extra_data_key_name` - Filter by key name
 
+**merchant_webhooks table:**
+- `idx_merchant_webhooks_app_id` - Lookup by application ID
+- `idx_merchant_webhooks_active` - Filter by active status
+
 ### Sequences
 
 - `operations_seq` - Auto-increment ID for operations table
 - `extra_data_seq` - Auto-increment ID for extra_data table
+- `merchant_webhooks_seq` - Auto-increment ID for merchant_webhooks table
 
 ### Design Notes
 
